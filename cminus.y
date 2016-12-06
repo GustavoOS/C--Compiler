@@ -5,6 +5,8 @@
 %token ELSE IF INT RETURN VOID WHILE
 %token PLUS MINUS TIMES SLASH LESSER LESSEQ GREATER GREATEQ EQCOMP NOTEQ EQATR SEMI COMMA LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token ID NUM
+%nonassoc "then"
+%nonassoc ELSE
 
 %%
 
@@ -80,7 +82,7 @@ expressao-decl:
         ;
 
 selecao-decl: 
-        IF LPAREN expressao RPAREN statement 
+        IF LPAREN expressao RPAREN statement %prec "then"
         | IF LPAREN expressao RPAREN statement ELSE statement
         ;
 
@@ -107,12 +109,10 @@ fator:
 
 
 var: 
-        ID var-sq
+        ID
+        | ID LBRACE expressao RBRACE
         ;
-var-sq: 
-        %empty
-        |LBRACE expressao RBRACE
-        ;
+
 
 simples-expressao: 
         soma-expressao relacional soma-expressao 
@@ -124,7 +124,7 @@ relacional:
         | LESSER 
         | GREATER 
         | GREATEQ
-        | EQATR 
+        | EQCOMP 
         | NOTEQ
         ;
 

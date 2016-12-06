@@ -4,10 +4,12 @@ Gramática BNF para C-:
 programa → declaração-lista
 declaração-lista → declaração-lista declaração | declaração
 declaração → var-declaração | fun-declaração
+declaração → error <===== MODIFICAÇÃO
 var-declaração → tipo-especificador ID ; | tipo-especificador ID [ NUM ] ;
-tipo-especificador → int | void | float
+tipo-especificador → int | void 
 fun-declaração → tipo-especificador ID ( params ) composto-decl
 params → param-lista | void
+params → error <======= MODIFICAÇÃO
 param-lista → param-lista, param | param
 param → tipo-especificador ID | tipo-especificador ID [ ]
 composto-decl → { local-declarações statement-lista }
