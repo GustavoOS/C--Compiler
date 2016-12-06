@@ -8,64 +8,65 @@
 
 %%
 
-programa : 
+programa: 
         declaracao-lista
         ;
 
-declaracao-lista : 
+declaracao-lista: 
         declaracao-lista declaracao 
         | declaracao
         ;
 
-declaracao : 
+declaracao: 
         var-declaracao 
         | fun-declaracao
         ;
 
-var-declaracao : 
-        INT ID SEMI 
-        | INT ID LBRACE NUM RBRACE SEMI
+var-declaracao: 
+        tipo-especificador ID SEMI
+        |tipo-especificador ID LBRACE NUM RBRACE SEMI
         ;
 
-tipo-especIFicador : 
+
+tipo-especificador: 
         INT 
         | VOID 
         ;
 
-fun-declaracao : 
-        tipo-especIFicador ID LPAREN params RPAREN composto-decl
+fun-declaracao: 
+        tipo-especificador ID LPAREN params RPAREN composto-decl
         ;
 
-params :
+params:
         param-lista 
         | VOID
         ;
 
-param-lista : 
+param-lista: 
         param-lista COMMA param 
         | param
         ;
 
-param : 
-        tipo-especIFicador ID 
-        | tipo-especIFicador ID LBRACE RBRACE
+param: 
+        tipo-especificador ID 
+        | tipo-especificador ID LBRACE RBRACE
         ;
 
-composto-decl : 
+composto-decl: 
         LBRACKET local-declaracoes statement-lista RBRACKET
         ;
 
-local-declaracoes : 
+local-declaracoes: 
         local-declaracoes var-declaracao 
         | %empty
         ;
 
-statement-lista : 
+statement-lista: 
         statement-lista statement 
         | %empty
         ;
 
-statement : 
+statement: 
         expressao-decl 
         | composto-decl 
         | selecao-decl 
@@ -73,41 +74,52 @@ statement :
         | retorno-decl
         ;
 
-expressao-decl : 
+expressao-decl: 
         expressao SEMI 
         | SEMI
         ;
 
-selecao-decl : 
+selecao-decl: 
         IF LPAREN expressao RPAREN statement 
         | IF LPAREN expressao RPAREN statement ELSE statement
         ;
 
-iteracao-decl : 
+iteracao-decl: 
         WHILE LPAREN expressao RPAREN statement
         ;
 
-retorno-decl : 
+retorno-decl: 
         RETURN SEMI 
         | RETURN expressao SEMI
         ;
 
-expressao : 
+expressao: 
         var EQATR expressao 
         | simples-expressao
         ;
 
-var : 
-        ID 
-        | ID LBRACE expressao RBRACE
+fator: 
+        LPAREN expressao RPAREN 
+        | var 
+        | ativacao 
+        | NUM
         ;
 
-simples-expressao : 
+
+var: 
+        ID var-sq
+        ;
+var-sq: 
+        %empty
+        |LBRACE expressao RBRACE
+        ;
+
+simples-expressao: 
         soma-expressao relacional soma-expressao 
         | soma-expressao
         ;
 
-relacional : 
+relacional: 
         LESSEQ 
         | LESSER 
         | GREATER 
@@ -116,43 +128,37 @@ relacional :
         | NOTEQ
         ;
 
-soma-expressao : 
+soma-expressao: 
         soma-expressao soma termo 
         | termo
         ;
 
-soma : 
+soma: 
         PLUS 
         | MINUS
         ;
 
-termo : 
+termo: 
         termo mult fator 
         | fator
         ;
 
-mult : 
+mult: 
         TIMES 
         | SLASH
         ;
 
-fator : 
-        LPAREN expressao RPAREN 
-        | var 
-        | ativacao 
-        | NUM
-        ;
 
-ativacao : 
+ativacao: 
         ID LPAREN args RPAREN
         ;
 
-args : 
+args: 
         arg-lista 
         | %empty
         ;
 
-arg-lista : 
+arg-lista: 
         arg-lista COMMA expressao 
         | expressao
         ;
