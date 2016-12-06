@@ -27,13 +27,13 @@ var-declaracao :
         | INT ID LBRACE NUM RBRACE SEMI
         ;
 
-tipo-especificador : 
+tipo-especIFicador : 
         INT 
         | VOID 
         ;
 
 fun-declaracao : 
-        tipo-especificador ID LPAREN params RPAREN composto-decl
+        tipo-especIFicador ID LPAREN params RPAREN composto-decl
         ;
 
 params :
@@ -42,21 +42,21 @@ params :
         ;
 
 param-lista : 
-        param-lista, param 
+        param-lista COMMA param 
         | param
         ;
 
 param : 
-        tipo-especificador ID 
-        | tipo-especificador ID LBRACE RBRACE
+        tipo-especIFicador ID 
+        | tipo-especIFicador ID LBRACE RBRACE
         ;
 
 composto-decl : 
-        LBRACKET local-declaracões statement-lista RBRACKET
+        LBRACKET local-declaracoes statement-lista RBRACKET
         ;
 
-local-declaracões : 
-        local-declaracões var-declaracao 
+local-declaracoes : 
+        local-declaracoes var-declaracao 
         | %empty
         ;
 
@@ -79,21 +79,21 @@ expressao-decl :
         ;
 
 selecao-decl : 
-        if LPAREN expressao RPAREN statement 
-        | if LPAREN expressao RPAREN statement else statement
+        IF LPAREN expressao RPAREN statement 
+        | IF LPAREN expressao RPAREN statement ELSE statement
         ;
 
 iteracao-decl : 
-        while LPAREN expressao RPAREN statement
+        WHILE LPAREN expressao RPAREN statement
         ;
 
 retorno-decl : 
-        return SEMI 
-        | return expressao SEMI
+        RETURN SEMI 
+        | RETURN expressao SEMI
         ;
 
 expressao : 
-        var = expressao 
+        var EQATR expressao 
         | simples-expressao
         ;
 
