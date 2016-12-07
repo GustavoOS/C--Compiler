@@ -65,7 +65,7 @@ extern int lineno; /* source line number for listing */
 typedef enum {StmtK,ExpK} NodeKind; //Bolinha ou quadrado
 typedef enum {IfK,WhileK,AssignK,ReturnK,VarDeclK,
               FunDeclK,FunActiveK, CompoundK} StmtKind;
-typedef enum {OpK, ConstK,IdK} ExpKind;
+typedef enum {OpK, ConstK,IdK,VetK} ExpKind;
 
 /* ExpType is used for type checking */
 typedef enum {Void,Integer,Boolean} ExpType;

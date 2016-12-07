@@ -26,11 +26,7 @@
 %%
 
 programa:
-        declaracao-lista 
-                {savedTree=$1;}
-        | %empty
-        {       savedTree=NULL;
-        }
+        declaracao-lista {savedTree=$1;}
         ;
 
 declaracao-lista:
@@ -139,9 +135,7 @@ param:
                   $$->attr.name = savedName;
                   $$->type = savedType;
                 }
-        | error  {
-                $$=NULL;
-                printf("DEU RUIM\n");}
+        | error  { $$=NULL; }
         ;
 
 composto-decl:
@@ -189,7 +183,6 @@ statement:
         | selecao-decl
         | iteracao-decl
         | retorno-decl
-        | error {$$=NULL;}
         ;
 
 expressao-decl:
@@ -267,7 +260,7 @@ var:
                 }
         | ID LBRACE expressao RBRACE
         { 
-                  $$ = newExpNode(IdK);
+                  $$ = newExpNode(VetK);
                   $$->attr.name = copyString(tokenString);
                   $$->child[0]=$3;
                 //   printf("Chegou no var ");

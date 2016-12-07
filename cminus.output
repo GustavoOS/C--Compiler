@@ -1,3 +1,8 @@
+Terminais sem uso na gramática
+
+   ERROR
+
+
 Gramática
 
     0 $accept: programa $end
@@ -5,1202 +10,1304 @@ Gramática
     1 programa: declaracao-lista
 
     2 declaracao-lista: declaracao-lista declaracao
-    3                 | declaracao
+    3                 | %empty
 
     4 declaracao: var-declaracao
     5           | fun-declaracao
 
-    6 var-declaracao: tipo-especificador ID SEMI
-    7               | tipo-especificador ID LBRACE NUM RBRACE SEMI
+    6 $@1: %empty
 
-    8 tipo-especificador: INT
-    9                   | VOID
+    7 var-declaracao: tipo-especificador ID $@1 SEMI
 
-   10 fun-declaracao: tipo-especificador ID LPAREN params RPAREN composto-decl
+    8 $@2: %empty
 
-   11 params: param-lista
-   12       | VOID
+    9 $@3: %empty
 
-   13 param-lista: param-lista COMMA param
-   14            | param
+   10 var-declaracao: tipo-especificador ID $@2 LBRACE NUM $@3 RBRACE SEMI
 
-   15 param: tipo-especificador ID
-   16      | tipo-especificador ID LBRACE RBRACE
+   11 tipo-especificador: INT
+   12                   | VOID
 
-   17 composto-decl: LBRACKET local-declaracoes statement-lista RBRACKET
+   13 @4: %empty
 
-   18 local-declaracoes: local-declaracoes var-declaracao
-   19                  | %empty
+   14 fun-declaracao: tipo-especificador ID @4 LPAREN params RPAREN composto-decl
 
-   20 statement-lista: statement-lista statement
-   21                | %empty
+   15 params: param-lista
+   16       | VOID
 
-   22 statement: expressao-decl
-   23          | composto-decl
-   24          | selecao-decl
-   25          | iteracao-decl
-   26          | retorno-decl
+   17 param-lista: param-lista COMMA param
+   18            | param
 
-   27 expressao-decl: expressao SEMI
-   28               | SEMI
+   19 param: tipo-especificador ID
 
-   29 selecao-decl: IF LPAREN expressao RPAREN statement
-   30             | IF LPAREN expressao RPAREN statement ELSE statement
+   20 $@5: %empty
 
-   31 iteracao-decl: WHILE LPAREN expressao RPAREN statement
+   21 param: tipo-especificador ID $@5 LBRACE RBRACE
+   22      | error
 
-   32 retorno-decl: RETURN SEMI
-   33             | RETURN expressao SEMI
+   23 composto-decl: LBRACKET local-declaracoes statement-lista RBRACKET
 
-   34 expressao: var EQATR expressao
-   35          | simples-expressao
+   24 local-declaracoes: local-declaracoes var-declaracao
+   25                  | %empty
 
-   36 fator: LPAREN expressao RPAREN
-   37      | var
-   38      | ativacao
-   39      | NUM
+   26 statement-lista: statement-lista statement
+   27                | %empty
 
-   40 var: ID
-   41    | ID LBRACE expressao RBRACE
+   28 statement: expressao-decl
+   29          | composto-decl
+   30          | selecao-decl
+   31          | iteracao-decl
+   32          | retorno-decl
 
-   42 simples-expressao: soma-expressao relacional soma-expressao
-   43                  | soma-expressao
+   33 expressao-decl: expressao SEMI
+   34               | SEMI
 
-   44 relacional: LESSEQ
-   45           | LESSER
-   46           | GREATER
-   47           | GREATEQ
-   48           | EQCOMP
-   49           | NOTEQ
+   35 selecao-decl: IF LPAREN expressao RPAREN statement
+   36             | IF LPAREN expressao RPAREN statement ELSE statement
 
-   50 soma-expressao: soma-expressao soma termo
-   51               | termo
+   37 iteracao-decl: WHILE LPAREN expressao RPAREN statement
 
-   52 soma: PLUS
-   53     | MINUS
+   38 retorno-decl: RETURN SEMI
+   39             | RETURN expressao SEMI
 
-   54 termo: termo mult fator
-   55      | fator
+   40 expressao: var EQATR expressao
+   41          | simples-expressao
 
-   56 mult: TIMES
-   57     | SLASH
+   42 fator: LPAREN expressao RPAREN
+   43      | var
+   44      | ativacao
+   45      | NUM
+   46      | error
 
-   58 ativacao: ID LPAREN args RPAREN
+   47 var: ID
+   48    | ID LBRACE expressao RBRACE
 
-   59 args: arg-lista
-   60     | %empty
+   49 simples-expressao: soma-expressao relacional soma-expressao
+   50                  | soma-expressao
 
-   61 arg-lista: arg-lista COMMA expressao
-   62          | expressao
+   51 relacional: LESSEQ
+   52           | LESSER
+   53           | GREATER
+   54           | GREATEQ
+   55           | EQCOMP
+   56           | NOTEQ
+
+   57 soma-expressao: soma-expressao soma termo
+   58               | termo
+
+   59 soma: PLUS
+   60     | MINUS
+
+   61 termo: termo mult fator
+   62      | fator
+
+   63 mult: TIMES
+   64     | SLASH
+
+   65 @6: %empty
+
+   66 ativacao: ID @6 LPAREN args RPAREN
+
+   67 args: arg-lista
+   68     | %empty
+
+   69 arg-lista: arg-lista COMMA expressao
+   70          | expressao
 
 
 Terminais, com as regras onde eles aparecem
 
 $end (0) 0
-error (256)
-ELSE (258) 30
-IF (259) 29 30
-INT (260) 8
-RETURN (261) 32 33
-VOID (262) 9 12
-WHILE (263) 31
-PLUS (264) 52
-MINUS (265) 53
-TIMES (266) 56
-SLASH (267) 57
-LESSER (268) 45
-LESSEQ (269) 44
-GREATER (270) 46
-GREATEQ (271) 47
-EQCOMP (272) 48
-NOTEQ (273) 49
-EQATR (274) 34
-SEMI (275) 6 7 27 28 32 33
-COMMA (276) 13 61
-LPAREN (277) 10 29 30 31 36 58
-RPAREN (278) 10 29 30 31 36 58
-LBRACKET (279) 17
-RBRACKET (280) 17
-LBRACE (281) 7 16 41
-RBRACE (282) 7 16 41
-ID (283) 6 7 10 15 16 40 41 58
-NUM (284) 7 39
-"then" (285)
+error (256) 22 46
+ERROR (258)
+ELSE (259) 36
+IF (260) 35 36
+INT (261) 11
+RETURN (262) 38 39
+VOID (263) 12 16
+WHILE (264) 37
+PLUS (265) 59
+MINUS (266) 60
+TIMES (267) 63
+SLASH (268) 64
+LESSER (269) 52
+LESSEQ (270) 51
+GREATER (271) 53
+GREATEQ (272) 54
+EQCOMP (273) 55
+NOTEQ (274) 56
+EQATR (275) 40
+SEMI (276) 7 10 33 34 38 39
+COMMA (277) 17 69
+LPAREN (278) 14 35 36 37 42 66
+RPAREN (279) 14 35 36 37 42 66
+LBRACKET (280) 23
+RBRACKET (281) 23
+LBRACE (282) 10 21 48
+RBRACE (283) 10 21 48
+ID (284) 7 10 14 19 21 47 48 66
+NUM (285) 10 45
+"then" (286)
 
 
 Não terminais com as regras onde eles aparecem
 
-$accept (31)
+$accept (32)
     à esquerda: 0
-programa (32)
+programa (33)
     à esquerda: 1, à direita: 0
-declaracao-lista (33)
+declaracao-lista (34)
     à esquerda: 2 3, à direita: 1 2
-declaracao (34)
-    à esquerda: 4 5, à direita: 2 3
-var-declaracao (35)
-    à esquerda: 6 7, à direita: 4 18
-tipo-especificador (36)
-    à esquerda: 8 9, à direita: 6 7 10 15 16
-fun-declaracao (37)
-    à esquerda: 10, à direita: 5
-params (38)
-    à esquerda: 11 12, à direita: 10
-param-lista (39)
-    à esquerda: 13 14, à direita: 11 13
-param (40)
-    à esquerda: 15 16, à direita: 13 14
-composto-decl (41)
-    à esquerda: 17, à direita: 10 23
-local-declaracoes (42)
-    à esquerda: 18 19, à direita: 17 18
-statement-lista (43)
-    à esquerda: 20 21, à direita: 17 20
-statement (44)
-    à esquerda: 22 23 24 25 26, à direita: 20 29 30 31
-expressao-decl (45)
-    à esquerda: 27 28, à direita: 22
-selecao-decl (46)
-    à esquerda: 29 30, à direita: 24
-iteracao-decl (47)
-    à esquerda: 31, à direita: 25
-retorno-decl (48)
-    à esquerda: 32 33, à direita: 26
-expressao (49)
-    à esquerda: 34 35, à direita: 27 29 30 31 33 34 36 41 61 62
-fator (50)
-    à esquerda: 36 37 38 39, à direita: 54 55
-var (51)
-    à esquerda: 40 41, à direita: 34 37
-simples-expressao (52)
-    à esquerda: 42 43, à direita: 35
-relacional (53)
-    à esquerda: 44 45 46 47 48 49, à direita: 42
-soma-expressao (54)
-    à esquerda: 50 51, à direita: 42 43 50
-soma (55)
-    à esquerda: 52 53, à direita: 50
-termo (56)
-    à esquerda: 54 55, à direita: 50 51 54
-mult (57)
-    à esquerda: 56 57, à direita: 54
-ativacao (58)
-    à esquerda: 58, à direita: 38
-args (59)
-    à esquerda: 59 60, à direita: 58
-arg-lista (60)
-    à esquerda: 61 62, à direita: 59 61
+declaracao (35)
+    à esquerda: 4 5, à direita: 2
+var-declaracao (36)
+    à esquerda: 7 10, à direita: 4 24
+$@1 (37)
+    à esquerda: 6, à direita: 7
+$@2 (38)
+    à esquerda: 8, à direita: 10
+$@3 (39)
+    à esquerda: 9, à direita: 10
+tipo-especificador (40)
+    à esquerda: 11 12, à direita: 7 10 14 19 21
+fun-declaracao (41)
+    à esquerda: 14, à direita: 5
+@4 (42)
+    à esquerda: 13, à direita: 14
+params (43)
+    à esquerda: 15 16, à direita: 14
+param-lista (44)
+    à esquerda: 17 18, à direita: 15 17
+param (45)
+    à esquerda: 19 21 22, à direita: 17 18
+$@5 (46)
+    à esquerda: 20, à direita: 21
+composto-decl (47)
+    à esquerda: 23, à direita: 14 29
+local-declaracoes (48)
+    à esquerda: 24 25, à direita: 23 24
+statement-lista (49)
+    à esquerda: 26 27, à direita: 23 26
+statement (50)
+    à esquerda: 28 29 30 31 32, à direita: 26 35 36 37
+expressao-decl (51)
+    à esquerda: 33 34, à direita: 28
+selecao-decl (52)
+    à esquerda: 35 36, à direita: 30
+iteracao-decl (53)
+    à esquerda: 37, à direita: 31
+retorno-decl (54)
+    à esquerda: 38 39, à direita: 32
+expressao (55)
+    à esquerda: 40 41, à direita: 33 35 36 37 39 40 42 48 69 70
+fator (56)
+    à esquerda: 42 43 44 45 46, à direita: 61 62
+var (57)
+    à esquerda: 47 48, à direita: 40 43
+simples-expressao (58)
+    à esquerda: 49 50, à direita: 41
+relacional (59)
+    à esquerda: 51 52 53 54 55 56, à direita: 49
+soma-expressao (60)
+    à esquerda: 57 58, à direita: 49 50 57
+soma (61)
+    à esquerda: 59 60, à direita: 57
+termo (62)
+    à esquerda: 61 62, à direita: 57 58 61
+mult (63)
+    à esquerda: 63 64, à direita: 61
+ativacao (64)
+    à esquerda: 66, à direita: 44
+@6 (65)
+    à esquerda: 65, à direita: 66
+args (66)
+    à esquerda: 67 68, à direita: 66
+arg-lista (67)
+    à esquerda: 69 70, à direita: 67 69
 
 
 Estado 0
 
     0 $accept: . programa $end
 
-    INT   deslocar, e ir ao estado 1
-    VOID  deslocar, e ir ao estado 2
+    $padrão  reduzir usando a regra 3 (declaracao-lista)
 
-    programa            ir ao estado 3
-    declaracao-lista    ir ao estado 4
-    declaracao          ir ao estado 5
-    var-declaracao      ir ao estado 6
-    tipo-especificador  ir ao estado 7
-    fun-declaracao      ir ao estado 8
+    programa          ir ao estado 1
+    declaracao-lista  ir ao estado 2
 
 
 Estado 1
 
-    8 tipo-especificador: INT .
+    0 $accept: programa . $end
 
-    $padrão  reduzir usando a regra 8 (tipo-especificador)
+    $end  deslocar, e ir ao estado 3
 
 
 Estado 2
 
-    9 tipo-especificador: VOID .
-
-    $padrão  reduzir usando a regra 9 (tipo-especificador)
-
-
-Estado 3
-
-    0 $accept: programa . $end
-
-    $end  deslocar, e ir ao estado 9
-
-
-Estado 4
-
     1 programa: declaracao-lista .
     2 declaracao-lista: declaracao-lista . declaracao
 
-    INT   deslocar, e ir ao estado 1
-    VOID  deslocar, e ir ao estado 2
+    INT   deslocar, e ir ao estado 4
+    VOID  deslocar, e ir ao estado 5
 
     $padrão  reduzir usando a regra 1 (programa)
 
-    declaracao          ir ao estado 10
-    var-declaracao      ir ao estado 6
-    tipo-especificador  ir ao estado 7
-    fun-declaracao      ir ao estado 8
+    declaracao          ir ao estado 6
+    var-declaracao      ir ao estado 7
+    tipo-especificador  ir ao estado 8
+    fun-declaracao      ir ao estado 9
 
 
-Estado 5
-
-    3 declaracao-lista: declaracao .
-
-    $padrão  reduzir usando a regra 3 (declaracao-lista)
-
-
-Estado 6
-
-    4 declaracao: var-declaracao .
-
-    $padrão  reduzir usando a regra 4 (declaracao)
-
-
-Estado 7
-
-    6 var-declaracao: tipo-especificador . ID SEMI
-    7               | tipo-especificador . ID LBRACE NUM RBRACE SEMI
-   10 fun-declaracao: tipo-especificador . ID LPAREN params RPAREN composto-decl
-
-    ID  deslocar, e ir ao estado 11
-
-
-Estado 8
-
-    5 declaracao: fun-declaracao .
-
-    $padrão  reduzir usando a regra 5 (declaracao)
-
-
-Estado 9
+Estado 3
 
     0 $accept: programa $end .
 
     $padrão  aceitar
 
 
-Estado 10
+Estado 4
+
+   11 tipo-especificador: INT .
+
+    $padrão  reduzir usando a regra 11 (tipo-especificador)
+
+
+Estado 5
+
+   12 tipo-especificador: VOID .
+
+    $padrão  reduzir usando a regra 12 (tipo-especificador)
+
+
+Estado 6
 
     2 declaracao-lista: declaracao-lista declaracao .
 
     $padrão  reduzir usando a regra 2 (declaracao-lista)
 
 
+Estado 7
+
+    4 declaracao: var-declaracao .
+
+    $padrão  reduzir usando a regra 4 (declaracao)
+
+
+Estado 8
+
+    7 var-declaracao: tipo-especificador . ID $@1 SEMI
+   10               | tipo-especificador . ID $@2 LBRACE NUM $@3 RBRACE SEMI
+   14 fun-declaracao: tipo-especificador . ID @4 LPAREN params RPAREN composto-decl
+
+    ID  deslocar, e ir ao estado 10
+
+
+Estado 9
+
+    5 declaracao: fun-declaracao .
+
+    $padrão  reduzir usando a regra 5 (declaracao)
+
+
+Estado 10
+
+    7 var-declaracao: tipo-especificador ID . $@1 SEMI
+   10               | tipo-especificador ID . $@2 LBRACE NUM $@3 RBRACE SEMI
+   14 fun-declaracao: tipo-especificador ID . @4 LPAREN params RPAREN composto-decl
+
+    LPAREN    reduzir usando a regra 13 (@4)
+    LBRACE    reduzir usando a regra 8 ($@2)
+    $padrão  reduzir usando a regra 6 ($@1)
+
+    $@1  ir ao estado 11
+    $@2  ir ao estado 12
+    @4   ir ao estado 13
+
+
 Estado 11
 
-    6 var-declaracao: tipo-especificador ID . SEMI
-    7               | tipo-especificador ID . LBRACE NUM RBRACE SEMI
-   10 fun-declaracao: tipo-especificador ID . LPAREN params RPAREN composto-decl
+    7 var-declaracao: tipo-especificador ID $@1 . SEMI
 
-    SEMI    deslocar, e ir ao estado 12
-    LPAREN  deslocar, e ir ao estado 13
-    LBRACE  deslocar, e ir ao estado 14
+    SEMI  deslocar, e ir ao estado 14
 
 
 Estado 12
 
-    6 var-declaracao: tipo-especificador ID SEMI .
+   10 var-declaracao: tipo-especificador ID $@2 . LBRACE NUM $@3 RBRACE SEMI
 
-    $padrão  reduzir usando a regra 6 (var-declaracao)
+    LBRACE  deslocar, e ir ao estado 15
 
 
 Estado 13
 
-   10 fun-declaracao: tipo-especificador ID LPAREN . params RPAREN composto-decl
+   14 fun-declaracao: tipo-especificador ID @4 . LPAREN params RPAREN composto-decl
 
-    INT   deslocar, e ir ao estado 1
-    VOID  deslocar, e ir ao estado 15
-
-    tipo-especificador  ir ao estado 16
-    params              ir ao estado 17
-    param-lista         ir ao estado 18
-    param               ir ao estado 19
+    LPAREN  deslocar, e ir ao estado 16
 
 
 Estado 14
 
-    7 var-declaracao: tipo-especificador ID LBRACE . NUM RBRACE SEMI
-
-    NUM  deslocar, e ir ao estado 20
-
-
-Estado 15
-
-    9 tipo-especificador: VOID .
-   12 params: VOID .
-
-    RPAREN    reduzir usando a regra 12 (params)
-    $padrão  reduzir usando a regra 9 (tipo-especificador)
-
-
-Estado 16
-
-   15 param: tipo-especificador . ID
-   16      | tipo-especificador . ID LBRACE RBRACE
-
-    ID  deslocar, e ir ao estado 21
-
-
-Estado 17
-
-   10 fun-declaracao: tipo-especificador ID LPAREN params . RPAREN composto-decl
-
-    RPAREN  deslocar, e ir ao estado 22
-
-
-Estado 18
-
-   11 params: param-lista .
-   13 param-lista: param-lista . COMMA param
-
-    COMMA  deslocar, e ir ao estado 23
-
-    $padrão  reduzir usando a regra 11 (params)
-
-
-Estado 19
-
-   14 param-lista: param .
-
-    $padrão  reduzir usando a regra 14 (param-lista)
-
-
-Estado 20
-
-    7 var-declaracao: tipo-especificador ID LBRACE NUM . RBRACE SEMI
-
-    RBRACE  deslocar, e ir ao estado 24
-
-
-Estado 21
-
-   15 param: tipo-especificador ID .
-   16      | tipo-especificador ID . LBRACE RBRACE
-
-    LBRACE  deslocar, e ir ao estado 25
-
-    $padrão  reduzir usando a regra 15 (param)
-
-
-Estado 22
-
-   10 fun-declaracao: tipo-especificador ID LPAREN params RPAREN . composto-decl
-
-    LBRACKET  deslocar, e ir ao estado 26
-
-    composto-decl  ir ao estado 27
-
-
-Estado 23
-
-   13 param-lista: param-lista COMMA . param
-
-    INT   deslocar, e ir ao estado 1
-    VOID  deslocar, e ir ao estado 2
-
-    tipo-especificador  ir ao estado 16
-    param               ir ao estado 28
-
-
-Estado 24
-
-    7 var-declaracao: tipo-especificador ID LBRACE NUM RBRACE . SEMI
-
-    SEMI  deslocar, e ir ao estado 29
-
-
-Estado 25
-
-   16 param: tipo-especificador ID LBRACE . RBRACE
-
-    RBRACE  deslocar, e ir ao estado 30
-
-
-Estado 26
-
-   17 composto-decl: LBRACKET . local-declaracoes statement-lista RBRACKET
-
-    $padrão  reduzir usando a regra 19 (local-declaracoes)
-
-    local-declaracoes  ir ao estado 31
-
-
-Estado 27
-
-   10 fun-declaracao: tipo-especificador ID LPAREN params RPAREN composto-decl .
-
-    $padrão  reduzir usando a regra 10 (fun-declaracao)
-
-
-Estado 28
-
-   13 param-lista: param-lista COMMA param .
-
-    $padrão  reduzir usando a regra 13 (param-lista)
-
-
-Estado 29
-
-    7 var-declaracao: tipo-especificador ID LBRACE NUM RBRACE SEMI .
+    7 var-declaracao: tipo-especificador ID $@1 SEMI .
 
     $padrão  reduzir usando a regra 7 (var-declaracao)
 
 
+Estado 15
+
+   10 var-declaracao: tipo-especificador ID $@2 LBRACE . NUM $@3 RBRACE SEMI
+
+    NUM  deslocar, e ir ao estado 17
+
+
+Estado 16
+
+   14 fun-declaracao: tipo-especificador ID @4 LPAREN . params RPAREN composto-decl
+
+    error  deslocar, e ir ao estado 18
+    INT    deslocar, e ir ao estado 4
+    VOID   deslocar, e ir ao estado 19
+
+    tipo-especificador  ir ao estado 20
+    params              ir ao estado 21
+    param-lista         ir ao estado 22
+    param               ir ao estado 23
+
+
+Estado 17
+
+   10 var-declaracao: tipo-especificador ID $@2 LBRACE NUM . $@3 RBRACE SEMI
+
+    $padrão  reduzir usando a regra 9 ($@3)
+
+    $@3  ir ao estado 24
+
+
+Estado 18
+
+   22 param: error .
+
+    $padrão  reduzir usando a regra 22 (param)
+
+
+Estado 19
+
+   12 tipo-especificador: VOID .
+   16 params: VOID .
+
+    RPAREN    reduzir usando a regra 16 (params)
+    $padrão  reduzir usando a regra 12 (tipo-especificador)
+
+
+Estado 20
+
+   19 param: tipo-especificador . ID
+   21      | tipo-especificador . ID $@5 LBRACE RBRACE
+
+    ID  deslocar, e ir ao estado 25
+
+
+Estado 21
+
+   14 fun-declaracao: tipo-especificador ID @4 LPAREN params . RPAREN composto-decl
+
+    RPAREN  deslocar, e ir ao estado 26
+
+
+Estado 22
+
+   15 params: param-lista .
+   17 param-lista: param-lista . COMMA param
+
+    COMMA  deslocar, e ir ao estado 27
+
+    $padrão  reduzir usando a regra 15 (params)
+
+
+Estado 23
+
+   18 param-lista: param .
+
+    $padrão  reduzir usando a regra 18 (param-lista)
+
+
+Estado 24
+
+   10 var-declaracao: tipo-especificador ID $@2 LBRACE NUM $@3 . RBRACE SEMI
+
+    RBRACE  deslocar, e ir ao estado 28
+
+
+Estado 25
+
+   19 param: tipo-especificador ID .
+   21      | tipo-especificador ID . $@5 LBRACE RBRACE
+
+    LBRACE    reduzir usando a regra 20 ($@5)
+    $padrão  reduzir usando a regra 19 (param)
+
+    $@5  ir ao estado 29
+
+
+Estado 26
+
+   14 fun-declaracao: tipo-especificador ID @4 LPAREN params RPAREN . composto-decl
+
+    LBRACKET  deslocar, e ir ao estado 30
+
+    composto-decl  ir ao estado 31
+
+
+Estado 27
+
+   17 param-lista: param-lista COMMA . param
+
+    error  deslocar, e ir ao estado 18
+    INT    deslocar, e ir ao estado 4
+    VOID   deslocar, e ir ao estado 5
+
+    tipo-especificador  ir ao estado 20
+    param               ir ao estado 32
+
+
+Estado 28
+
+   10 var-declaracao: tipo-especificador ID $@2 LBRACE NUM $@3 RBRACE . SEMI
+
+    SEMI  deslocar, e ir ao estado 33
+
+
+Estado 29
+
+   21 param: tipo-especificador ID $@5 . LBRACE RBRACE
+
+    LBRACE  deslocar, e ir ao estado 34
+
+
 Estado 30
 
-   16 param: tipo-especificador ID LBRACE RBRACE .
+   23 composto-decl: LBRACKET . local-declaracoes statement-lista RBRACKET
 
-    $padrão  reduzir usando a regra 16 (param)
+    $padrão  reduzir usando a regra 25 (local-declaracoes)
+
+    local-declaracoes  ir ao estado 35
 
 
 Estado 31
 
-   17 composto-decl: LBRACKET local-declaracoes . statement-lista RBRACKET
-   18 local-declaracoes: local-declaracoes . var-declaracao
+   14 fun-declaracao: tipo-especificador ID @4 LPAREN params RPAREN composto-decl .
 
-    INT   deslocar, e ir ao estado 1
-    VOID  deslocar, e ir ao estado 2
-
-    $padrão  reduzir usando a regra 21 (statement-lista)
-
-    var-declaracao      ir ao estado 32
-    tipo-especificador  ir ao estado 33
-    statement-lista     ir ao estado 34
+    $padrão  reduzir usando a regra 14 (fun-declaracao)
 
 
 Estado 32
 
-   18 local-declaracoes: local-declaracoes var-declaracao .
+   17 param-lista: param-lista COMMA param .
 
-    $padrão  reduzir usando a regra 18 (local-declaracoes)
+    $padrão  reduzir usando a regra 17 (param-lista)
 
 
 Estado 33
 
-    6 var-declaracao: tipo-especificador . ID SEMI
-    7               | tipo-especificador . ID LBRACE NUM RBRACE SEMI
+   10 var-declaracao: tipo-especificador ID $@2 LBRACE NUM $@3 RBRACE SEMI .
 
-    ID  deslocar, e ir ao estado 35
+    $padrão  reduzir usando a regra 10 (var-declaracao)
 
 
 Estado 34
 
-   17 composto-decl: LBRACKET local-declaracoes statement-lista . RBRACKET
-   20 statement-lista: statement-lista . statement
+   21 param: tipo-especificador ID $@5 LBRACE . RBRACE
 
-    IF        deslocar, e ir ao estado 36
-    RETURN    deslocar, e ir ao estado 37
-    WHILE     deslocar, e ir ao estado 38
-    SEMI      deslocar, e ir ao estado 39
-    LPAREN    deslocar, e ir ao estado 40
-    LBRACKET  deslocar, e ir ao estado 26
-    RBRACKET  deslocar, e ir ao estado 41
-    ID        deslocar, e ir ao estado 42
-    NUM       deslocar, e ir ao estado 43
-
-    composto-decl      ir ao estado 44
-    statement          ir ao estado 45
-    expressao-decl     ir ao estado 46
-    selecao-decl       ir ao estado 47
-    iteracao-decl      ir ao estado 48
-    retorno-decl       ir ao estado 49
-    expressao          ir ao estado 50
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    RBRACE  deslocar, e ir ao estado 36
 
 
 Estado 35
 
-    6 var-declaracao: tipo-especificador ID . SEMI
-    7               | tipo-especificador ID . LBRACE NUM RBRACE SEMI
+   23 composto-decl: LBRACKET local-declaracoes . statement-lista RBRACKET
+   24 local-declaracoes: local-declaracoes . var-declaracao
 
-    SEMI    deslocar, e ir ao estado 12
-    LBRACE  deslocar, e ir ao estado 14
+    INT   deslocar, e ir ao estado 4
+    VOID  deslocar, e ir ao estado 5
+
+    $padrão  reduzir usando a regra 27 (statement-lista)
+
+    var-declaracao      ir ao estado 37
+    tipo-especificador  ir ao estado 38
+    statement-lista     ir ao estado 39
 
 
 Estado 36
 
-   29 selecao-decl: IF . LPAREN expressao RPAREN statement
-   30             | IF . LPAREN expressao RPAREN statement ELSE statement
+   21 param: tipo-especificador ID $@5 LBRACE RBRACE .
 
-    LPAREN  deslocar, e ir ao estado 57
+    $padrão  reduzir usando a regra 21 (param)
 
 
 Estado 37
 
-   32 retorno-decl: RETURN . SEMI
-   33             | RETURN . expressao SEMI
+   24 local-declaracoes: local-declaracoes var-declaracao .
 
-    SEMI    deslocar, e ir ao estado 58
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    expressao          ir ao estado 59
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $padrão  reduzir usando a regra 24 (local-declaracoes)
 
 
 Estado 38
 
-   31 iteracao-decl: WHILE . LPAREN expressao RPAREN statement
+    7 var-declaracao: tipo-especificador . ID $@1 SEMI
+   10               | tipo-especificador . ID $@2 LBRACE NUM $@3 RBRACE SEMI
 
-    LPAREN  deslocar, e ir ao estado 60
+    ID  deslocar, e ir ao estado 40
 
 
 Estado 39
 
-   28 expressao-decl: SEMI .
+   23 composto-decl: LBRACKET local-declaracoes statement-lista . RBRACKET
+   26 statement-lista: statement-lista . statement
 
-    $padrão  reduzir usando a regra 28 (expressao-decl)
+    error     deslocar, e ir ao estado 41
+    IF        deslocar, e ir ao estado 42
+    RETURN    deslocar, e ir ao estado 43
+    WHILE     deslocar, e ir ao estado 44
+    SEMI      deslocar, e ir ao estado 45
+    LPAREN    deslocar, e ir ao estado 46
+    LBRACKET  deslocar, e ir ao estado 30
+    RBRACKET  deslocar, e ir ao estado 47
+    ID        deslocar, e ir ao estado 48
+    NUM       deslocar, e ir ao estado 49
+
+    composto-decl      ir ao estado 50
+    statement          ir ao estado 51
+    expressao-decl     ir ao estado 52
+    selecao-decl       ir ao estado 53
+    iteracao-decl      ir ao estado 54
+    retorno-decl       ir ao estado 55
+    expressao          ir ao estado 56
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 40
 
-   36 fator: LPAREN . expressao RPAREN
+    7 var-declaracao: tipo-especificador ID . $@1 SEMI
+   10               | tipo-especificador ID . $@2 LBRACE NUM $@3 RBRACE SEMI
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
+    LBRACE    reduzir usando a regra 8 ($@2)
+    $padrão  reduzir usando a regra 6 ($@1)
 
-    expressao          ir ao estado 61
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $@1  ir ao estado 11
+    $@2  ir ao estado 12
 
 
 Estado 41
 
-   17 composto-decl: LBRACKET local-declaracoes statement-lista RBRACKET .
+   46 fator: error .
 
-    $padrão  reduzir usando a regra 17 (composto-decl)
+    $padrão  reduzir usando a regra 46 (fator)
 
 
 Estado 42
 
-   40 var: ID .
-   41    | ID . LBRACE expressao RBRACE
-   58 ativacao: ID . LPAREN args RPAREN
+   35 selecao-decl: IF . LPAREN expressao RPAREN statement
+   36             | IF . LPAREN expressao RPAREN statement ELSE statement
 
-    LPAREN  deslocar, e ir ao estado 62
-    LBRACE  deslocar, e ir ao estado 63
-
-    $padrão  reduzir usando a regra 40 (var)
+    LPAREN  deslocar, e ir ao estado 63
 
 
 Estado 43
 
-   39 fator: NUM .
+   38 retorno-decl: RETURN . SEMI
+   39             | RETURN . expressao SEMI
 
-    $padrão  reduzir usando a regra 39 (fator)
+    error   deslocar, e ir ao estado 41
+    SEMI    deslocar, e ir ao estado 64
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    expressao          ir ao estado 65
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 44
 
-   23 statement: composto-decl .
+   37 iteracao-decl: WHILE . LPAREN expressao RPAREN statement
 
-    $padrão  reduzir usando a regra 23 (statement)
+    LPAREN  deslocar, e ir ao estado 66
 
 
 Estado 45
 
-   20 statement-lista: statement-lista statement .
+   34 expressao-decl: SEMI .
 
-    $padrão  reduzir usando a regra 20 (statement-lista)
+    $padrão  reduzir usando a regra 34 (expressao-decl)
 
 
 Estado 46
 
-   22 statement: expressao-decl .
+   42 fator: LPAREN . expressao RPAREN
 
-    $padrão  reduzir usando a regra 22 (statement)
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    expressao          ir ao estado 67
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 47
 
-   24 statement: selecao-decl .
+   23 composto-decl: LBRACKET local-declaracoes statement-lista RBRACKET .
 
-    $padrão  reduzir usando a regra 24 (statement)
+    $padrão  reduzir usando a regra 23 (composto-decl)
 
 
 Estado 48
 
-   25 statement: iteracao-decl .
+   47 var: ID .
+   48    | ID . LBRACE expressao RBRACE
+   66 ativacao: ID . @6 LPAREN args RPAREN
 
-    $padrão  reduzir usando a regra 25 (statement)
+    LBRACE  deslocar, e ir ao estado 68
+
+    LPAREN    reduzir usando a regra 65 (@6)
+    $padrão  reduzir usando a regra 47 (var)
+
+    @6  ir ao estado 69
 
 
 Estado 49
 
-   26 statement: retorno-decl .
+   45 fator: NUM .
 
-    $padrão  reduzir usando a regra 26 (statement)
+    $padrão  reduzir usando a regra 45 (fator)
 
 
 Estado 50
 
-   27 expressao-decl: expressao . SEMI
+   29 statement: composto-decl .
 
-    SEMI  deslocar, e ir ao estado 64
+    $padrão  reduzir usando a regra 29 (statement)
 
 
 Estado 51
 
-   55 termo: fator .
+   26 statement-lista: statement-lista statement .
 
-    $padrão  reduzir usando a regra 55 (termo)
+    $padrão  reduzir usando a regra 26 (statement-lista)
 
 
 Estado 52
 
-   34 expressao: var . EQATR expressao
-   37 fator: var .
+   28 statement: expressao-decl .
 
-    EQATR  deslocar, e ir ao estado 65
-
-    $padrão  reduzir usando a regra 37 (fator)
+    $padrão  reduzir usando a regra 28 (statement)
 
 
 Estado 53
 
-   35 expressao: simples-expressao .
+   30 statement: selecao-decl .
 
-    $padrão  reduzir usando a regra 35 (expressao)
+    $padrão  reduzir usando a regra 30 (statement)
 
 
 Estado 54
 
-   42 simples-expressao: soma-expressao . relacional soma-expressao
-   43                  | soma-expressao .
-   50 soma-expressao: soma-expressao . soma termo
+   31 statement: iteracao-decl .
 
-    PLUS     deslocar, e ir ao estado 66
-    MINUS    deslocar, e ir ao estado 67
-    LESSER   deslocar, e ir ao estado 68
-    LESSEQ   deslocar, e ir ao estado 69
-    GREATER  deslocar, e ir ao estado 70
-    GREATEQ  deslocar, e ir ao estado 71
-    EQCOMP   deslocar, e ir ao estado 72
-    NOTEQ    deslocar, e ir ao estado 73
-
-    $padrão  reduzir usando a regra 43 (simples-expressao)
-
-    relacional  ir ao estado 74
-    soma        ir ao estado 75
+    $padrão  reduzir usando a regra 31 (statement)
 
 
 Estado 55
 
-   51 soma-expressao: termo .
-   54 termo: termo . mult fator
+   32 statement: retorno-decl .
 
-    TIMES  deslocar, e ir ao estado 76
-    SLASH  deslocar, e ir ao estado 77
-
-    $padrão  reduzir usando a regra 51 (soma-expressao)
-
-    mult  ir ao estado 78
+    $padrão  reduzir usando a regra 32 (statement)
 
 
 Estado 56
 
-   38 fator: ativacao .
+   33 expressao-decl: expressao . SEMI
 
-    $padrão  reduzir usando a regra 38 (fator)
+    SEMI  deslocar, e ir ao estado 70
 
 
 Estado 57
 
-   29 selecao-decl: IF LPAREN . expressao RPAREN statement
-   30             | IF LPAREN . expressao RPAREN statement ELSE statement
+   62 termo: fator .
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    expressao          ir ao estado 79
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $padrão  reduzir usando a regra 62 (termo)
 
 
 Estado 58
 
-   32 retorno-decl: RETURN SEMI .
+   40 expressao: var . EQATR expressao
+   43 fator: var .
 
-    $padrão  reduzir usando a regra 32 (retorno-decl)
+    EQATR  deslocar, e ir ao estado 71
+
+    $padrão  reduzir usando a regra 43 (fator)
 
 
 Estado 59
 
-   33 retorno-decl: RETURN expressao . SEMI
+   41 expressao: simples-expressao .
 
-    SEMI  deslocar, e ir ao estado 80
+    $padrão  reduzir usando a regra 41 (expressao)
 
 
 Estado 60
 
-   31 iteracao-decl: WHILE LPAREN . expressao RPAREN statement
+   49 simples-expressao: soma-expressao . relacional soma-expressao
+   50                  | soma-expressao .
+   57 soma-expressao: soma-expressao . soma termo
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
+    PLUS     deslocar, e ir ao estado 72
+    MINUS    deslocar, e ir ao estado 73
+    LESSER   deslocar, e ir ao estado 74
+    LESSEQ   deslocar, e ir ao estado 75
+    GREATER  deslocar, e ir ao estado 76
+    GREATEQ  deslocar, e ir ao estado 77
+    EQCOMP   deslocar, e ir ao estado 78
+    NOTEQ    deslocar, e ir ao estado 79
 
-    expressao          ir ao estado 81
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $padrão  reduzir usando a regra 50 (simples-expressao)
+
+    relacional  ir ao estado 80
+    soma        ir ao estado 81
 
 
 Estado 61
 
-   36 fator: LPAREN expressao . RPAREN
+   58 soma-expressao: termo .
+   61 termo: termo . mult fator
 
-    RPAREN  deslocar, e ir ao estado 82
+    TIMES  deslocar, e ir ao estado 82
+    SLASH  deslocar, e ir ao estado 83
+
+    $padrão  reduzir usando a regra 58 (soma-expressao)
+
+    mult  ir ao estado 84
 
 
 Estado 62
 
-   58 ativacao: ID LPAREN . args RPAREN
+   44 fator: ativacao .
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    $padrão  reduzir usando a regra 60 (args)
-
-    expressao          ir ao estado 83
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
-    args               ir ao estado 84
-    arg-lista          ir ao estado 85
+    $padrão  reduzir usando a regra 44 (fator)
 
 
 Estado 63
 
-   41 var: ID LBRACE . expressao RBRACE
+   35 selecao-decl: IF LPAREN . expressao RPAREN statement
+   36             | IF LPAREN . expressao RPAREN statement ELSE statement
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
 
-    expressao          ir ao estado 86
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    expressao          ir ao estado 85
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 64
 
-   27 expressao-decl: expressao SEMI .
+   38 retorno-decl: RETURN SEMI .
 
-    $padrão  reduzir usando a regra 27 (expressao-decl)
+    $padrão  reduzir usando a regra 38 (retorno-decl)
 
 
 Estado 65
 
-   34 expressao: var EQATR . expressao
+   39 retorno-decl: RETURN expressao . SEMI
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    expressao          ir ao estado 87
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    SEMI  deslocar, e ir ao estado 86
 
 
 Estado 66
 
-   52 soma: PLUS .
+   37 iteracao-decl: WHILE LPAREN . expressao RPAREN statement
 
-    $padrão  reduzir usando a regra 52 (soma)
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    expressao          ir ao estado 87
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 67
 
-   53 soma: MINUS .
+   42 fator: LPAREN expressao . RPAREN
 
-    $padrão  reduzir usando a regra 53 (soma)
+    RPAREN  deslocar, e ir ao estado 88
 
 
 Estado 68
 
-   45 relacional: LESSER .
+   48 var: ID LBRACE . expressao RBRACE
 
-    $padrão  reduzir usando a regra 45 (relacional)
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    expressao          ir ao estado 89
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 69
 
-   44 relacional: LESSEQ .
+   66 ativacao: ID @6 . LPAREN args RPAREN
 
-    $padrão  reduzir usando a regra 44 (relacional)
+    LPAREN  deslocar, e ir ao estado 90
 
 
 Estado 70
 
-   46 relacional: GREATER .
+   33 expressao-decl: expressao SEMI .
 
-    $padrão  reduzir usando a regra 46 (relacional)
+    $padrão  reduzir usando a regra 33 (expressao-decl)
 
 
 Estado 71
 
-   47 relacional: GREATEQ .
+   40 expressao: var EQATR . expressao
 
-    $padrão  reduzir usando a regra 47 (relacional)
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    expressao          ir ao estado 91
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 72
 
-   48 relacional: EQCOMP .
+   59 soma: PLUS .
 
-    $padrão  reduzir usando a regra 48 (relacional)
+    $padrão  reduzir usando a regra 59 (soma)
 
 
 Estado 73
 
-   49 relacional: NOTEQ .
+   60 soma: MINUS .
 
-    $padrão  reduzir usando a regra 49 (relacional)
+    $padrão  reduzir usando a regra 60 (soma)
 
 
 Estado 74
 
-   42 simples-expressao: soma-expressao relacional . soma-expressao
+   52 relacional: LESSER .
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    fator           ir ao estado 51
-    var             ir ao estado 88
-    soma-expressao  ir ao estado 89
-    termo           ir ao estado 55
-    ativacao        ir ao estado 56
+    $padrão  reduzir usando a regra 52 (relacional)
 
 
 Estado 75
 
-   50 soma-expressao: soma-expressao soma . termo
+   51 relacional: LESSEQ .
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    fator     ir ao estado 51
-    var       ir ao estado 88
-    termo     ir ao estado 90
-    ativacao  ir ao estado 56
+    $padrão  reduzir usando a regra 51 (relacional)
 
 
 Estado 76
 
-   56 mult: TIMES .
+   53 relacional: GREATER .
 
-    $padrão  reduzir usando a regra 56 (mult)
+    $padrão  reduzir usando a regra 53 (relacional)
 
 
 Estado 77
 
-   57 mult: SLASH .
+   54 relacional: GREATEQ .
 
-    $padrão  reduzir usando a regra 57 (mult)
+    $padrão  reduzir usando a regra 54 (relacional)
 
 
 Estado 78
 
-   54 termo: termo mult . fator
+   55 relacional: EQCOMP .
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    fator     ir ao estado 91
-    var       ir ao estado 88
-    ativacao  ir ao estado 56
+    $padrão  reduzir usando a regra 55 (relacional)
 
 
 Estado 79
 
-   29 selecao-decl: IF LPAREN expressao . RPAREN statement
-   30             | IF LPAREN expressao . RPAREN statement ELSE statement
+   56 relacional: NOTEQ .
 
-    RPAREN  deslocar, e ir ao estado 92
+    $padrão  reduzir usando a regra 56 (relacional)
 
 
 Estado 80
 
-   33 retorno-decl: RETURN expressao SEMI .
+   49 simples-expressao: soma-expressao relacional . soma-expressao
 
-    $padrão  reduzir usando a regra 33 (retorno-decl)
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    fator           ir ao estado 57
+    var             ir ao estado 92
+    soma-expressao  ir ao estado 93
+    termo           ir ao estado 61
+    ativacao        ir ao estado 62
 
 
 Estado 81
 
-   31 iteracao-decl: WHILE LPAREN expressao . RPAREN statement
+   57 soma-expressao: soma-expressao soma . termo
 
-    RPAREN  deslocar, e ir ao estado 93
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    fator     ir ao estado 57
+    var       ir ao estado 92
+    termo     ir ao estado 94
+    ativacao  ir ao estado 62
 
 
 Estado 82
 
-   36 fator: LPAREN expressao RPAREN .
+   63 mult: TIMES .
 
-    $padrão  reduzir usando a regra 36 (fator)
+    $padrão  reduzir usando a regra 63 (mult)
 
 
 Estado 83
 
-   62 arg-lista: expressao .
+   64 mult: SLASH .
 
-    $padrão  reduzir usando a regra 62 (arg-lista)
+    $padrão  reduzir usando a regra 64 (mult)
 
 
 Estado 84
 
-   58 ativacao: ID LPAREN args . RPAREN
+   61 termo: termo mult . fator
 
-    RPAREN  deslocar, e ir ao estado 94
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    fator     ir ao estado 95
+    var       ir ao estado 92
+    ativacao  ir ao estado 62
 
 
 Estado 85
 
-   59 args: arg-lista .
-   61 arg-lista: arg-lista . COMMA expressao
+   35 selecao-decl: IF LPAREN expressao . RPAREN statement
+   36             | IF LPAREN expressao . RPAREN statement ELSE statement
 
-    COMMA  deslocar, e ir ao estado 95
-
-    $padrão  reduzir usando a regra 59 (args)
+    RPAREN  deslocar, e ir ao estado 96
 
 
 Estado 86
 
-   41 var: ID LBRACE expressao . RBRACE
+   39 retorno-decl: RETURN expressao SEMI .
 
-    RBRACE  deslocar, e ir ao estado 96
+    $padrão  reduzir usando a regra 39 (retorno-decl)
 
 
 Estado 87
 
-   34 expressao: var EQATR expressao .
+   37 iteracao-decl: WHILE LPAREN expressao . RPAREN statement
 
-    $padrão  reduzir usando a regra 34 (expressao)
+    RPAREN  deslocar, e ir ao estado 97
 
 
 Estado 88
 
-   37 fator: var .
+   42 fator: LPAREN expressao RPAREN .
 
-    $padrão  reduzir usando a regra 37 (fator)
+    $padrão  reduzir usando a regra 42 (fator)
 
 
 Estado 89
 
-   42 simples-expressao: soma-expressao relacional soma-expressao .
-   50 soma-expressao: soma-expressao . soma termo
+   48 var: ID LBRACE expressao . RBRACE
 
-    PLUS   deslocar, e ir ao estado 66
-    MINUS  deslocar, e ir ao estado 67
-
-    $padrão  reduzir usando a regra 42 (simples-expressao)
-
-    soma  ir ao estado 75
+    RBRACE  deslocar, e ir ao estado 98
 
 
 Estado 90
 
-   50 soma-expressao: soma-expressao soma termo .
-   54 termo: termo . mult fator
+   66 ativacao: ID @6 LPAREN . args RPAREN
 
-    TIMES  deslocar, e ir ao estado 76
-    SLASH  deslocar, e ir ao estado 77
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
 
-    $padrão  reduzir usando a regra 50 (soma-expressao)
+    RPAREN  reduzir usando a regra 68 (args)
 
-    mult  ir ao estado 78
+    expressao          ir ao estado 99
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
+    args               ir ao estado 100
+    arg-lista          ir ao estado 101
 
 
 Estado 91
 
-   54 termo: termo mult fator .
+   40 expressao: var EQATR expressao .
 
-    $padrão  reduzir usando a regra 54 (termo)
+    $padrão  reduzir usando a regra 40 (expressao)
 
 
 Estado 92
 
-   29 selecao-decl: IF LPAREN expressao RPAREN . statement
-   30             | IF LPAREN expressao RPAREN . statement ELSE statement
+   43 fator: var .
 
-    IF        deslocar, e ir ao estado 36
-    RETURN    deslocar, e ir ao estado 37
-    WHILE     deslocar, e ir ao estado 38
-    SEMI      deslocar, e ir ao estado 39
-    LPAREN    deslocar, e ir ao estado 40
-    LBRACKET  deslocar, e ir ao estado 26
-    ID        deslocar, e ir ao estado 42
-    NUM       deslocar, e ir ao estado 43
-
-    composto-decl      ir ao estado 44
-    statement          ir ao estado 97
-    expressao-decl     ir ao estado 46
-    selecao-decl       ir ao estado 47
-    iteracao-decl      ir ao estado 48
-    retorno-decl       ir ao estado 49
-    expressao          ir ao estado 50
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $padrão  reduzir usando a regra 43 (fator)
 
 
 Estado 93
 
-   31 iteracao-decl: WHILE LPAREN expressao RPAREN . statement
+   49 simples-expressao: soma-expressao relacional soma-expressao .
+   57 soma-expressao: soma-expressao . soma termo
 
-    IF        deslocar, e ir ao estado 36
-    RETURN    deslocar, e ir ao estado 37
-    WHILE     deslocar, e ir ao estado 38
-    SEMI      deslocar, e ir ao estado 39
-    LPAREN    deslocar, e ir ao estado 40
-    LBRACKET  deslocar, e ir ao estado 26
-    ID        deslocar, e ir ao estado 42
-    NUM       deslocar, e ir ao estado 43
+    PLUS   deslocar, e ir ao estado 72
+    MINUS  deslocar, e ir ao estado 73
 
-    composto-decl      ir ao estado 44
-    statement          ir ao estado 98
-    expressao-decl     ir ao estado 46
-    selecao-decl       ir ao estado 47
-    iteracao-decl      ir ao estado 48
-    retorno-decl       ir ao estado 49
-    expressao          ir ao estado 50
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $padrão  reduzir usando a regra 49 (simples-expressao)
+
+    soma  ir ao estado 81
 
 
 Estado 94
 
-   58 ativacao: ID LPAREN args RPAREN .
+   57 soma-expressao: soma-expressao soma termo .
+   61 termo: termo . mult fator
 
-    $padrão  reduzir usando a regra 58 (ativacao)
+    TIMES  deslocar, e ir ao estado 82
+    SLASH  deslocar, e ir ao estado 83
+
+    $padrão  reduzir usando a regra 57 (soma-expressao)
+
+    mult  ir ao estado 84
 
 
 Estado 95
 
-   61 arg-lista: arg-lista COMMA . expressao
+   61 termo: termo mult fator .
 
-    LPAREN  deslocar, e ir ao estado 40
-    ID      deslocar, e ir ao estado 42
-    NUM     deslocar, e ir ao estado 43
-
-    expressao          ir ao estado 99
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    $padrão  reduzir usando a regra 61 (termo)
 
 
 Estado 96
 
-   41 var: ID LBRACE expressao RBRACE .
+   35 selecao-decl: IF LPAREN expressao RPAREN . statement
+   36             | IF LPAREN expressao RPAREN . statement ELSE statement
 
-    $padrão  reduzir usando a regra 41 (var)
+    error     deslocar, e ir ao estado 41
+    IF        deslocar, e ir ao estado 42
+    RETURN    deslocar, e ir ao estado 43
+    WHILE     deslocar, e ir ao estado 44
+    SEMI      deslocar, e ir ao estado 45
+    LPAREN    deslocar, e ir ao estado 46
+    LBRACKET  deslocar, e ir ao estado 30
+    ID        deslocar, e ir ao estado 48
+    NUM       deslocar, e ir ao estado 49
+
+    composto-decl      ir ao estado 50
+    statement          ir ao estado 102
+    expressao-decl     ir ao estado 52
+    selecao-decl       ir ao estado 53
+    iteracao-decl      ir ao estado 54
+    retorno-decl       ir ao estado 55
+    expressao          ir ao estado 56
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 97
 
-   29 selecao-decl: IF LPAREN expressao RPAREN statement .
-   30             | IF LPAREN expressao RPAREN statement . ELSE statement
+   37 iteracao-decl: WHILE LPAREN expressao RPAREN . statement
 
-    ELSE  deslocar, e ir ao estado 100
+    error     deslocar, e ir ao estado 41
+    IF        deslocar, e ir ao estado 42
+    RETURN    deslocar, e ir ao estado 43
+    WHILE     deslocar, e ir ao estado 44
+    SEMI      deslocar, e ir ao estado 45
+    LPAREN    deslocar, e ir ao estado 46
+    LBRACKET  deslocar, e ir ao estado 30
+    ID        deslocar, e ir ao estado 48
+    NUM       deslocar, e ir ao estado 49
 
-    $padrão  reduzir usando a regra 29 (selecao-decl)
+    composto-decl      ir ao estado 50
+    statement          ir ao estado 103
+    expressao-decl     ir ao estado 52
+    selecao-decl       ir ao estado 53
+    iteracao-decl      ir ao estado 54
+    retorno-decl       ir ao estado 55
+    expressao          ir ao estado 56
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
 
 
 Estado 98
 
-   31 iteracao-decl: WHILE LPAREN expressao RPAREN statement .
+   48 var: ID LBRACE expressao RBRACE .
 
-    $padrão  reduzir usando a regra 31 (iteracao-decl)
+    $padrão  reduzir usando a regra 48 (var)
 
 
 Estado 99
 
-   61 arg-lista: arg-lista COMMA expressao .
+   70 arg-lista: expressao .
 
-    $padrão  reduzir usando a regra 61 (arg-lista)
+    $padrão  reduzir usando a regra 70 (arg-lista)
 
 
 Estado 100
 
-   30 selecao-decl: IF LPAREN expressao RPAREN statement ELSE . statement
+   66 ativacao: ID @6 LPAREN args . RPAREN
 
-    IF        deslocar, e ir ao estado 36
-    RETURN    deslocar, e ir ao estado 37
-    WHILE     deslocar, e ir ao estado 38
-    SEMI      deslocar, e ir ao estado 39
-    LPAREN    deslocar, e ir ao estado 40
-    LBRACKET  deslocar, e ir ao estado 26
-    ID        deslocar, e ir ao estado 42
-    NUM       deslocar, e ir ao estado 43
-
-    composto-decl      ir ao estado 44
-    statement          ir ao estado 101
-    expressao-decl     ir ao estado 46
-    selecao-decl       ir ao estado 47
-    iteracao-decl      ir ao estado 48
-    retorno-decl       ir ao estado 49
-    expressao          ir ao estado 50
-    fator              ir ao estado 51
-    var                ir ao estado 52
-    simples-expressao  ir ao estado 53
-    soma-expressao     ir ao estado 54
-    termo              ir ao estado 55
-    ativacao           ir ao estado 56
+    RPAREN  deslocar, e ir ao estado 104
 
 
 Estado 101
 
-   30 selecao-decl: IF LPAREN expressao RPAREN statement ELSE statement .
+   67 args: arg-lista .
+   69 arg-lista: arg-lista . COMMA expressao
 
-    $padrão  reduzir usando a regra 30 (selecao-decl)
+    COMMA  deslocar, e ir ao estado 105
+
+    $padrão  reduzir usando a regra 67 (args)
+
+
+Estado 102
+
+   35 selecao-decl: IF LPAREN expressao RPAREN statement .
+   36             | IF LPAREN expressao RPAREN statement . ELSE statement
+
+    ELSE  deslocar, e ir ao estado 106
+
+    $padrão  reduzir usando a regra 35 (selecao-decl)
+
+
+Estado 103
+
+   37 iteracao-decl: WHILE LPAREN expressao RPAREN statement .
+
+    $padrão  reduzir usando a regra 37 (iteracao-decl)
+
+
+Estado 104
+
+   66 ativacao: ID @6 LPAREN args RPAREN .
+
+    $padrão  reduzir usando a regra 66 (ativacao)
+
+
+Estado 105
+
+   69 arg-lista: arg-lista COMMA . expressao
+
+    error   deslocar, e ir ao estado 41
+    LPAREN  deslocar, e ir ao estado 46
+    ID      deslocar, e ir ao estado 48
+    NUM     deslocar, e ir ao estado 49
+
+    expressao          ir ao estado 107
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
+
+
+Estado 106
+
+   36 selecao-decl: IF LPAREN expressao RPAREN statement ELSE . statement
+
+    error     deslocar, e ir ao estado 41
+    IF        deslocar, e ir ao estado 42
+    RETURN    deslocar, e ir ao estado 43
+    WHILE     deslocar, e ir ao estado 44
+    SEMI      deslocar, e ir ao estado 45
+    LPAREN    deslocar, e ir ao estado 46
+    LBRACKET  deslocar, e ir ao estado 30
+    ID        deslocar, e ir ao estado 48
+    NUM       deslocar, e ir ao estado 49
+
+    composto-decl      ir ao estado 50
+    statement          ir ao estado 108
+    expressao-decl     ir ao estado 52
+    selecao-decl       ir ao estado 53
+    iteracao-decl      ir ao estado 54
+    retorno-decl       ir ao estado 55
+    expressao          ir ao estado 56
+    fator              ir ao estado 57
+    var                ir ao estado 58
+    simples-expressao  ir ao estado 59
+    soma-expressao     ir ao estado 60
+    termo              ir ao estado 61
+    ativacao           ir ao estado 62
+
+
+Estado 107
+
+   69 arg-lista: arg-lista COMMA expressao .
+
+    $padrão  reduzir usando a regra 69 (arg-lista)
+
+
+Estado 108
+
+   36 selecao-decl: IF LPAREN expressao RPAREN statement ELSE statement .
+
+    $padrão  reduzir usando a regra 36 (selecao-decl)
