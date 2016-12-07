@@ -90,7 +90,7 @@ tipo-especificador:
 fun-declaracao:
         tipo-especificador ID
         {
-                printf("Chegou no ID %s\n" ,tokenString);
+                // printf("Chegou no ID %s\n" ,tokenString);
                 $$ = newStmtNode(FunDeclK);
                 $$->attr.name =  copyString(tokenString);;
         } 
@@ -127,12 +127,13 @@ param:
                   $$ = newStmtNode(VarDeclK);
                   $$->attr.name = copyString(tokenString);
                   $$->type = savedType;
-                  printf("Chegou no param %s\n",tokenString);
+                //   printf("Chegou no param %s\n",tokenString);
                 }
         | tipo-especificador ID 
                 { savedName = copyString(tokenString);
                   savedLineNo = lineno;
-                  printf("Chegou no param %s\n",tokenString);}
+                //   printf("Chegou no param %s\n",tokenString);
+                }
         LBRACE RBRACE
                 { $$ = newStmtNode(VarDeclK);
                   $$->attr.name = savedName;
@@ -149,8 +150,8 @@ composto-decl:
                   $$ = newStmtNode(CompoundK);
                   $$->child[0] = $2;
                   $$->child[1] = $3;
-                  printf("Chegou no composto \n");
-                  printTree($3);
+                //   printf("Chegou no composto \n");
+                //   printTree($3);
         }
         ;
 
@@ -201,14 +202,14 @@ selecao-decl:
         {       $$ = newStmtNode(IfK);
                 $$->child[0] = $3;
                 $$->child[1] = $5;
-                printf("Chegou no IF \n");
+                // printf("Chegou no IF \n");
         }
         | IF LPAREN expressao RPAREN statement ELSE statement
         {       $$ = newStmtNode(IfK);
                 $$->child[0] = $3;
                 $$->child[1] = $5;
                 $$->child[2] = $7;
-                printf("Chegou no IF \n");
+                // printf("Chegou no IF \n");
         }
         ;
 
@@ -217,19 +218,19 @@ iteracao-decl:
         {       $$ = newStmtNode(WhileK);
                 $$->child[0] = $3;
                 $$->child[1] = $5;
-                printf("Chegou no WHILE \n");
+                // printf("Chegou no WHILE \n");
         }
         ;
 
 retorno-decl:
         RETURN SEMI
         {       $$ = newStmtNode(ReturnK);
-                printf("Chegou no RETURN \n");
+                // printf("Chegou no RETURN \n");
         }
         | RETURN expressao SEMI
         {       $$ = newStmtNode(ReturnK);
                 $$->child[0] = $2;
-                printf("Chegou no RETURN \n");
+                // printf("Chegou no RETURN \n");
         }
         ;
 
@@ -238,7 +239,7 @@ expressao:
         {       $$ = newStmtNode(AssignK);
                 $$->child[0] = $1;
                 $$->child[1] = $3;
-                printf("Chegou no expressao \n");
+                // printf("Chegou no expressao \n");
         }
         | simples-expressao
         ;
@@ -262,14 +263,14 @@ var:
         ID{ 
                   $$ = newExpNode(IdK);
                   $$->attr.name = copyString(tokenString);
-                  printf("Chegou no var ");
+                //   printf("Chegou no var ");
                 }
         | ID LBRACE expressao RBRACE
         { 
                   $$ = newExpNode(IdK);
                   $$->attr.name = copyString(tokenString);
                   $$->child[0]=$3;
-                  printf("Chegou no var ");
+                //   printf("Chegou no var ");
         }
         ;
 
@@ -280,10 +281,9 @@ simples-expressao:
                   $$ = $2;
                   $$->child[0]=$1;
                   $$->child[1]=$3;
-                  printf("Chegou no simples-expressao ");
+                //   printf("Chegou no simples-expressao ");
         }
         | soma-expressao
-        | error
         ;
 
 relacional:
@@ -325,7 +325,7 @@ soma-expressao:
                   $$ = $2;
                   $$->child[0]=$1;
                   $$->child[1]=$3;
-                  printf("Chegou no soma-expressao ");
+                //   printf("Chegou no soma-expressao ");
         }
         | termo
         ;
@@ -349,7 +349,7 @@ termo:
                   $$ = $2;
                   $$->child[0]=$1;
                   $$->child[1]=$3;
-                  printf("Chegou no termo ");
+                //   printf("Chegou no termo ");
         }
         | fator
         ;
@@ -377,7 +377,7 @@ ativacao:
         LPAREN args RPAREN
         {       $$ = $2;
                 $$->child[0] = $4;
-                printf("Chegou no ativacao \n");
+                // printf("Chegou no ativacao \n");
         }
         ;
 
