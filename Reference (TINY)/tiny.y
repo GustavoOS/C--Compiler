@@ -22,14 +22,14 @@ static int yylex(void);
 %}
 
 %token IF THEN ELSE END REPEAT UNTIL READ WRITE
-%token ID NUM 
+%token ID NUM
 %token ASSIGN EQ LT PLUS MINUS TIMES OVER LPAREN RPAREN SEMI
-%token ERROR 
+%token ERROR
 
 %% /* Grammar for TINY */
 
 program     : stmt_seq
-                 { savedTree = $1;} 
+                 { savedTree = $1;}
             ;
 stmt_seq    : stmt_seq SEMI stmt
                  { YYSTYPE t = $1;
@@ -87,7 +87,7 @@ write_stmt  : WRITE exp
                    $$->child[0] = $2;
                  }
             ;
-exp         : simple_exp LT simple_exp 
+exp         : simple_exp LT simple_exp
                  { $$ = newExpNode(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
@@ -101,7 +101,7 @@ exp         : simple_exp LT simple_exp
                  }
             | simple_exp { $$ = $1; }
             ;
-simple_exp  : simple_exp PLUS term 
+simple_exp  : simple_exp PLUS term
                  { $$ = newExpNode(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
@@ -112,10 +112,10 @@ simple_exp  : simple_exp PLUS term
                    $$->child[0] = $1;
                    $$->child[1] = $3;
                    $$->attr.op = MINUS;
-                 } 
+                 }
             | term { $$ = $1; }
             ;
-term        : term TIMES factor 
+term        : term TIMES factor
                  { $$ = newExpNode(OpK);
                    $$->child[0] = $1;
                    $$->child[1] = $3;
@@ -162,4 +162,3 @@ TreeNode * parse(void)
 { yyparse();
   return savedTree;
 }
-

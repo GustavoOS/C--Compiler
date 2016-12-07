@@ -1,5 +1,10 @@
 %{
-#include "scanner.h"
+#include "globals.h"
+#include "util.h"
+#include "scan.h"
+/* lexeme of identifier or reserved word */
+char tokenString[MAXTOKENLEN+1];
+static int yylex(void);
 %}
 
 %x comment
@@ -49,7 +54,7 @@
 "}"                                 return RBRACE;
 
 
-.                                   return ERRO;
+.                                   return ERROR;
 
 %%
 

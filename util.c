@@ -9,47 +9,58 @@
 #include "globals.h"
 #include "util.h"
 
-
-
-/* Procedure printToken prints a token 
+/* Procedure printToken prints a token
  * and its lexeme to the listing file
  */
+
 void printToken( TokenType token, const char* tokenString )
 { switch (token)
-  { case IF:
-    case THEN:
+  {
+    case ERROR:
+      fprintf(listing,
+          "ERROR: %s\n",tokenString);
+      break;
     case ELSE:
-    case END:
-    case REPEAT:
-    case UNTIL:
-    case READ:
-    case WRITE:
+    case IF:
+    case INT:
+    case RETURN:
+    case VOID:
+    case WHILE:
       fprintf(listing,
          "reserved word: %s\n",tokenString);
-      break;
-    case ASSIGN: fprintf(listing,":=\n"); break;
-    case LT: fprintf(listing,"<\n"); break;
-    case EQ: fprintf(listing,"=\n"); break;
-    case LPAREN: fprintf(listing,"(\n"); break;
-    case RPAREN: fprintf(listing,")\n"); break;
-    case SEMI: fprintf(listing,";\n"); break;
-    case PLUS: fprintf(listing,"+\n"); break;
-    case MINUS: fprintf(listing,"-\n"); break;
-    case TIMES: fprintf(listing,"*\n"); break;
-    case OVER: fprintf(listing,"/\n"); break;
-    case ENDFILE: fprintf(listing,"EOF\n"); break;
-    case NUM:
-      fprintf(listing,
-          "NUM, val= %s\n",tokenString);
       break;
     case ID:
       fprintf(listing,
           "ID, name= %s\n",tokenString);
       break;
-    case ERROR:
+    case NUM:
       fprintf(listing,
-          "ERROR: %s\n",tokenString);
+          "NUM, val= %s\n",tokenString);
       break;
+    case PLUS: fprintf(listing,"+\n"); break;
+    case MINUS: fprintf(listing,"-\n"); break;
+    case TIMES: fprintf(listing,"*\n"); break;
+    case SLASH: fprintf(listing,"/\n"); break;
+
+    case LESSER: fprintf(listing,"<\n"); break;
+    case LESSEQ: fprintf(listing,"<=\n"); break;
+    case GREATER: fprintf(listing,">\n"); break;
+    case GREATEQ: fprintf(listing,">=\n"); break;
+    case EQCOMP: fprintf(listing,"==\n"); break;
+    case NOTEQ: fprintf(listing,"!=\n"); break;
+    case EQATR: fprintf(listing,"=\n"); break;
+
+    case SEMI: fprintf(listing,";\n"); break;
+    case COMMA: fprintf(listing,",\n"); break;
+
+    case LPAREN: fprintf(listing,"(\n"); break;
+    case RPAREN: fprintf(listing,")\n"); break;
+    case LBRACKET: fprintf(listing,"[\n"); break;
+    case RBRACKET: fprintf(listing,"]\n"); break;
+    case LBRACE: fprintf(listing,"{\n"); break;
+    case RBRACE: fprintf(listing,"}\n"); break;
+
+    case ENDFILE: fprintf(listing,"EOF\n"); break;
     default: /* should never happen */
       fprintf(listing,"Unknown token: %d\n",token);
   }
@@ -73,7 +84,7 @@ TreeNode * newStmtNode(StmtKind kind)
   return t;
 }
 
-/* Function newExpNode creates a new expression 
+/* Function newExpNode creates a new expression
  * node for syntax tree construction
  */
 TreeNode * newExpNode(ExpKind kind)
@@ -110,7 +121,7 @@ char * copyString(char * s)
 /* Variable indentno is used by printTree to
  * store current number of spaces to indent
  */
-static indentno = 0;
+static int indentno = 0;
 
 /* macros to increase/decrease indentation */
 #define INDENT indentno+=2
@@ -123,7 +134,7 @@ static void printSpaces(void)
     fprintf(listing," ");
 }
 
-/* procedure printTree prints a syntax tree to the 
+/* procedure printTree prints a syntax tree to the
  * listing file using indentation to indicate subtrees
  */
 void printTree( TreeNode * tree )

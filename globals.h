@@ -27,7 +27,7 @@
 #ifndef YYPARSER
 
 /* the name of the following file may change */
-// #include "cminus.tab.h"
+#include "cminus.tab.h"
 
 /* ENDFILE is implicitly defined by Yacc/Bison,
  * and not included in the tab.h file
@@ -50,7 +50,7 @@
 /* Yacc/Bison generates its own integer values
  * for tokens
  */
-typedef int TokenType; 
+typedef int TokenType;
 
 extern FILE* source; /* source code text file */
 extern FILE* listing; /* listing output text file */
@@ -116,5 +116,5 @@ extern int TraceAnalyze;
 extern int TraceCode;
 
 /* Error = TRUE prevents further passes if an error occurs */
-extern int Error; 
+extern int Error;
 #endif
