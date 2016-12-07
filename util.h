@@ -33,4 +33,6 @@ char * copyString( char * );
  */
 void printTree( TreeNode * );
 
+const char *names[]={"Invalid Character","else", "if", "int", "return", "void", "while", "+", "-", "*", "/", "<", "<=", ">", ">=", "==", "!=", "=", ";", ",", "(", ")", "[", "]", "{", "}", "id", "num" };
+
 #endif

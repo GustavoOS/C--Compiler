@@ -49,7 +49,7 @@
 "}"                                 return RBRACE;
 
 
-.                                   printf("Invalid character");
+.                                   return ERRO;
 
 %%
 
