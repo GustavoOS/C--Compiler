@@ -1,3 +1,4 @@
+
 /****************************************************/
 /* File: scan.h                                     */
 /* The scanner interface for the TINY compiler      */
