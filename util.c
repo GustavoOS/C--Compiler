@@ -147,17 +147,26 @@ void printTree( TreeNode * tree )
         case IfK:
           fprintf(listing,"If\n");
           break;
-        case RepeatK:
-          fprintf(listing,"Repeat\n");
+        case WhileK:
+          fprintf(listing,"While\n");
           break;
         case AssignK:
-          fprintf(listing,"Assign to: %s\n",tree->attr.name);
+          fprintf(listing,"Assignment\n");
           break;
-        case ReadK:
-          fprintf(listing,"Read: %s\n",tree->attr.name);
+        case ReturnK:
+          fprintf(listing,"Return\n");
           break;
-        case WriteK:
-          fprintf(listing,"Write\n");
+        case VarDeclK:
+          fprintf(listing,"Variable declaration: %s\n", tree->attr.name);
+          break;
+        case FunDeclK:
+          fprintf(listing,"Function declaration: %s\n", tree->attr.name);
+          break;
+        case FunActiveK:
+          fprintf(listing,"Activation of: %s\n",tree->attr.name);
+          break;
+        case CompoundK:
+          fprintf(listing,"Compound\n");
           break;
         default:
           fprintf(listing,"Unknown ExpNode kind\n");

@@ -2017,10 +2017,11 @@ TokenType getToken(void)
     yyout = listing;
   }
   currentToken = yylex();
-  strncpy(tokenString,yytext,MAXTOKENLEN);
+  if( currentToken == ID || currentToken== NUM)
+    strncpy(tokenString,yytext,MAXTOKENLEN);
   if (TraceScan) {
     fprintf(listing,"\t%d: ",lineno);
-    printToken(currentToken,tokenString);
+    printToken(currentToken,yytext);
   }
   return currentToken;
 }

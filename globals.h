@@ -63,8 +63,9 @@ extern int lineno; /* source line number for listing */
 /**************************************************/
 
 typedef enum {StmtK,ExpK} NodeKind; //Bolinha ou quadrado
-typedef enum {IfK,WhileK,AssignK,ReadK,WriteK} StmtKind;
-typedef enum {OpK,ConstK,IdK} ExpKind;
+typedef enum {IfK,WhileK,AssignK,ReturnK,VarDeclK,
+              FunDeclK,FunActiveK, CompoundK} StmtKind;
+typedef enum {OpK, ConstK,IdK} ExpKind;
 
 /* ExpType is used for type checking */
 typedef enum {Void,Integer,Boolean} ExpType;
@@ -77,12 +78,12 @@ typedef struct treeNode
      int lineno;
      NodeKind nodekind;
      union { StmtKind stmt; ExpKind exp;} kind;
-     union { TokenType op;
-             int val;
-             char * name; } attr;
+     union { TokenType op; //Token do operador logico ou aritmetico
+             int val; // Valor de uma constante
+             char * name; //Nome de função ou da variavel (ID) ( int pacoca )
+          } attr;
      ExpType type; /* for type checking of exps */
    } TreeNode;
-
 /**************************************************/
 /***********   Flags for tracing       ************/
 /**************************************************/
