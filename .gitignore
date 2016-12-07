@@ -1,2 +1,6 @@
 obj/*
 bin/*
+*.output
+*.tab.c
+*.tab.h
+scanner.c
