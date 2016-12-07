@@ -11,13 +11,11 @@ static int yylex(void);
 
 
 %%
-        int line_num = 1;
-
 "/*"         BEGIN(comment);
 
 <comment>[^*\n]*                    /* eat anything that's not a '*' */
 <comment>"*"+[^*/\n]*               /* eat up '*'s not followed by '/'s */
-<comment>\n                         ++line_num;
+<comment>\n                         ++lineno;
 <comment>"*"+"/"                    BEGIN(INITIAL);
 
 "else"                              return ELSE;
@@ -30,8 +28,8 @@ static int yylex(void);
 "_"?[a-zA-Z][_a-zA-Z0-9]*           return ID;
 [0-9]+                              return NUM;
 
-[ \t\n]                             ;
-
+[ \t]                               ;
+\n                                  lineno++;
 
 "+"                                 return PLUS;
 "-"                                 return MINUS;
@@ -58,7 +56,22 @@ static int yylex(void);
 
 %%
 
-
-int yywrap(void){
-    return 1;
+TokenType getToken(void)
+{ static int firstTime = TRUE;
+  TokenType currentToken;
+  if (firstTime)
+  { firstTime = FALSE;
+    lineno++;
+    yyin = source;
+    yyout = listing;
+  }
+  currentToken = yylex();
+  strncpy(tokenString,yytext,MAXTOKENLEN);
+  if (TraceScan) {
+    fprintf(listing,"\t%d: ",lineno);
+    printToken(currentToken,tokenString);
+  }
+  return currentToken;
 }
+
+

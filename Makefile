@@ -1,6 +1,6 @@
 cminus: scanner.o util.o
-	gcc -o cminus obj/* main.c -ly -lfl
-	cminus
+	gcc -o bin/cminus obj/*  main.c -ly -lfl
+	bin/cminus programa.c
 
 scanner.o: parser.o
 	flex -o scanner.c scanner.l
