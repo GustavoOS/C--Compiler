@@ -10,7 +10,8 @@ reserved words:
 else  if  int  return  void  while
 
 special symbols:
-+  -  *  /  <  <=  >  >=  ==  !=  =  ;  ,  (  )  [  ]  {  }  
+
+<  <=  >  >=  ==  !=  = - + *  /   ;  ,  (  )  [  ]  {  }  
 
 Identifiers:
 ID = _(optional) letter followed by any number of repetitions of (letter or num or _)
