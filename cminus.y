@@ -25,6 +25,7 @@
 
 programa:
         declaracao-lista
+        | %empty
         ;
 
 declaracao-lista:
@@ -53,7 +54,7 @@ fun-declaracao:
         ;
 
 params:
-        param-lista
+        param-lista 
         | VOID
         ;
 
@@ -65,6 +66,7 @@ param-lista:
 param:
         tipo-especificador ID
         | tipo-especificador ID LBRACE RBRACE
+        | error 
         ;
 
 composto-decl:
@@ -87,6 +89,7 @@ statement:
         | selecao-decl
         | iteracao-decl
         | retorno-decl
+        | error 
         ;
 
 expressao-decl:
@@ -118,6 +121,7 @@ fator:
         | var
         | ativacao
         | NUM
+        | error 
         ;
 
 

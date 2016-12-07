@@ -2,7 +2,7 @@
 Gramática BNF para C-:
 
 programa → declaração-lista
-declaração-lista → declaração-lista declaração | declaração
+declaração-lista → declaração-lista declaração | dec  o
 declaração → var-declaração | fun-declaração
 declaração → error <===== MODIFICAÇÃO
 var-declaração → tipo-especificador ID ; | tipo-especificador ID [ NUM ] ;

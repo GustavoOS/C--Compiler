@@ -37,13 +37,13 @@ FILE * listing;
 FILE * code;
 
 /* allocate and set tracing flags */
-int EchoSource = FALSE;
+int EchoSource = TRUE;
 int TraceScan = FALSE;
 int TraceParse = TRUE;
-int TraceAnalyze = FALSE;
-int TraceCode = FALSE;
+int TraceAnalyze = TRUE;
+int TraceCode = TRUE;
 
-int Error = FALSE;
+int Error = TRUE;
 
 int main( int argc, char * argv[] )
 { TreeNode * syntaxTree;
@@ -61,7 +61,7 @@ int main( int argc, char * argv[] )
     exit(1);
   }
   listing = stdout; /* send listing to screen */
-  fprintf(listing,"\nTINY COMPILATION: %s\n",pgm);
+  fprintf(listing,"\nCMINUS COMPILATION: %s\n",pgm);
 #if NO_PARSE
   while (getToken()!=ENDFILE);
 #else

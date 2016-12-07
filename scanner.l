@@ -8,15 +8,21 @@ static int yylex(void);
 %}
 
 %x comment
+%x comentario
 
 
 %%
 "/*"         BEGIN(comment);
-
 <comment>[^*\n]*                    /* eat anything that's not a '*' */
 <comment>"*"+[^*/\n]*               /* eat up '*'s not followed by '/'s */
 <comment>\n                         ++lineno;
 <comment>"*"+"/"                    BEGIN(INITIAL);
+
+"//"         BEGIN(comentario);
+<comentario>[^\n]*
+<comentario>\n                         ++lineno;BEGIN(INITIAL);
+
+
 
 "else"                              return ELSE;
 "if"                                return IF;
@@ -46,10 +52,10 @@ static int yylex(void);
 ","                                 return COMMA;
 "("                                 return LPAREN;
 ")"                                 return RPAREN;
-"["                                 return LBRACKET;
-"]"                                 return RBRACKET;
-"{"                                 return LBRACE;
-"}"                                 return RBRACE;
+"{"                                 return LBRACKET;
+"}"                                 return RBRACKET;
+"["                                 return LBRACE;
+"]"                                 return RBRACE;
 
 
 .                                   return ERROR;
