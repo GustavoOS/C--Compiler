@@ -159,6 +159,10 @@ void printTree( TreeNode * tree )
         case VarDeclK:
           fprintf(listing,"Variable declaration: %s\n", tree->attr.name);
           break;
+        case VetDeclK:
+          fprintf(listing,"Vector declaration: %s[]\n", tree->attr.name);
+          break;
+
         case FunDeclK:
           fprintf(listing,"Function declaration: %s\n", tree->attr.name);
           break;

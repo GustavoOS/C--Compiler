@@ -53,7 +53,7 @@ var-declaracao:
                   $$->type = savedType;}
         SEMI    { $$ = $3; }
         |tipo-especificador ID
-                { $$ = newStmtNode(VarDeclK);
+                { $$ = newStmtNode(VetDeclK);
                   $$->attr.name = copyString(tokenString);
                   $$->type = savedType;
                 }
@@ -119,7 +119,7 @@ param:
                   $$->type = savedType;
                 }
         | tipo-especificador ID 
-                { $$ = newStmtNode(VarDeclK);
+                { $$ = newStmtNode(VetDeclK);
                   $$->attr.name = copyString(tokenString);
                   $$->type = savedType;
                 }

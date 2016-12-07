@@ -1372,7 +1372,7 @@ yyreduce:
 
   case 9:
 #line 56 "cminus.y" /* yacc.c:1646  */
-    { (yyval) = newStmtNode(VarDeclK);
+    { (yyval) = newStmtNode(VetDeclK);
                   (yyval)->attr.name = copyString(tokenString);
                   (yyval)->type = savedType;
                 }
@@ -1467,7 +1467,7 @@ yyreduce:
 
   case 21:
 #line 122 "cminus.y" /* yacc.c:1646  */
-    { (yyval) = newStmtNode(VarDeclK);
+    { (yyval) = newStmtNode(VetDeclK);
                   (yyval)->attr.name = copyString(tokenString);
                   (yyval)->type = savedType;
                 }
