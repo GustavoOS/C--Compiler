@@ -5,12 +5,12 @@ int  gdc (int u, int v)
 {
    if (v == 0) return u;
    else return gdc(v,u-u/v*v);
-   /* u-u / v*v == u mod v */
+   /* u-u / v*v == u mod va */
 }
 
 void main(void)
 {
-   int x;//ue
+   int x;// ue
    int y;
    x = input();
    y = input();
