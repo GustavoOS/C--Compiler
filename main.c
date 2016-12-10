@@ -38,14 +38,14 @@ FILE * code;
 
 /* allocate and set tracing flags */
 int EchoSource = FALSE;
-int TraceScan = TRUE;
+int TraceScan = FALSE;
 int TraceParse = TRUE;
 int TraceAnalyze = TRUE;
-int TraceCode = FALSE;
+int TraceCode = TRUE;
 
 int Error = FALSE;
 
-main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 { TreeNode * syntaxTree;
   char pgm[120]; /* source code file name */
   if (argc != 2)
@@ -74,6 +74,12 @@ main( int argc, char * argv[] )
   if (! Error)
   { if (TraceAnalyze) fprintf(listing,"\nBuilding Symbol Table...\n");
     buildSymtab(syntaxTree);
+  }
+  if(!Error){   
+    if (TraceAnalyze) fprintf(listing,"\nChecking for main Function...\n");
+    mainVerify( );
+  }
+  if (!Error){
     if (TraceAnalyze) fprintf(listing,"\nChecking Types...\n");
     typeCheck(syntaxTree);
     if (TraceAnalyze) fprintf(listing,"\nType Checking Finished\n");

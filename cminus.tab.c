@@ -73,11 +73,11 @@
 
     #define YYSTYPE TreeNode *
     static int savedConstant;
-    static int savedType;
+    static ExpType savedType;
     static int savedLineNo;  /* ditto */
     static TreeNode * savedTree; /* stores syntax tree for later return */
     static int yylex(void);
-    int yyerror(char * message);
+    int yyerror( const char * message);
 
 
 #line 84 "cminus.tab.c" /* yacc.c:339  */
@@ -95,7 +95,7 @@
 # undef YYERROR_VERBOSE
 # define YYERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 0
+# define YYERROR_VERBOSE 1
 #endif
 
 /* In a future release of Bison, this section will be replaced
@@ -473,7 +473,7 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+#if YYDEBUG || YYERROR_VERBOSE || 1
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -1415,18 +1415,18 @@ yyreduce:
     {
                 (yyval) = newStmtNode(FunDeclK);
                 (yyval)->attr.name =  copyString(tokenString);;
+                (yyval)->type = savedType;
         }
-#line 1420 "cminus.tab.c" /* yacc.c:1646  */
+#line 1421 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 88 "cminus.y" /* yacc.c:1646  */
+#line 89 "cminus.y" /* yacc.c:1646  */
     { 
-                  (yyval) = (yyvsp[-4]);
-                  (yyval)->type = savedType;
-                  (yyval)->child[0] = (yyvsp[-2]);
-                  (yyval)->child[1] = (yyvsp[0]);
-                }
+                (yyval) = (yyvsp[-4]);
+                (yyval)->child[0] = (yyvsp[-2]);
+                (yyval)->child[1] = (yyvsp[0]);
+        }
 #line 1431 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1482,7 +1482,7 @@ yyreduce:
 
   case 23:
 #line 128 "cminus.y" /* yacc.c:1646  */
-    { (yyval)=NULL; }
+    {   (yyval) = NULL;}
 #line 1487 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
@@ -2033,7 +2033,7 @@ yyreturn:
 #line 375 "cminus.y" /* yacc.c:1906  */
 
 
-int yyerror(char * message)
+int yyerror(const char * message)
 { fprintf(listing,"Syntax error at line %d: %s\n",lineno,message);
   fprintf(listing,"Current token: ");
   printToken(yychar,tokenString);

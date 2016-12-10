@@ -12,7 +12,7 @@
     static int savedLineNo;  /* ditto */
     static TreeNode * savedTree; /* stores syntax tree for later return */
     static int yylex(void);
-    int yyerror(char * message);
+    int yyerror( const char * message);
 
 %}
 
@@ -21,7 +21,7 @@
 %token ID NUM
 %nonassoc "then"
 %nonassoc ELSE
-
+%error-verbose 
 %%
 
 programa:
@@ -83,14 +83,14 @@ fun-declaracao:
         {
                 $$ = newStmtNode(FunDeclK);
                 $$->attr.name =  copyString(tokenString);;
+                $$->type = savedType;
         } 
         LPAREN params RPAREN composto-decl
-                { 
-                  $$ = $3;
-                  $$->type = savedType;
-                  $$->child[0] = $5;
-                  $$->child[1] = $7;
-                }
+        { 
+                $$ = $3;
+                $$->child[0] = $5;
+                $$->child[1] = $7;
+        }
         ;
 
 params:
@@ -125,7 +125,7 @@ param:
                 }
         LBRACE RBRACE
                 { $$ = $3; }
-        | error  { $$=NULL; }
+        | error {   $$ = NULL;};
         ;
 
 composto-decl:
@@ -374,7 +374,7 @@ arg-lista:
 
 %%
 
-int yyerror(char * message)
+int yyerror(const char * message)
 { fprintf(listing,"Syntax error at line %d: %s\n",lineno,message);
   fprintf(listing,"Current token: ");
   printToken(yychar,tokenString);

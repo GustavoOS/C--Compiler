@@ -41,11 +41,59 @@ static void traverse(TreeNode *t,
  */
 static void nullProc(TreeNode *t)
 {
-  if (t == NULL)
-    return;
-  else
+  if (t == NULL||t!=NULL)
     return;
 }
+
+static void funcAlreadyDefinedError(TreeNode *t)
+{
+  printf(
+    "Function %s already defined error at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void varAlreadyDefinedError(TreeNode *t)
+{
+  printf(
+    "Variable %s already defined error at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void varNotDefinedError(TreeNode *t)
+{
+  printf(
+    "Variable %s not defined error at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void funcNotDefinedError(TreeNode *t)
+{
+  printf(
+    "Function %s not defined error at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void isNotVectorError(TreeNode *t)
+{
+  printf(
+    "Error: %s is not a vector at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void isNotVarError(TreeNode *t)
+{
+  printf(
+    "Error: %s is not a variable at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void isNotFuncError(TreeNode *t)
+{
+  printf(
+    "Error: %s is not a function at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
 
 /* Procedure insertNode inserts 
  * identifiers stored in t into 
@@ -58,24 +106,42 @@ static void insertNode(TreeNode *t)
   case StmtK:
     switch (t->kind.stmt)
     {
-    case AssignK:
-    case ReturnK:
     case VarDeclK:
-    case VetDeclK:
-    case FunDeclK:
-    case FunActiveK:
-    /*
-    case ReadK:
-      if (st_lookup(t->attr.name) == -1)
-        // not yet in table, so treat as new definition 
-        st_insert(t->attr.name, t->lineno, location++);
-      else
-        // already in table, so ignore location, 
-       //      add line number of use only
-        st_insert(t->attr.name, t->lineno, 0);
-        break;
-        */
+      if (st_lookup(t->attr.name) == -1){
+        st_insert(t->attr.name, t->lineno, location++, VARIABLE);
+      }else{
+        varAlreadyDefinedError(t);
+      }
       break;
+    case VetDeclK:
+      if (st_lookup(t->attr.name) == -1){
+        st_insert(t->attr.name, t->lineno, location++, VECTOR);
+      }else{
+        varAlreadyDefinedError(t);
+      }
+     break;
+    case FunDeclK:
+      if (st_lookup(t->attr.name) == -1){
+        BucketList l = st_insert(t->attr.name, t->lineno, location++, FUNCTION);
+        l->dtype = t->type;
+      }else{
+        funcAlreadyDefinedError(t);
+      }
+      break;
+    case FunActiveK:
+    {
+      BucketList l = st_find(t->attr.name);
+      if (l == NULL){
+        funcNotDefinedError(t);
+      }else{
+        if(l->vtype == FUNCTION){
+          st_insert(t->attr.name, t->lineno, 0, FUNCTION);
+        }else{
+          isNotFuncError(t);
+        }
+      }
+    }
+    break;
     default:
       break;
     }
@@ -83,17 +149,34 @@ static void insertNode(TreeNode *t)
   case ExpK:
     switch (t->kind.exp)
     {
-    case OpK:
     case VetK:
-    case IdK:
-      if (st_lookup(t->attr.name) == -1)
-        /* not yet in table, so treat as new definition */
-        st_insert(t->attr.name, t->lineno, location++);
-      else
-        /* already in table, so ignore location, 
-             add line number of use only */
-        st_insert(t->attr.name, t->lineno, 0);
+    {
+      BucketList l = st_find(t->attr.name);
+       if (l == NULL){
+        varNotDefinedError(t);
+      }else{
+        if(l->vtype == VECTOR){
+          st_insert(t->attr.name, t->lineno, 0, VECTOR);
+        }else{
+          isNotVectorError(t);
+        }
+      }
       break;
+    }
+    case IdK:
+    {
+      BucketList l = st_find(t->attr.name);
+      if (l == NULL){
+        varNotDefinedError(t);
+      }else{
+        if(l->vtype == VARIABLE){
+          st_insert(t->attr.name, t->lineno, 0, VARIABLE);
+        }else{
+          isNotVarError(t);
+        }
+      }
+      break;
+    }
     default:
       break;
     }
@@ -104,17 +187,17 @@ static void insertNode(TreeNode *t)
 }
 
 //
-int mainVerify(void (*st_lookup)(char *))
+void mainVerify()
 {
-  if (st_lookup("main") == -1)
+  BucketList myList = st_find("main");
+  if (myList == NULL)
   {
-    return 0;
-  }
-  else
-  {
-    Error = TRUE;
-    printf("Main function was not found");
-    return -1;
+     Error = TRUE;
+     printf("Error: Main function was not found.\n");
+  }else{
+     if( myList->vtype != FUNCTION){
+       printf("Error: Main is not a function.\n");
+     }
   }
 }
 //
@@ -141,8 +224,7 @@ static void typeError(TreeNode *t, char *message)
 /* Procedure checkNode performs
  * type checking at a single tree node
  */
-static void checkNode(TreeNode *t)
-{
+static void checkNode(TreeNode *t) {
   switch (t->nodekind)
   {
   case ExpK:
@@ -152,11 +234,25 @@ static void checkNode(TreeNode *t)
       if ((t->child[0]->type != Integer) ||
           (t->child[1]->type != Integer))
         typeError(t, "Op applied to non-integer");
-      if ((t->attr.op == EQ) || (t->attr.op == LT))
-        t->type = Boolean;
-      else
-        t->type = Integer;
-      break;
+        switch( t->attr.op){
+          case LESSEQ:
+          case LESSER:
+          case GREATER:
+          case GREATEQ:
+          case EQCOMP:
+          case NOTEQ:
+            t->type = Boolean;
+            break;
+          case PLUS:
+          case MINUS:
+          case TIMES:
+          case SLASH:
+            t->type = Integer;
+            break;
+          default:
+            printf("ERROR! Unknown operator.");
+        }
+        break;
     case ConstK:
     case IdK:
       t->type = Integer;
@@ -168,22 +264,27 @@ static void checkNode(TreeNode *t)
   case StmtK:
     switch (t->kind.stmt)
     {
+    case FunActiveK:
+      t->type = st_find(t->attr.name)->dtype;
+      break;
     case IfK:
-      if (t->child[0]->type == Integer)
+      if(t->child[0] == NULL){
+        typeError(t->child[0], "if test invalid");
+      }else if (t->child[0]->type == Integer)
         typeError(t->child[0], "if test is not Boolean");
       break;
     case AssignK:
-      if (t->child[0]->type != Integer)
-        typeError(t->child[0], "assignment of non-integer value");
+      if (t->child[1]->type != Integer)
+        typeError(t->child[1], "assignment of non-integer value");
       break;
-    case WriteK:
-      if (t->child[0]->type != Integer)
-        typeError(t->child[0], "write of non-integer value");
-      break;
-    case RepeatK:
-      if (t->child[1]->type == Integer)
-        typeError(t->child[1], "repeat test is not Boolean");
-      break;
+    // case WriteK:
+    //   if (t->child[0]->type != Integer)
+    //     typeError(t->child[0], "write of non-integer value");
+    //   break;
+    // case RepeatK:
+    //   if (t->child[1]->type == Integer)
+    //     typeError(t->child[1], "repeat test is not Boolean");
+    //   break;
     default:
       break;
     }
