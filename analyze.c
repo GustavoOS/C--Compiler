@@ -124,6 +124,7 @@ static void insertNode(TreeNode *t)
       if (st_lookup(t->attr.name) == -1){
         BucketList l = st_insert(t->attr.name, t->lineno, location++, FUNCTION);
         l->dtype = t->type;
+        //Empilha ( entra escopo )
       }else{
         funcAlreadyDefinedError(t);
       }
@@ -270,21 +271,17 @@ static void checkNode(TreeNode *t) {
     case IfK:
       if(t->child[0] == NULL){
         typeError(t->child[0], "if test invalid");
-      }else if (t->child[0]->type == Integer)
+      }else if (t->child[0]->type != Boolean)
         typeError(t->child[0], "if test is not Boolean");
       break;
     case AssignK:
       if (t->child[1]->type != Integer)
         typeError(t->child[1], "assignment of non-integer value");
       break;
-    // case WriteK:
-    //   if (t->child[0]->type != Integer)
-    //     typeError(t->child[0], "write of non-integer value");
-    //   break;
-    // case RepeatK:
-    //   if (t->child[1]->type == Integer)
-    //     typeError(t->child[1], "repeat test is not Boolean");
-    //   break;
+    case WhileK:
+      if (t->child[0]->type != Boolean)
+        typeError(t->child[0], "while test is not Boolean");
+      break;
     default:
       break;
     }

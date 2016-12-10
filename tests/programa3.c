@@ -4,7 +4,7 @@ int j;
 
 int k;
 
-void cocacola(int l){
+int cocacola(int l){
 
 }
 
@@ -16,6 +16,9 @@ int pacoca( int pirulito ) {
     i = cocacola();
     if( i < pipoca() ) {
         return pacoca( i );
+    }
+    while( 1 ) {
+
     }
 }
 

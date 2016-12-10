@@ -92,7 +92,7 @@ BucketList st_find ( char * name )
  */
 void printSymTab(FILE * listing)
 { int i;
-  fprintf(listing,"Variable Name  Var. Type  Location   Line Numbers\n");
+  fprintf(listing,"Variable Name  Data type  Location   Line Numbers\n");
   fprintf(listing,"-------------  ---------  --------   ------------\n");
   for (i=0;i<SIZE;++i)
   { if (hashTable[i] != NULL)
