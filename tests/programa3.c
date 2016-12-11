@@ -1,32 +1,31 @@
-INT i;
+int i;
 
-INT j;
+int j;
 
-INT k;
+int k;
 
-VOID cocacola(INT l){
-    RETURN;
+int cocacola(int l){
+
 }
 
-INT pipoca ( void ){
-    INT i;
-    INT j;
-    i=15;
+int pipoca ( void ){
+    int i;
+    int k;
+    i=0;
     j=1;
-    RETURN i+j;
 }
-INT pacoca( INT pirulito ) {
-    INT i;
+int pacoca( int pirulito ) {
+    int i;
     i = k;
     i = cocacola();
-    IF( i < pipoca() ) {
-        RETURN pacoca( i );
+    if( i < pipoca() ) {
+        return pacoca( i );
     }
-    WHILE( i > j) {
+    while( i > j) {
 
     }
 }
 
-INT main( INT ads ){
-    
+int main( int ads ){
+    return k * 10 + 3 - 5 = 13;
 }
