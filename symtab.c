@@ -40,16 +40,12 @@ static BucketList hashTable[SIZE];
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scope)
-{ int h = hash(name);
-  BucketList l =  hashTable[h];
-  // Search the last declaration with the same name
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) // variable/function not yet in table = simple addition
-  { 
-    //addition
-    l = (BucketList) malloc(sizeof(struct BucketListRec));
+
+BucketList st_declare( char * name, int lineno, int loc, IDType type, char * scope)
+{
+    // printf( "%s name %d lineno %d loc %d type %s scope\n",name,  lineno,  loc,  type,  scope);
+    int h = hash(name);  
+    BucketList l = (BucketList) malloc(sizeof(struct BucketListRec));
     l->name = name;
     l->lines = (LineList) malloc(sizeof(struct LineListRec));
     l->lines->lineno = lineno;
@@ -60,43 +56,37 @@ BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scop
     l->vtype = type;
     l->dtype = Integer;
     hashTable[h] = l; 
-    
-    }
+    return l;
+ }
 
-    
-  else // found in table, so check scope in table. Sorry, can't just add line number 
-  { 
-    
+BucketList st_reference( BucketList l, int lineno)
+{ 
     LineList t = l->lines;
     while (t->next != NULL) t = t->next;
     t->next = (LineList) malloc(sizeof(struct LineListRec));
     t->next->lineno = lineno;
     t->next->next = NULL;
-
-
-  }
   return l;
 } /* st_insert */
 
-/* Function st_lookup returns the memory 
- * location of a variable or -1 if not found
- */
-int st_lookup ( char * name, char *scope )
-{ int h = hash(name);
-  BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) return -1;
-  else return l->memloc;
-}
 
-BucketList st_find ( char * name, char * scope )
+
+/* Function st_find searches a variable in local scope and then in global scope. Not finding anything makes it return NULL
+ */
+BucketList st_find ( char * name, char * escopo )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
+  while ((l != NULL) && (strcmp(name,l->name)!= 0)&&((strcmp(escopo,l->scope)!=0)))
     l = l->next;
+  if( (l == NULL) && (strcmp("global",escopo)!=0) ){
+    l = hashTable[h];
+    while((l != NULL) && ((strcmp("global",l->scope)!=0)))
+       l = l->next;
+  }
   return l;
 }
+
+
 /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 
  * to the listing file

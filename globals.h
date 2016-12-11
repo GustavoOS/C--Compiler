@@ -50,6 +50,7 @@
 /* Yacc/Bison generates its own integer values
  * for tokens
  */
+
 typedef int TokenType;
 
 extern FILE* source; /* source code text file */
@@ -85,7 +86,7 @@ typedef struct treeNode
      ExpType type; /* for type checking of expressions */
    } TreeNode;
 
-   
+
 /**************************************************/
 /***********   Flags for tracing       ************/
 /**************************************************/

@@ -10,6 +10,8 @@
 #include "symtab.h"
 #include "analyze.h"
 
+//current scope, standard is global
+char scope[42] = "global";
 /* counter for variable memory locations */
 static int location = 0;
 
@@ -45,6 +47,20 @@ static void nullProc(TreeNode *t)
 {
   if (t == NULL||t!=NULL)
     return;
+}
+
+static void IntInvalidReturnError(TreeNode *t)
+{
+  printf(
+    "Error: Function %s is an int one, yet it is not returning anything at line %d.\n", scope, t->lineno);
+  Error = TRUE;
+}
+
+static void VoidInvalidReturnError(TreeNode *t)
+{
+  printf(
+    "Error: Function %s is a void one, yet it is returning something at line %d.\n", scope, t->lineno);
+  Error = TRUE;
 }
 
 static void funcAlreadyDefinedError(TreeNode *t)
@@ -96,11 +112,11 @@ static void isNotFuncError(TreeNode *t)
   Error = TRUE;
 }
 
-char scope[42] = "global";
+
 static void exitScope( TreeNode *t )
 {
   if(t->nodekind == StmtK && t->kind.stmt == FunDeclK ) {
-    printf("Sai do escopo %s\n", scope);
+    // printf("Sai do escopo %s\n", scope);
     strcpy(scope, "global");
   }
 }
@@ -111,49 +127,78 @@ static void exitScope( TreeNode *t )
  */
 static void insertNode(TreeNode *t)
 {
+  BucketList l;
   switch (t->nodekind)
   {
   case StmtK:
     switch (t->kind.stmt)
     {
     case VarDeclK:
-      if (st_lookup(t->attr.name, scope) == -1){
-        st_insert(t->attr.name, t->lineno, location++, VARIABLE, scope);
+      l = st_find(t->attr.name, scope);
+      if ((l == NULL) || (strcmp(scope,l->scope)!=0)){
+        st_declare(t->attr.name, t->lineno, location++, VARIABLE, scope);
       }else{
         varAlreadyDefinedError(t);
       }
       break;
     case VetDeclK:
-      if (st_lookup(t->attr.name, scope) == -1){
-        st_insert(t->attr.name, t->lineno, location++, VECTOR, scope);
+      l = st_find(t->attr.name, scope);
+      if ((l == NULL) || (strcmp(scope,l->scope)!=0)){
+        st_declare(t->attr.name, t->lineno, location++, VECTOR, scope);
       }else{
         varAlreadyDefinedError(t);
       }
      break;
     case FunDeclK:
-      if (st_lookup(t->attr.name, scope) == -1){
-        BucketList l = st_insert(t->attr.name, t->lineno, location++, FUNCTION, scope);
-        l->dtype = t->type;
+      l = st_find(t->attr.name, scope);
+      if ((l == NULL) || (strcmp(scope,l->scope)!=0)){
+        BucketList l2 = st_declare(t->attr.name, t->lineno, location++, FUNCTION, scope);
+        l2->dtype = t->type;
         strcpy(scope, t->attr.name);
-        printf("Entrei no escopo %s\n", scope);
+        // printf("Entrei no escopo %s\n", scope);
       }else{
         funcAlreadyDefinedError(t);
       }
       break;
     case FunActiveK:
     {
-      BucketList l = st_find(t->attr.name, scope);
+      l = st_find(t->attr.name, scope);
       if (l == NULL){
         funcNotDefinedError(t);
       }else{
         if(l->vtype == FUNCTION){
-          st_insert(t->attr.name, t->lineno, 0, FUNCTION, scope);
+          st_reference(l,t->lineno);
         }else{
           isNotFuncError(t);
         }
       }
+      break;
+    }
+    case ReturnK:
+    {
+      l = st_find(scope, "global");
+      switch(l->dtype){
+        case Void:
+        {
+          if(t->child[0]!=NULL){
+            VoidInvalidReturnError(t);
+          } 
+          
+        break;
+        }
+        case Integer:
+        {
+           if(t->child[0]==NULL){
+            IntInvalidReturnError(t);
+          } 
+          
+        break;
+        }
+        default: printf("Vishe! Nem eu entendi"); break;
+      }
     }
     break;
+
     default:
       break;
     }
@@ -163,12 +208,12 @@ static void insertNode(TreeNode *t)
     {
     case VetK:
     {
-      BucketList l = st_find(t->attr.name, scope);
+      l = st_find(t->attr.name, scope);
        if (l == NULL){
         varNotDefinedError(t);
       }else{
         if(l->vtype == VECTOR){
-          st_insert(t->attr.name, t->lineno, 0, VECTOR, scope);
+          st_reference(l,t->lineno);
         }else{
           isNotVectorError(t);
         }
@@ -177,12 +222,12 @@ static void insertNode(TreeNode *t)
     }
     case IdK:
     {
-      BucketList l = st_find(t->attr.name, scope);
+      l = st_find(t->attr.name, scope);
       if (l == NULL){
         varNotDefinedError(t);
       }else{
         if(l->vtype == VARIABLE){
-          st_insert(t->attr.name, t->lineno, 0, VARIABLE, scope);
+          st_reference(l,t->lineno);
         }else{
           isNotVarError(t);
         }

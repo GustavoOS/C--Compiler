@@ -25,11 +25,17 @@ static int yylex(void);
 
 
 "else"                              return ELSE;
+"ELSE"                              return ELSE;
 "if"                                return IF;
+"IF"                                return IF;
 "int"                               return INT;
+"INT"                               return INT;
 "return"                            return RETURN;
+"RETURN"                            return RETURN;
 "void"                              return VOID;
+"VOID"                              return VOID;
 "while"                             return WHILE;
+"WHILE"                             return WHILE;
 
 [_@:]?[a-zA-Z][_a-zA-Z0-9]*         return ID;
 [0-9]+                              return NUM;
