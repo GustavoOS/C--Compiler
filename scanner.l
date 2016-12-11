@@ -31,7 +31,7 @@ static int yylex(void);
 "void"                              return VOID;
 "while"                             return WHILE;
 
-"_"?[a-zA-Z][_a-zA-Z0-9]*           return ID;
+[_@:]?[a-zA-Z][_a-zA-Z0-9]*         return ID;
 [0-9]+                              return NUM;
 
 [ \t]                               ;

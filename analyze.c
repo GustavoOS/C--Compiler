@@ -13,6 +13,14 @@
 /* counter for variable memory locations */
 static int location = 0;
 
+// Scope treatment
+char* escopo = "global";
+
+void ScopeUpdate(TreeNode * t)
+{
+  if (t->child[0] != NULL && t->child[0]->kind.exp == FunDeclK) escopo = t->child[0]->attr.name;
+}
+
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc 

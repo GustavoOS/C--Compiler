@@ -40,29 +40,40 @@ static BucketList hashTable[SIZE];
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-BucketList st_insert( char * name, int lineno, int loc, IDType type ) //, char * scope
+BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scope)
 { int h = hash(name);
   BucketList l =  hashTable[h];
+  // Search the last declaration with the same name
   while ((l != NULL) && (strcmp(name,l->name) != 0))
     l = l->next;
-  if (l == NULL) // variable not yet in table 
-  { l = (BucketList) malloc(sizeof(struct BucketListRec));
+  if (l == NULL) // variable/function not yet in table = simple addition
+  { 
+    //addition
+    l = (BucketList) malloc(sizeof(struct BucketListRec));
     l->name = name;
     l->lines = (LineList) malloc(sizeof(struct LineListRec));
     l->lines->lineno = lineno;
     l->memloc = loc;
     l->lines->next = NULL;
-    // l->scope=scope;
+    l->scope=scope;
     l->next = hashTable[h];
     l->vtype = type;
     l->dtype = Integer;
-    hashTable[h] = l; }
-  else // found in table, so just add line number 
-  { LineList t = l->lines;
+    hashTable[h] = l; 
+    
+    }
+
+    
+  else // found in table, so check scope in table. Sorry, can't just add line number 
+  { 
+    
+    LineList t = l->lines;
     while (t->next != NULL) t = t->next;
     t->next = (LineList) malloc(sizeof(struct LineListRec));
     t->next->lineno = lineno;
     t->next->next = NULL;
+
+    
   }
   return l;
 } /* st_insert */
