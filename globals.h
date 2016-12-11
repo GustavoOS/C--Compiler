@@ -78,12 +78,14 @@ typedef struct treeNode
      int lineno;
      NodeKind nodekind;
      union { StmtKind stmt; ExpKind exp;} kind;
-     union { TokenType op; //Token do operador logico ou aritmetico
-             int val; // Valor de uma constante
-             char * name; //Nome de função ou da variavel (ID) ( int pacoca )
+     union { TokenType op; //Token of logic or arithmetic operator
+             int val; // Value of a constant
+             char * name; //Name of a function or variable (ID) ( int peanutbutter )
           } attr;
-     ExpType type; /* for type checking of exps */
+     ExpType type; /* for type checking of expressions */
    } TreeNode;
+
+   
 /**************************************************/
 /***********   Flags for tracing       ************/
 /**************************************************/

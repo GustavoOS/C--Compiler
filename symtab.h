@@ -33,7 +33,7 @@ typedef struct BucketListRec
      LineList lines;
      int memloc ; /* memory location for variable */
      struct BucketListRec * next;
-     char * scope;
+     char scope[51];
      IDType vtype;
      ExpType dtype;
    } * BucketList;
@@ -43,17 +43,17 @@ typedef struct BucketListRec
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-BucketList st_insert( char * name, int lineno, int loc, IDType type  );
+BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scope  );
 
 /* Function st_lookup returns the memory reference 
    to the bucketlist of the variable or NULL if not found
  */
-BucketList st_find(char * name);
+BucketList st_find(char * name, char * scope);
 
 /* Function st_lookup returns the memory location 
    of the variable or -1 if not found
  */
-int st_lookup ( char * name );
+int st_lookup ( char * name, char * scope );
 
 /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 

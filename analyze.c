@@ -13,13 +13,7 @@
 /* counter for variable memory locations */
 static int location = 0;
 
-// Scope treatment
-char* escopo = "global";
 
-void ScopeUpdate(TreeNode * t)
-{
-  if (t->child[0] != NULL && t->child[0]->kind.exp == FunDeclK) escopo = t->child[0]->attr.name;
-}
 
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
@@ -102,6 +96,14 @@ static void isNotFuncError(TreeNode *t)
   Error = TRUE;
 }
 
+char scope[42] = "global";
+static void exitScope( TreeNode *t )
+{
+  if(t->nodekind == StmtK && t->kind.stmt == FunDeclK ) {
+    printf("Sai do escopo %s\n", scope);
+    strcpy(scope, "global");
+  }
+}
 
 /* Procedure insertNode inserts 
  * identifiers stored in t into 
@@ -115,36 +117,37 @@ static void insertNode(TreeNode *t)
     switch (t->kind.stmt)
     {
     case VarDeclK:
-      if (st_lookup(t->attr.name) == -1){
-        st_insert(t->attr.name, t->lineno, location++, VARIABLE);
+      if (st_lookup(t->attr.name, scope) == -1){
+        st_insert(t->attr.name, t->lineno, location++, VARIABLE, scope);
       }else{
         varAlreadyDefinedError(t);
       }
       break;
     case VetDeclK:
-      if (st_lookup(t->attr.name) == -1){
-        st_insert(t->attr.name, t->lineno, location++, VECTOR);
+      if (st_lookup(t->attr.name, scope) == -1){
+        st_insert(t->attr.name, t->lineno, location++, VECTOR, scope);
       }else{
         varAlreadyDefinedError(t);
       }
      break;
     case FunDeclK:
-      if (st_lookup(t->attr.name) == -1){
-        BucketList l = st_insert(t->attr.name, t->lineno, location++, FUNCTION);
+      if (st_lookup(t->attr.name, scope) == -1){
+        BucketList l = st_insert(t->attr.name, t->lineno, location++, FUNCTION, scope);
         l->dtype = t->type;
-        //Empilha ( entra escopo )
+        strcpy(scope, t->attr.name);
+        printf("Entrei no escopo %s\n", scope);
       }else{
         funcAlreadyDefinedError(t);
       }
       break;
     case FunActiveK:
     {
-      BucketList l = st_find(t->attr.name);
+      BucketList l = st_find(t->attr.name, scope);
       if (l == NULL){
         funcNotDefinedError(t);
       }else{
         if(l->vtype == FUNCTION){
-          st_insert(t->attr.name, t->lineno, 0, FUNCTION);
+          st_insert(t->attr.name, t->lineno, 0, FUNCTION, scope);
         }else{
           isNotFuncError(t);
         }
@@ -160,12 +163,12 @@ static void insertNode(TreeNode *t)
     {
     case VetK:
     {
-      BucketList l = st_find(t->attr.name);
+      BucketList l = st_find(t->attr.name, scope);
        if (l == NULL){
         varNotDefinedError(t);
       }else{
         if(l->vtype == VECTOR){
-          st_insert(t->attr.name, t->lineno, 0, VECTOR);
+          st_insert(t->attr.name, t->lineno, 0, VECTOR, scope);
         }else{
           isNotVectorError(t);
         }
@@ -174,12 +177,12 @@ static void insertNode(TreeNode *t)
     }
     case IdK:
     {
-      BucketList l = st_find(t->attr.name);
+      BucketList l = st_find(t->attr.name, scope);
       if (l == NULL){
         varNotDefinedError(t);
       }else{
         if(l->vtype == VARIABLE){
-          st_insert(t->attr.name, t->lineno, 0, VARIABLE);
+          st_insert(t->attr.name, t->lineno, 0, VARIABLE, scope);
         }else{
           isNotVarError(t);
         }
@@ -198,7 +201,7 @@ static void insertNode(TreeNode *t)
 //
 void mainVerify()
 {
-  BucketList myList = st_find("main");
+  BucketList myList = st_find("main",scope);
   if (myList == NULL)
   {
      Error = TRUE;
@@ -216,7 +219,7 @@ void mainVerify()
  */
 void buildSymtab(TreeNode *syntaxTree)
 {
-  traverse(syntaxTree, insertNode, nullProc);
+  traverse(syntaxTree, insertNode, exitScope);
   if (TraceAnalyze)
   {
     fprintf(listing, "\nSymbol table:\n\n");
@@ -274,7 +277,7 @@ static void checkNode(TreeNode *t) {
     switch (t->kind.stmt)
     {
     case FunActiveK:
-      t->type = st_find(t->attr.name)->dtype;
+      t->type = st_find(t->attr.name, scope)->dtype;
       break;
     case IfK:
       if(t->child[0] == NULL){

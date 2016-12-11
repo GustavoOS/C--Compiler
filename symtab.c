@@ -55,7 +55,7 @@ BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scop
     l->lines->lineno = lineno;
     l->memloc = loc;
     l->lines->next = NULL;
-    l->scope=scope;
+    strcpy(l->scope,scope);
     l->next = hashTable[h];
     l->vtype = type;
     l->dtype = Integer;
@@ -73,7 +73,7 @@ BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scop
     t->next->lineno = lineno;
     t->next->next = NULL;
 
-    
+
   }
   return l;
 } /* st_insert */
@@ -81,7 +81,7 @@ BucketList st_insert( char * name, int lineno, int loc, IDType type, char * scop
 /* Function st_lookup returns the memory 
  * location of a variable or -1 if not found
  */
-int st_lookup ( char * name )
+int st_lookup ( char * name, char *scope )
 { int h = hash(name);
   BucketList l =  hashTable[h];
   while ((l != NULL) && (strcmp(name,l->name) != 0))
@@ -90,7 +90,7 @@ int st_lookup ( char * name )
   else return l->memloc;
 }
 
-BucketList st_find ( char * name )
+BucketList st_find ( char * name, char * scope )
 { int h = hash(name);
   BucketList l =  hashTable[h];
   while ((l != NULL) && (strcmp(name,l->name) != 0))
@@ -103,8 +103,8 @@ BucketList st_find ( char * name )
  */
 void printSymTab(FILE * listing)
 { int i;
-  fprintf(listing,"Variable Name  Data type  Location   Line Numbers\n");
-  fprintf(listing,"-------------  ---------  --------   ------------\n");
+  fprintf(listing,"Variable Name  Data type  Location  Scope       Line Numbers\n");
+  fprintf(listing,"-------------  ---------  --------  -----       ------------\n");
   for (i=0;i<SIZE;++i)
   { if (hashTable[i] != NULL)
     { BucketList l = hashTable[i];
@@ -119,8 +119,10 @@ void printSymTab(FILE * listing)
           fprintf(listing,"%-10s ","Void");
         }
         fprintf(listing,"%-8d  ",l->memloc);
+        fprintf(listing,"%-10s  ",l->scope);
         while (t != NULL)
-        { fprintf(listing,"%4d ",t->lineno);
+        { 
+          fprintf(listing,"%4d ",t->lineno);
           t = t->next;
         }
         fprintf(listing,"\n");
