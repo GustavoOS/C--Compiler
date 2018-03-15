@@ -14,6 +14,12 @@
     static int yylex(void);
     int yyerror( const char * message);
 
+    YYSTYPE findLastSibling(YYSTYPE node){
+        while ( node != NULL && node->sibling != NULL) node = node->sibling;
+        return node;
+    }
+
+
 %}
 
 %token ERROR ELSE IF INT RETURN VOID WHILE
@@ -22,364 +28,422 @@
 %nonassoc "then"
 %nonassoc ELSE
 %error-verbose 
+
 %%
 
-programa:
-        declaracao-lista {savedTree=$1;}
+programa: declaracao-lista
+            {
+                savedTree=$1;
+            }
         ;
 
-declaracao-lista:
-        declaracao-lista declaracao
-                 { YYSTYPE t = $1;
-                   if (t != NULL)
-                   { while (t->sibling != NULL)
-                        t = t->sibling;
-                     t->sibling = $2;
-                     $$ = $1; }
-                     else $$ = $2;
-                 }
-        | %empty { $$ = NULL; }
-        ;
+declaracao-lista: declaracao-lista declaracao
+                    { 
+                        YYSTYPE t = $1;
+                        if (t != NULL)
+                        {
+                            t = findLastSibling(t);
+                            t->sibling = $2;
+                            $$ = $1;
+                        }
+                        else $$ = $2;
+                    }
 
-declaracao:
-        var-declaracao {$$ = $1;}
-        | fun-declaracao  {$$ = $1;}
-        ;
+                | %empty
+                    {
+                        $$ = NULL;
+                    }
+                ;
 
-var-declaracao:
-        tipo-especificador ID
-                { $$ = newStmtNode(VarDeclK);
-                  $$->attr.name = copyString(tokenString);
-                  $$->type = savedType;}
-        SEMI    { $$ = $3; }
-        |tipo-especificador ID
-                { $$ = newStmtNode(VetDeclK);
-                  $$->attr.name = copyString(tokenString);
-                  $$->type = savedType;
+declaracao: var-declaracao
+                {
+                    $$ = $1;
                 }
-        LBRACE NUM
-                { savedConstant = atoi(tokenString); }
-        RBRACE SEMI
-                { $$ = $3;
-                  $$->child[0] = newExpNode(ConstK);
-                  $$->child[0]->attr.val = savedConstant; 
+
+            | fun-declaracao
+                {
+                    $$ = $1;
                 }
         ;
 
+var-declaracao: tipo-especificador ID
+                    {
+                        $$ = newStmtNode(VarDeclK);
+                        $$->attr.name = copyString(tokenString);
+                        $$->type = savedType;
+                    }
+                    SEMI
+                    {
+                        $$ = $3;
+                    }
 
-tipo-especificador:
-        INT
-        {
-                savedType=Integer;
-        }
-        | VOID
-        {
-                savedType=Void;
-        }
-        ;
+                |tipo-especificador ID
+                    {
+                        $$ = newStmtNode(VetDeclK);
+                        $$->attr.name = copyString(tokenString);
+                        $$->type = savedType;
+                    }
+                    LBRACE NUM
+                    {
+                        savedConstant = atoi(tokenString);
+                    }
+                    RBRACE SEMI
+                    {
+                        $$ = $3;
+                        $$->child[0] = newExpNode(ConstK);
+                        $$->child[0]->attr.val = savedConstant; 
+                    }
+                ;
 
-fun-declaracao:
-        tipo-especificador ID
-        {
-                $$ = newStmtNode(FunDeclK);
-                $$->attr.name =  copyString(tokenString);;
-                $$->type = savedType;
-        } 
-        LPAREN params RPAREN composto-decl
-        { 
-                $$ = $3;
-                $$->child[0] = $5;
-                $$->child[1] = $7;
-        }
-        ;
 
-params:
-        param-lista      { $$ = $1;  }
-        | VOID
-        ;
+tipo-especificador: INT
+                    {
+                        savedType=Integer;
+                    }
+                    | VOID
+                    {
+                        savedType=Void;
+                    }
+                    ;
 
-param-lista:
-        param-lista COMMA param
-        { YYSTYPE t = $1;
-                if (t != NULL)
-                { while (t->sibling != NULL)
-                        t = t->sibling;
-                t->sibling = $3;
-                $$ = $1; }
-                else $$ = $3;
-        }
-        | param  { $$=$1; }
-        ;
-
-param:
-        tipo-especificador ID
+fun-declaracao: tipo-especificador ID
+                {
+                    $$ = newStmtNode(FunDeclK);
+                    $$->attr.name =  copyString(tokenString);;
+                    $$->type = savedType;
+                } 
+                LPAREN params RPAREN composto-decl
                 { 
-                  $$ = newStmtNode(VarDeclK);
-                  $$->attr.name = copyString(tokenString);
-                  $$->type = savedType;
+                    $$ = $3;
+                    $$->child[0] = $5;
+                    $$->child[1] = $7;
                 }
+                ;
+
+params: param-lista
+            {
+                $$ = $1;
+            }
+        | VOID
+        ;
+
+param-lista:    param-lista COMMA param
+                {
+                    YYSTYPE t = $1;
+                    if (t != NULL)
+                    {
+                        t = findLastSibling(t);
+                        t->sibling = $3;
+                        $$ = $1;
+                    }
+                    else $$ = $3;
+                }
+
+                | param
+                    {
+                        $$=$1;
+                    }
+                ;
+
+param:  tipo-especificador ID
+            { 
+                $$ = newStmtNode(VarDeclK);
+                $$->attr.name = copyString(tokenString);
+                $$->type = savedType;
+            }
+
         | tipo-especificador ID 
-                { $$ = newStmtNode(VetDeclK);
-                  $$->attr.name = copyString(tokenString);
-                  $$->type = savedType;
-                }
-        LBRACE RBRACE
-                { $$ = $3; }
-        | error {   $$ = NULL;};
+            { 
+                $$ = newStmtNode(VetDeclK);
+                $$->attr.name = copyString(tokenString);
+                $$->type = savedType;
+            }
+            LBRACE RBRACE
+            {
+                $$ = $3;
+            }
+        | error 
+            {
+                $$ = NULL;
+            }
         ;
 
-composto-decl:
-        LBRACKET local-declaracoes statement-lista RBRACKET
-        { 
-                  $$ = newStmtNode(CompoundK);
-                  $$->child[0] = $2;
-                  $$->child[1] = $3;
-        }
-        ;
+composto-decl:  LBRACKET local-declaracoes statement-lista RBRACKET
+                    { 
+                        $$ = newStmtNode(CompoundK);
+                        $$->child[0] = $2;
+                        $$->child[1] = $3;
+                    }
+                ;
 
-local-declaracoes:
-        local-declaracoes var-declaracao
-        {       YYSTYPE t = $1;
-                if (t != NULL)
-                { while (t->sibling != NULL)
-                        t = t->sibling;
-                t->sibling = $2;
-                $$ = $1; 
-                }
-                else $$ = $2;
-        }
-        | %empty{$$=NULL;}
-        ;
+local-declaracoes:  local-declaracoes var-declaracao
+                        {       
+                            YYSTYPE t = $1;
+                            if (t != NULL)
+                            { 
+                                t = findLastSibling(t);
+                                t->sibling = $2;
+                                $$ = $1; 
+                            }
+                            else $$ = $2;
+                        }
+                    | %empty
+                        {
+                            $$ = NULL;
+                        }
+                    ;
 
-statement-lista:
-        statement-lista statement
-        {       YYSTYPE t = $1;
-                if (t != NULL)
-                { while (t->sibling != NULL)
-                        t = t->sibling;
-                t->sibling = $2;
-                $$ = $1; 
-                }
-                else $$ = $2;
-        }
-        | %empty {$$=NULL;}
-        ;
+statement-lista:    statement-lista statement
+                        {       
+                            YYSTYPE t = $1;
+                            if (t != NULL)
+                            { 
+                                t = findLastSibling(t);
+                                t->sibling = $2;
+                                $$ = $1; 
+                            }
+                            else $$ = $2;
+                        }
+                    | %empty
+                        {
+                            $$ = NULL;
+                        }
+                    ;
 
-statement:
-        expressao-decl
-        | composto-decl
-        | selecao-decl
-        | iteracao-decl
-        | retorno-decl
-        ;
+statement:  expressao-decl
+            | composto-decl
+            | selecao-decl
+            | iteracao-decl
+            | retorno-decl
+            ;
 
-expressao-decl:
-        expressao SEMI
-        | SEMI {$$=NULL;}
-        ;
+expressao-decl: expressao SEMI
+                | SEMI 
+                    {
+                        $$ = NULL;
+                    }
+                ;
 
-selecao-decl:
-        IF LPAREN expressao RPAREN statement %prec "then"
-        {       $$ = newStmtNode(IfK);
-                $$->child[0] = $3;
-                $$->child[1] = $5;
-        }
-        | IF LPAREN expressao RPAREN statement ELSE statement
-        {       $$ = newStmtNode(IfK);
-                $$->child[0] = $3;
-                $$->child[1] = $5;
-                $$->child[2] = $7;
-        }
-        ;
+selecao-decl:   IF LPAREN expressao RPAREN statement %prec "then"
+                    {       
+                        $$ = newStmtNode(IfK);
+                        $$->child[0] = $3;
+                        $$->child[1] = $5;
+                    }
+                | IF LPAREN expressao RPAREN statement ELSE statement
+                    {       
+                        $$ = newStmtNode(IfK);
+                        $$->child[0] = $3;
+                        $$->child[1] = $5;
+                        $$->child[2] = $7;
+                    }
+                ;
 
-iteracao-decl:
-        WHILE LPAREN expressao RPAREN statement
-        {       $$ = newStmtNode(WhileK);
-                $$->child[0] = $3;
-                $$->child[1] = $5;
-        }
-        ;
+iteracao-decl:  WHILE LPAREN expressao RPAREN statement
+                    {       
+                        $$ = newStmtNode(WhileK);
+                        $$->child[0] = $3;
+                        $$->child[1] = $5;
+                    }
+                ;
 
 retorno-decl:
         RETURN SEMI
-        {       $$ = newStmtNode(ReturnK);
-        }
+            {       
+                $$ = newStmtNode(ReturnK);
+            }
         | RETURN expressao SEMI
-        {       $$ = newStmtNode(ReturnK);
+            {       
+                $$ = newStmtNode(ReturnK);
                 $$->child[0] = $2;
-        }
+            }
         ;
 
-expressao:
-        var EQATR expressao
-        {       $$ = newStmtNode(AssignK);
-                $$->child[0] = $1;
-                $$->child[1] = $3;
-        }
-        | simples-expressao
-        ;
+expressao:  var EQATR expressao
+                {       
+                    $$ = newStmtNode(AssignK);
+                    $$->child[0] = $1;
+                    $$->child[1] = $3;
+                }
+            | simples-expressao
+            ;
 
-fator:
-        LPAREN expressao RPAREN
-        {
+fator:  LPAREN expressao RPAREN
+            {
                 $$=$2;
-        }
+            }
         | var
         | ativacao
-        | NUM {
+        | NUM
+            {
                 $$=newExpNode(ConstK);
                 $$->attr.val=atoi(tokenString);
-        }
-        | error {$$=NULL;}
+            }
+        | error 
+            {
+                $$=NULL;
+            }
         ;
 
 
-var:
-        ID{ 
-                  $$ = newExpNode(IdK);
-                  $$->attr.name = copyString(tokenString);
+var:    ID
+            { 
+                $$ = newExpNode(IdK);
+                $$->attr.name = copyString(tokenString);
+            }
+        | ID
+            {
+                $$ = newExpNode(VetK);
+                $$->attr.name = copyString(tokenString);
+            }
+            LBRACE expressao RBRACE
+            { 
+                $$ = $2;
+                $$->child[0]=$4;
+            }
+        ;
+
+
+simples-expressao:  soma-expressao relacional soma-expressao
+                        { 
+                            $$ = $2;
+                            $$->child[0]=$1;
+                            $$->child[1]=$3;
+                        }
+
+                    | soma-expressao
+                    ;
+
+relacional: LESSEQ
+                {
+                    $$ = newExpNode(OpK);
+                    $$->attr.op = LESSEQ;
                 }
-        | ID{
-                  $$ = newExpNode(VetK);
-                  $$->attr.name = copyString(tokenString);
-        }
-         LBRACE expressao RBRACE
-        { 
-                  $$ = $2;
-                  $$->child[0]=$4;
-        }
-        ;
 
+            | LESSER
+                {
+                    $$ = newExpNode(OpK);
+                    $$->attr.op = LESSER;
+                }
 
-simples-expressao:
-        soma-expressao relacional soma-expressao
-        { 
-                  $$ = $2;
-                  $$->child[0]=$1;
-                  $$->child[1]=$3;
-        }
-        | soma-expressao
-        ;
+            | GREATER
+                {
+                    $$ = newExpNode(OpK);
+                    $$->attr.op = GREATER;
+                }
 
-relacional:
-        LESSEQ
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = LESSEQ;
-        }
-        | LESSER
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = LESSER;
-        }
-        | GREATER
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = GREATER;
-        }
-        | GREATEQ
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = GREATEQ;
-        }
-        | EQCOMP
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = EQCOMP;
-        }
-        | NOTEQ
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = NOTEQ;
-        }
-        ;
+            | GREATEQ
+                {
+                    $$ = newExpNode(OpK);
+                    $$->attr.op = GREATEQ;
+                }
 
-soma-expressao:
-        soma-expressao soma termo
-        { 
-                  $$ = $2;
-                  $$->child[0]=$1;
-                  $$->child[1]=$3;
-        }
-        | termo
-        ;
+            | EQCOMP
+                {
+                    $$ = newExpNode(OpK);
+                    $$->attr.op = EQCOMP;
+                }
 
-soma:
-        PLUS
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = PLUS;
-        }
+            | NOTEQ
+                {
+                    $$ = newExpNode(OpK);
+                    $$->attr.op = NOTEQ;
+                }
+            ;
+
+soma-expressao: soma-expressao soma termo
+                { 
+                    $$ = $2;
+                    $$->child[0]=$1;
+                    $$->child[1]=$3;
+                }
+
+                | termo
+                ;
+
+soma:   PLUS
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = PLUS;
+            }
+
         | MINUS
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = MINUS;
-        }
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = MINUS;
+            }
         ;
 
 termo:
         termo mult fator
-        { 
-                  $$ = $2;
-                  $$->child[0]=$1;
-                  $$->child[1]=$3;
-        }
+            { 
+                $$ = $2;
+                $$->child[0]=$1;
+                $$->child[1]=$3;
+            }
+
         | fator
         ;
 
 mult:
         TIMES
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = TIMES;
-        }
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = TIMES;
+            }
+
         | SLASH
-        {
-                  $$ = newExpNode(OpK);
-                  $$->attr.op = SLASH;
-        }
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = SLASH;
+            }
         ;
 
 
 ativacao:
         ID 
-        {
+            {
                 $$ = newStmtNode(FunActiveK);
                 $$->attr.name= copyString(tokenString);
-        }
-        LPAREN args RPAREN
-        {       $$ = $2;
+            }
+            LPAREN args RPAREN
+            {       
+                $$ = $2;
                 $$->child[0] = $4;
-        }
+            }
         ;
 
-args:
-        arg-lista
-        | %empty {$$=NULL;}
+args:   arg-lista
+
+        | %empty
+            {
+                $$ = NULL;
+            }
         ;
 
-arg-lista:
-        arg-lista COMMA expressao
-        {       YYSTYPE t = $1;
-                if (t != NULL)
-                { while (t->sibling != NULL)
-                        t = t->sibling;
-                t->sibling = $3;
-                $$ = $1; 
+arg-lista:  arg-lista COMMA expressao
+                {       
+                    YYSTYPE t = $1;
+                    if (t != NULL)
+                    { 
+                        t = findLastSibling(t);
+                        t->sibling = $3;
+                        $$ = $1; 
+                    }
+                    else $$ = $3;
                 }
-                else $$ = $3;
-        }
-        | expressao
-        ;
+            | expressao
+            ;
 
 %%
 
 int yyerror(const char * message)
-{ fprintf(listing,"Syntax error at line %d: %s\n",lineno,message);
-  fprintf(listing,"Current token: ");
-  printToken(yychar,tokenString);
-  Error = TRUE;
-  return 0;
+{ 
+    fprintf(listing,"Syntax error at line %d: %s\n",lineno,message);
+    fprintf(listing,"Current token: ");
+    printToken(yychar,tokenString);
+    Error = TRUE;
+    return 0;
 }
 
 /* yylex calls getToken to make Yacc/Bison output
@@ -392,3 +456,7 @@ TreeNode * parse(void)
 { yyparse();
   return savedTree;
 }
+
+
+
+
