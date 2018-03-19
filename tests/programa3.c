@@ -27,5 +27,5 @@ int pacoca( int pirulito ) {
 }
 
 int main( int ads ){
-    return k * 10 + 3 - 5 = 13;
+    return k * 10 + 3 - 5; //= 13;
 }
