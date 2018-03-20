@@ -107,15 +107,16 @@ TreeNode * newExpNode(ExpKind kind)
  * copy of an existing string
  */
 char * copyString(char * s)
-{ int n;
-  char * t;
+{ 
+  int n;
+  char * result;
   if (s==NULL) return NULL;
   n = strlen(s)+1;
-  t = malloc(n);
-  if (t==NULL)
+  result = (char *) malloc(n*sizeof(char));
+  if (result==NULL)
     fprintf(listing,"Out of memory error at line %d\n",lineno);
-  else strcpy(t,s);
-  return t;
+  else strcpy(result,s);
+  return result;
 }
 
 /* Variable indentno is used by printTree to

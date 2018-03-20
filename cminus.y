@@ -7,6 +7,8 @@
     #include "parse.h"
 
     #define YYSTYPE TreeNode *
+
+    
     static int savedConstant;
     static ExpType savedType;
     static int savedLineNo;  /* ditto */
@@ -97,13 +99,13 @@ var-declaracao: tipo-especificador ID
 
 
 tipo-especificador: INT
-                    {
-                        savedType=Integer;
-                    }
+                        {
+                            savedType=Integer;
+                        }
                     | VOID
-                    {
-                        savedType=Void;
-                    }
+                        {
+                            savedType=Void;
+                        }
                     ;
 
 fun-declaracao: tipo-especificador ID

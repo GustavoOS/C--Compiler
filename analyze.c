@@ -15,8 +15,6 @@ char scope[42] = "global";
 /* counter for variable memory locations */
 static int location = 0;
 
-
-
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc 
@@ -45,80 +43,99 @@ static void traverse(TreeNode *t,
  */
 static void nullProc(TreeNode *t)
 {
-  if (t == NULL||t!=NULL)
+  if (t == NULL || t != NULL)
     return;
 }
 
 static void IntInvalidReturnError(TreeNode *t)
 {
   printf(
-    "Error: Function %s is an int one, yet it is not returning anything at line %d.\n", scope, t->lineno);
+      "\nError: Function %s is an int one, yet it is not returning anything at line %d.\n", scope, t->lineno);
   Error = TRUE;
 }
 
 static void VoidInvalidReturnError(TreeNode *t)
 {
   printf(
-    "Error: Function %s is a void one, yet it is returning something at line %d.\n", scope, t->lineno);
+      "\nError: Function %s is a void one, yet it is returning something at line %d.\n", scope, t->lineno);
   Error = TRUE;
 }
 
 static void funcAlreadyDefinedError(TreeNode *t)
 {
   printf(
-    "Function %s already defined error at line %d.\n", t->attr.name, t->lineno);
+      "\nError: Function %s already defined at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
 static void varAlreadyDefinedError(TreeNode *t)
 {
   printf(
-    "Variable %s already defined error at line %d.\n", t->attr.name, t->lineno);
+      "\nError: Variable %s already defined at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
 static void varNotDefinedError(TreeNode *t)
 {
   printf(
-    "Variable %s not defined error at line %d.\n", t->attr.name, t->lineno);
+      "\nError: Variable %s not defined at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
 static void funcNotDefinedError(TreeNode *t)
 {
   printf(
-    "Function %s not defined error at line %d.\n", t->attr.name, t->lineno);
+      "\nError: Function %s not defined at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
 static void isNotVectorError(TreeNode *t)
 {
   printf(
-    "Error: %s is not a vector at line %d.\n", t->attr.name, t->lineno);
+      "\nError: %s is not a vector at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
 static void isNotVarError(TreeNode *t)
 {
   printf(
-    "Error: %s is not a variable at line %d.\n", t->attr.name, t->lineno);
+      "\nError: %s is not a variable at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
 static void isNotFuncError(TreeNode *t)
 {
   printf(
-    "Error: %s is not a function at line %d.\n", t->attr.name, t->lineno);
+      "\nError: %s is not a function at line %d.\n", t->attr.name, t->lineno);
   Error = TRUE;
 }
 
-
-static void exitScope( TreeNode *t )
+static void VoidVarError(TreeNode *t)
 {
-  if(t->nodekind == StmtK && t->kind.stmt == FunDeclK ) {
+  printf(
+      "\nError: %s variable has a forbidden type at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void VoidVecError(TreeNode *t)
+{
+  printf(
+      "\nError: %s vector has a forbidden type at line %d.\n", t->attr.name, t->lineno);
+  Error = TRUE;
+}
+
+static void exitScope(TreeNode *t)
+{
+  if (t->nodekind == StmtK && t->kind.stmt == FunDeclK)
+  {
     // printf("Sai do escopo %s\n", scope);
     strcpy(scope, "global");
   }
+}
+
+int isVariableInt(TreeNode *node)
+{
+  return (node != NULL && node->type == Integer) ? 1 : 0;
 }
 
 /* Procedure insertNode inserts 
@@ -128,6 +145,7 @@ static void exitScope( TreeNode *t )
 static void insertNode(TreeNode *t)
 {
   BucketList l;
+
   switch (t->nodekind)
   {
   case StmtK:
@@ -135,69 +153,112 @@ static void insertNode(TreeNode *t)
     {
     case VarDeclK:
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope,l->scope)!=0)){
-        st_declare(t->attr.name, t->lineno, location++, VARIABLE, scope);
-      }else{
+      // if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      // printf("\nentrouLinha138 %s : %s", scope);
+      if (l == NULL)
+      {
+        if (isVariableInt(t))
+        {
+          st_declare(t->attr.name, t->lineno, location++, VARIABLE, scope);
+        }
+        else
+        {
+          VoidVarError(t);
+        }
+        
+      }
+      else
+      {
         varAlreadyDefinedError(t);
       }
       break;
+
     case VetDeclK:
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope,l->scope)!=0)){
-        st_declare(t->attr.name, t->lineno, location++, VECTOR, scope);
-      }else{
-        varAlreadyDefinedError(t);
+      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      {
+        if (isVariableInt(t))
+        {
+          st_declare(t->attr.name, t->lineno, location++, VECTOR, scope);
+        }
+        else
+        {
+          VoidVecError(t);
+        }
+        
       }
-     break;
+      else
+      {
+        varAlreadyDefinedError(t);
+        
+      }
+      break;
+
     case FunDeclK:
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope,l->scope)!=0)){
+      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      {
         BucketList l2 = st_declare(t->attr.name, t->lineno, location++, FUNCTION, scope);
         l2->dtype = t->type;
         strcpy(scope, t->attr.name);
-        // printf("Entrei no escopo %s\n", scope);
-      }else{
+        // printf("\nAnalyze 168: Entrei no escopo %s", scope);
+      }
+      else
+      {
         funcAlreadyDefinedError(t);
       }
       break;
+
     case FunActiveK:
     {
       l = st_find(t->attr.name, scope);
-      if (l == NULL){
+      if (l == NULL)
+      {
         funcNotDefinedError(t);
-      }else{
-        if(l->vtype == FUNCTION){
-          st_reference(l,t->lineno);
-        }else{
+      }
+      else
+      {
+        if (l->vtype == FUNCTION)
+        {
+          st_reference(l, t->lineno);
+        }
+        else
+        {
           isNotFuncError(t);
         }
       }
       break;
     }
+
     case ReturnK:
     {
       l = st_find(scope, "global");
-      switch(l->dtype){
-        case Void:
+      switch (l->dtype)
+      {
+      case Void:
+      {
+        if (t->child[0] != NULL)
         {
-          if(t->child[0]!=NULL){
-            VoidInvalidReturnError(t);
-          } 
-          
-        break;
+          VoidInvalidReturnError(t);
         }
-        case Integer:
-        {
-           if(t->child[0]==NULL){
-            IntInvalidReturnError(t);
-          } 
-          
+
         break;
-        }
-        default: printf("Vishe! Nem eu entendi"); break;
       }
+      case Integer:
+      {
+        if (t->child[0] == NULL)
+        {
+          IntInvalidReturnError(t);
+        }
+
+        break;
+      }
+      default:
+        printf("Vishe! Nem eu entendi");
+        break;
+      }
+      break;
     }
-    break;
 
     default:
       break;
@@ -209,12 +270,18 @@ static void insertNode(TreeNode *t)
     case VetK:
     {
       l = st_find(t->attr.name, scope);
-       if (l == NULL){
+      if (l == NULL)
+      {
         varNotDefinedError(t);
-      }else{
-        if(l->vtype == VECTOR){
-          st_reference(l,t->lineno);
-        }else{
+      }
+      else
+      {
+        if (l->vtype == VECTOR)
+        {
+          st_reference(l, t->lineno);
+        }
+        else
+        {
           isNotVectorError(t);
         }
       }
@@ -223,12 +290,18 @@ static void insertNode(TreeNode *t)
     case IdK:
     {
       l = st_find(t->attr.name, scope);
-      if (l == NULL){
+      if (l == NULL)
+      {
         varNotDefinedError(t);
-      }else{
-        if(l->vtype == VARIABLE){
-          st_reference(l,t->lineno);
-        }else{
+      }
+      else
+      {
+        if (l->vtype == VARIABLE)
+        {
+          st_reference(l, t->lineno);
+        }
+        else
+        {
           isNotVarError(t);
         }
       }
@@ -246,15 +319,18 @@ static void insertNode(TreeNode *t)
 //
 void mainVerify()
 {
-  BucketList myList = st_find("main",scope);
+  BucketList myList = st_find("main", scope);
   if (myList == NULL)
   {
-     Error = TRUE;
-     printf("Error: Main function was not found.\n");
-  }else{
-     if( myList->vtype != FUNCTION){
-       printf("Error: Main is not a function.\n");
-     }
+    Error = TRUE;
+    printf("\nError: Main function was not found.\n");
+  }
+  else
+  {
+    if (myList->vtype != FUNCTION)
+    {
+      printf("\nError: Main is not a function.\n");
+    }
   }
 }
 //
@@ -281,7 +357,8 @@ static void typeError(TreeNode *t, char *message)
 /* Procedure checkNode performs
  * type checking at a single tree node
  */
-static void checkNode(TreeNode *t) {
+static void checkNode(TreeNode *t)
+{
   switch (t->nodekind)
   {
   case ExpK:
@@ -291,25 +368,26 @@ static void checkNode(TreeNode *t) {
       if ((t->child[0]->type != Integer) ||
           (t->child[1]->type != Integer))
         typeError(t, "Op applied to non-integer");
-        switch( t->attr.op){
-          case LESSEQ:
-          case LESSER:
-          case GREATER:
-          case GREATEQ:
-          case EQCOMP:
-          case NOTEQ:
-            t->type = Boolean;
-            break;
-          case PLUS:
-          case MINUS:
-          case TIMES:
-          case SLASH:
-            t->type = Integer;
-            break;
-          default:
-            printf("ERROR! Unknown operator.");
-        }
+      switch (t->attr.op)
+      {
+      case LESSEQ:
+      case LESSER:
+      case GREATER:
+      case GREATEQ:
+      case EQCOMP:
+      case NOTEQ:
+        t->type = boolean;
         break;
+      case PLUS:
+      case MINUS:
+      case TIMES:
+      case SLASH:
+        t->type = Integer;
+        break;
+      default:
+        printf("ERROR! Unknown operator.");
+      }
+      break;
     case ConstK:
     case IdK:
       t->type = Integer;
@@ -325,18 +403,20 @@ static void checkNode(TreeNode *t) {
       t->type = st_find(t->attr.name, scope)->dtype;
       break;
     case IfK:
-      if(t->child[0] == NULL){
+      if (t->child[0] == NULL)
+      {
         typeError(t->child[0], "if test invalid");
-      }else if (t->child[0]->type != Boolean)
-        typeError(t->child[0], "if test is not Boolean");
+      }
+      else if (t->child[0]->type != boolean)
+        typeError(t->child[0], "if test is not boolean");
       break;
     case AssignK:
       if (t->child[1]->type != Integer)
         typeError(t->child[1], "assignment of non-integer value");
       break;
     case WhileK:
-      if (t->child[0]->type != Boolean)
-        typeError(t->child[0], "while test is not Boolean");
+      if (t->child[0]->type != boolean)
+        typeError(t->child[0], "while test is not boolean");
       break;
     default:
       break;

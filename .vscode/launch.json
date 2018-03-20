@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/bin/cminus",
-            "args": ["${workspaceRoot}/tests/programa3.c"],
+            "args": ["${workspaceRoot}/tests/declarationConflict.c"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
