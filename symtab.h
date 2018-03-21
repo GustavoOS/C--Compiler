@@ -29,7 +29,8 @@ typedef struct LineListRec
  * it appears in the source code
  */
 typedef struct BucketListRec
-   { char * name;
+   { 
+     char * name;
      LineList lines;
      int memloc ; /* memory location for variable */
      struct BucketListRec * next;
