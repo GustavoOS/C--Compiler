@@ -45,7 +45,8 @@ typedef struct BucketListRec
  * first time, otherwise ignored
  */
 BucketList st_declare( char * name, int lineno, int loc, IDType type, char * scope);
-BucketList st_reference( BucketList l, int lineno);
+BucketList st_declare_function(char *name, int lineno, int loc, IDType type, ExpType eType, char *escopo);
+BucketList st_reference(BucketList l, int lineno);
 /* Function st_find returns the memory reference 
    to the bucketlist of the variable or NULL if not found
  */
