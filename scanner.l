@@ -7,20 +7,23 @@ char tokenString[MAXTOKENLEN+1];
 static int yylex(void);
 %}
 
-%x comment
-%x comentario
+%Start MultiLineComment SingleLineComment
 
 
 %%
-"/*"         BEGIN(comment);
-<comment>[^*\n]*                    /* eat anything that's not a '*' */
-<comment>"*"+[^*/\n]*               /* eat up '*'s not followed by '/'s */
-<comment>\n                         ++lineno;
-<comment>"*"+"/"                    BEGIN(INITIAL);
+<INITIAL>"/*"                         BEGIN MultiLineComment;
+<MultiLineComment>"*"+\/              BEGIN (INITIAL);
+<MultiLineComment>[^\n\*]*            |
+<MultiLineComment>"*"+[^\n\/]         ;//Deletes most characters
+<MultiLineComment>\n                  lineno++;
+<MultiLineComment>.                   ;//Deletes missing characters if needed
+<MultiLineComment><<EOF>>             ;// Ignore
 
-"//"         BEGIN(comentario);
-<comentario>[^\n]*
-<comentario>\n                         ++lineno;BEGIN(INITIAL);
+
+<INITIAL>"//"                         BEGIN SingleLineComment;
+<SingleLineComment>.*                 ;
+<SingleLineComment>\n                 lineno++;BEGIN (INITIAL);
+<SingleLineComment><<EOF>>            BEGIN (INITIAL);
 
 
 

@@ -1,6 +1,5 @@
-#line 2 "scanner.c"
 
-#line 4 "scanner.c"
+#line 3 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -531,7 +530,7 @@ char tokenString[MAXTOKENLEN+1];
 static int yylex(void);
 
 
-#line 535 "scanner.c"
+#line 534 "lex.yy.c"
 
 #define INITIAL 0
 #define comment 1
@@ -753,7 +752,7 @@ YY_DECL
 	{
 #line 14 "scanner.l"
 
-#line 757 "scanner.c"
+#line 756 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1038,7 +1037,7 @@ YY_RULE_SETUP
 #line 69 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1042 "scanner.c"
+#line 1041 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(comentario):

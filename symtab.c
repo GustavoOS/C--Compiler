@@ -59,6 +59,29 @@ BucketList st_declare(char *name, int lineno, int loc, IDType type, char *escopo
   return l;
 }
 
+BucketList st_declare_function(char *name, int lineno, int loc, IDType type, ExpType eType, char *escopo)
+{
+  // printf( "%s name %d lineno %d loc %d type %s scope\n",name,  lineno,  loc,  type,  scope);
+  int h = hash(name);
+  BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
+  l->name = name;
+  l->lines = (LineList)malloc(sizeof(struct LineListRec));
+  l->lines->lineno = lineno;
+  l->memloc = loc;
+  l->lines->next = NULL;
+  strcpy(l->scope, escopo);
+  l->next = hashTable[h];
+  l->vtype = type;
+  l->dtype = eType;
+  hashTable[h] = l;
+  return l;
+}
+
+BucketList advanceNode(BucketList node)
+{
+  return (node != NULL) ? node->next : node;
+}
+
 BucketList st_reference(BucketList l, int lineno)
 {
   LineList t = l->lines;
@@ -70,40 +93,36 @@ BucketList st_reference(BucketList l, int lineno)
   return l;
 } /* st_insert */
 
+int cantMatchNameAndScopeInRange(BucketList node, char *name, char *escopo)
+{
+  return
+      (node != NULL) && (                                         //in range
+                            (strcmp(escopo, node->scope) != 0) || //Scopes don't match
+                            (strcmp(name, node->name) != 0));     //names don't match
+ 
+}
+
+BucketList st_find_at_scope(char *name, char *escopo)
+{
+  int hashIndex = hash(name);
+  BucketList EntryNode = hashTable[hashIndex];
+  while (cantMatchNameAndScopeInRange(EntryNode, name, escopo))
+  {
+    EntryNode = advanceNode(EntryNode);
+  }
+  return EntryNode;
+}
+
 /* Function st_find searches a variable in local scope and then in 
-global scope.
- Not finding anything makes it return NULL
+ * global scope.
+ * Not finding anything makes it return NULL
  */
 BucketList st_find(char *name, char *escopo)
 {
-  int hashIndex = hash(name);
-  BucketList l = hashTable[hashIndex];
-  // printf("\nst_find %s %s", name, escopo);
-  while (
-      (l != NULL) && //in range
-      
-          (strcmp(escopo, l->scope) != 0)&& //Scopes don't
-          (strcmp(name, l->name) != 0)  //names don't match
-        
-    )
-    l = l->next; // l advances
-
-  if (
-        (l != NULL) && //In range
-        (strcmp(escopo, l->scope)!=0) //Haven't found on scope
-      )
-  {
-    l = hashTable[hashIndex]; //Restart search area
-    while (
-        (l != NULL) &&  // In range
-        (
-          (strcmp("global", l->scope) != 0)&& //Global scope don't match
-          (strcmp(name, l->name)!=0) //names don't match
-        )
-      )
-      l = l->next; //l advances
-  }
-  return l;
+  BucketList result = st_find_at_scope(name, escopo);
+  if (result == NULL)
+    result = st_find_at_scope(name, (char *)"global");
+  return result;
 }
 
 /* Procedure printSymTab prints a formatted 
