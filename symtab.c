@@ -95,28 +95,22 @@ BucketList st_reference(BucketList l, int lineno)
 
 int cantMatchNameAndScopeInRange(BucketList node, char *name, char *escopo)
 {
-  return (
-      (node != NULL) &&                     //in range
-      (strcmp(escopo, node->scope) != 0) && //Scopes don't
-      (strcmp(name, node->name) != 0));     //names don't match
+  return
+      (node != NULL) && (                                         //in range
+                            (strcmp(escopo, node->scope) != 0) || //Scopes don't match
+                            (strcmp(name, node->name) != 0));     //names don't match
+ 
 }
 
 BucketList st_find_at_scope(char *name, char *escopo)
 {
   int hashIndex = hash(name);
   BucketList EntryNode = hashTable[hashIndex];
-  // printf("\nst_find %s %s", name, escopo);
   while (cantMatchNameAndScopeInRange(EntryNode, name, escopo))
   {
     EntryNode = advanceNode(EntryNode);
   }
   return EntryNode;
-}
-
-int cantMatchScopeInRange(BucketList node, char *escopo)
-{
-  return (node == NULL) || ((node != NULL) &&                    //In range
-                            (strcmp(escopo, node->scope) != 0)); //Scopes don't match
 }
 
 /* Function st_find searches a variable in local scope and then in 
