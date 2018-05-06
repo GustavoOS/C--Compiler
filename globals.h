@@ -53,11 +53,11 @@
 
 typedef int TokenType;
 
-extern FILE* source; /* source code text file */
-extern FILE* listing; /* listing output text file */
-extern FILE* code; /* code text file for TM simulator */
+extern "C" FILE* source; /* source code text file */
+extern "C" FILE* listing; /* listing output text file */
+extern "C" FILE* code; /* code text file for TM simulator */
 
-extern int lineno; /* source line number for listing */
+extern "C" int lineno; /* source line number for listing */
 
 /**************************************************/
 /***********   Syntax tree for parsing ************/
@@ -95,30 +95,30 @@ typedef struct treeNode
  * be echoed to the listing file with line numbers
  * during parsing
  */
-extern int EchoSource;
+extern "C" int EchoSource;
 
 /* TraceScan = TRUE causes token information to be
  * printed to the listing file as each token is
  * recognized by the scanner
  */
-extern int TraceScan;
+extern "C" int TraceScan;
 
 /* TraceParse = TRUE causes the syntax tree to be
  * printed to the listing file in linearized form
  * (using indents for children)
  */
-extern int TraceParse;
+extern "C" int TraceParse;
 
 /* TraceAnalyze = TRUE causes symbol table inserts
  * and lookups to be reported to the listing file
  */
-extern int TraceAnalyze;
+extern "C" int TraceAnalyze;
 
 /* TraceCode = TRUE causes comments to be written
  * to the TM code file as code is generated
  */
-extern int TraceCode;
+extern "C" int TraceCode;
 
 /* Error = TRUE prevents further passes if an error occurs */
-extern int Error;
+extern "C" int Error;
 #endif

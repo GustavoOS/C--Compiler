@@ -154,9 +154,9 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 typedef size_t yy_size_t;
 #endif
 
-extern int yyleng;
+extern "C" int yyleng;
 
-extern FILE *yyin, *yyout;
+extern "C" FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
@@ -335,11 +335,11 @@ FILE *yyin = NULL, *yyout = NULL;
 
 typedef int yy_state_type;
 
-extern int yylineno;
+extern "C" int yylineno;
 
 int yylineno = 1;
 
-extern char *yytext;
+extern "C" char *yytext;
 #ifdef yytext_ptr
 #undef yytext_ptr
 #endif
@@ -509,7 +509,7 @@ static yyconst flex_int16_t yy_chk[185] =
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
-extern int yy_flex_debug;
+extern "C" int yy_flex_debug;
 int yy_flex_debug = 0;
 
 /* The intent behind this definition is that it'll catch
@@ -587,7 +587,7 @@ void yyset_lineno (int _line_number  );
 #ifdef __cplusplus
 extern "C" int yywrap (void );
 #else
-extern int yywrap (void );
+extern "C" int yywrap (void );
 #endif
 #endif
 
@@ -695,7 +695,7 @@ static int input (void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int yylex (void);
+extern "C" int yylex (void);
 
 #define YY_DECL int yylex (void)
 #endif /* !YY_DECL */

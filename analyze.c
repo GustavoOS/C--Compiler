@@ -280,8 +280,10 @@ static void insertNode(TreeNode *t)
       }
       else
       {
+
         if (l->vtype == VECTOR)
         {
+          t->type = l->dtype;
           st_reference(l, t->lineno);
         }
         else
@@ -303,6 +305,7 @@ static void insertNode(TreeNode *t)
       {
         // if (l->vtype == VARIABLE)
         // {
+        t->type = l->dtype;
         st_reference(l, t->lineno);
         // }
         // else
