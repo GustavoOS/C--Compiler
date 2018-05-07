@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "symtab.h"
 #include "analyze.h"
+#include "memory.h"
 
 //current scope, standard is global
 char scope[42] = "global";
@@ -149,6 +150,7 @@ int isTreeNodeTypeInt(TreeNode *node)
  */
 static void insertNode(TreeNode *t)
 {
+  DataSection *dataSection = new DataSection();
   BucketList l;
 
   switch (t->nodekind)
@@ -163,7 +165,7 @@ static void insertNode(TreeNode *t)
       {
         if (isTreeNodeTypeInt(t))
         {
-          st_declare(t->attr.name, t->lineno, location++, VARIABLE, scope);
+          st_declare(t->attr.name, t->lineno, dataSection->allocateVariable(scope, 1), VARIABLE, scope);
         }
         else
         {
@@ -174,6 +176,7 @@ static void insertNode(TreeNode *t)
       {
         varAlreadyDefinedError(t);
       }
+
       break;
 
     case VetDeclK:
@@ -184,7 +187,11 @@ static void insertNode(TreeNode *t)
       {
         if (isTreeNodeTypeInt(t))
         {
-          st_declare(t->attr.name, t->lineno, location++, VECTOR, scope);
+          st_declare(t->attr.name, t->lineno,
+                     dataSection->allocateVariable(scope, 
+                      t->child[0] !=NULL ? t->child[0]->attr.val : 1
+                     ),
+                     VECTOR, scope);
         }
         else
         {
@@ -201,7 +208,7 @@ static void insertNode(TreeNode *t)
       l = st_find(t->attr.name, scope);
       if ((l == NULL) || (strcmp(scope, l->scope) != 0))
       {
-        BucketList l2 = st_declare_function(t->attr.name, t->lineno, location++, FUNCTION, t->type, scope);
+        BucketList l2 = st_declare_function(t->attr.name, t->lineno, dataSection->allocateFunction(), FUNCTION, t->type, scope);
         l2->dtype = t->type;
         strcpy(scope, t->attr.name);
         // printf("\nAnalyze 168: Entrei no escopo %s", scope);

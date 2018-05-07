@@ -1,4 +1,4 @@
-cminus: scanner.o util.o analyze.o symtab.o
+cminus: scanner.o util.o memory.o analyze.o symtab.o intermediate.o
 	g++ -g -o bin/cminus obj/*  main.c -ly -lfl
 
 scanner.o: parser.o
@@ -12,9 +12,16 @@ parser.o:
 	bison -d cminus.y
 	g++ -g -c cminus.tab.c -o obj/parser.o
 
-analyze.o:
-	g++ -g -c analyze.c -o obj/analyze.o
+intermediate.o:
+	g++ -g -c intermediate.cc -o obj/intermediate.o
 
+memory.o:
+	g++ -g -c memory.cc -o obj/memory.o
+
+analyze.o:
+	g++ -g -c analyze.cc -o obj/analyze.o
+
+	
 symtab.o:
 	g++ -g -c symtab.c -o obj/symtab.o
 

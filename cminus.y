@@ -175,6 +175,7 @@ composto-decl:  LBRACKET local-declaracoes statement-lista RBRACKET
                         $$ = newStmtNode(CompoundK);
                         $$->child[0] = $2;
                         $$->child[1] = $3;
+                        
                     }
                 ;
 
