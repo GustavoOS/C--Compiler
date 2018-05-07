@@ -1,7 +1,7 @@
 #ifndef _MEMORY_MANAGEMENT_
 #define _MEMORY_MANAGEMENT_
 
-
+#include <iostream>
 #include <map>
 
 class DataSection
