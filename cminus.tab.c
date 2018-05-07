@@ -1500,7 +1500,7 @@ yyreduce:
   case 21:
 #line 158 "cminus.y" /* yacc.c:1646  */
     { 
-                (yyval) = newStmtNode(VetDeclK);
+                (yyval) = newStmtNode(VectorParamK);
                 (yyval)->attr.name = copyString(tokenString);
                 (yyval)->type = savedType;
             }

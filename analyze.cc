@@ -187,11 +187,38 @@ static void insertNode(TreeNode *t)
       {
         if (isTreeNodeTypeInt(t))
         {
-          st_declare(t->attr.name, t->lineno,
-                     dataSection->allocateVariable(scope, 
-                      t->child[0] !=NULL ? t->child[0]->attr.val : 1
-                     ),
-                     VECTOR, scope);
+          st_declare(t->attr.name,
+                     t->lineno,
+                     dataSection->allocateVariable(
+                         scope,
+                         t->child[0]->attr.val),
+                     VECTOR,
+                     scope);
+        }
+        else
+        {
+          VoidVecError(t);
+        }
+      }
+      else
+      {
+        varAlreadyDefinedError(t);
+      }
+      break;
+
+    case VectorParamK:
+      strcpy(dvariable, scope);
+      l = st_find(t->attr.name, scope);
+      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      {
+        if (isTreeNodeTypeInt(t))
+        {
+          st_declare(
+              t->attr.name,
+              t->lineno,
+              dataSection->allocateVariable(scope, 1),
+              VECTOR,
+              scope);
         }
         else
         {

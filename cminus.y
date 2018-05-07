@@ -156,7 +156,7 @@ param:  tipo-especificador ID
 
         | tipo-especificador ID 
             { 
-                $$ = newStmtNode(VetDeclK);
+                $$ = newStmtNode(VectorParamK);
                 $$->attr.name = copyString(tokenString);
                 $$->type = savedType;
             }
