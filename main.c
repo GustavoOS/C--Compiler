@@ -41,7 +41,7 @@ int TraceScan = FALSE;
 int TraceParse = TRUE;
 int TraceAnalyze = TRUE;
 int TraceCode = TRUE;
-int TraceIntermediate = FALSE;
+// int TraceIntermediate = FALSE;
 
 int Error = FALSE;
 

@@ -1,4 +1,4 @@
-#include "intermediate.h"
+#include "codegenerator.h"
 #include "analyze.h"
 #include <vector>
 

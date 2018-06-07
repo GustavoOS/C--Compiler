@@ -1,5 +1,5 @@
-#ifndef _INTERMEDIATE_CODE_
-#define _INTERMEDIATE_CODE_
+#ifndef _CODE_GENERATOR_
+#define _CODE_GENERATOR_
 
 #include <vector>
 #include <iostream>
