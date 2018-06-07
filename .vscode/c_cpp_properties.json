@@ -28,7 +28,9 @@
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "/usr/include/c++/7",
+                "/usr/include/c++/7/x86_64-redhat-linux"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -40,7 +42,10 @@
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            }
+            },
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
         },
         {
             "name": "WSL",
@@ -98,5 +103,5 @@
             "cppStandard": "c++17"
         }
     ],
-    "version": 3
+    "version": 4
 }

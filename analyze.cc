@@ -21,7 +21,7 @@ static int location = 0;
  * it applies preProc in preorder and postProc 
  * in postorder to tree pointed to by t
  */
-static void traverse(TreeNode *t,
+void traverse(TreeNode *t,
                      void (*preProc)(TreeNode *),
                      void (*postProc)(TreeNode *))
 {
@@ -42,7 +42,7 @@ static void traverse(TreeNode *t,
  * generate preorder-only or postorder-only
  * traversals from traverse
  */
-static void nullProc(TreeNode *t)
+void nullProc(TreeNode *t)
 {
   if (t == NULL || t != NULL)
     return;

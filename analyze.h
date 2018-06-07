@@ -19,5 +19,9 @@ void buildSymtab(TreeNode *);
 void typeCheck(TreeNode *);
 
 void mainVerify();
+void traverse(TreeNode *t,
+                     void (*preProc)(TreeNode *),
+                     void (*postProc)(TreeNode *));
+
 
 #endif

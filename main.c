@@ -4,7 +4,6 @@
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
 /****************************************************/
-
 #include "globals.h"
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
@@ -42,6 +41,7 @@ int TraceScan = FALSE;
 int TraceParse = TRUE;
 int TraceAnalyze = TRUE;
 int TraceCode = TRUE;
+int TraceIntermediate = FALSE;
 
 int Error = FALSE;
 

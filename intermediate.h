@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include "globals.h"
 
 enum Operation
 {
@@ -51,5 +52,7 @@ class TripleList
   public:
     void addTriple(Triple *tripleItem);
 };
+void verifyNode(TreeNode * syntaxTree);
+void generateIntermediate(TreeNode *syntaxTree);
 
 #endif

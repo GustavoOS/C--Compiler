@@ -1,4 +1,5 @@
 #include "intermediate.h"
+#include "analyze.h"
 #include <vector>
 
 void Operand::setAsVariable(std::string name, std::string scope)
@@ -30,4 +31,21 @@ Triple::Triple(Operation _operation, Operand *_firstOPerand, Operand *_secondOPe
 void TripleList::addTriple(Triple *addedTriple)
 {
     list.push_back(addedTriple);
+}
+
+void verifyNode(TreeNode *syntaxTree)
+{
+}
+void doNothing(TreeNode *t)
+{
+}
+
+void generateIntermediate(TreeNode *syntaxTree)
+{
+    traverse(syntaxTree, verifyNode, doNothing);
+    // if (TraceAnalyze)
+    // {
+    //     fprintf(listing, "\nSymbol table:\n\n");
+    //     printSymTab(listing);
+    // }
 }
