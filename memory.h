@@ -7,7 +7,7 @@
 class DataSection
 {
   public:
-    int allocateVariable(char * scope, int size);
+    int allocateVariable(char * scope);
     int allocateFunction();
   private:  
     static std::map<std::string, int> variableMap;
