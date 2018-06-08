@@ -3,6 +3,7 @@
 /* Main program for TINY compiler                   */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
+/* Adapted by Gustavo O. Souza                      */
 /****************************************************/
 #include "globals.h"
 
@@ -23,8 +24,8 @@
 #include "parse.h"
 #if !NO_ANALYZE
 #include "analyze.h"
-#if !NO_CODE
-#include "cgen.h"
+#if !_CODE_GENERATOR_
+#include "codegenerator.h"
 #endif
 #endif
 #endif
@@ -83,6 +84,10 @@ int main( int argc, char * argv[] )
     if (TraceAnalyze) fprintf(listing,"\nChecking Types...\n");
     typeCheck(syntaxTree);
     if (TraceAnalyze) fprintf(listing,"\nType Checking Finished\n");
+  }
+  if(!Error){
+    CodeGenerator cg = CodeGenerator(TraceCode);
+    cg.generate(syntaxTree);
   }
 #if !NO_CODE
   if (! Error)

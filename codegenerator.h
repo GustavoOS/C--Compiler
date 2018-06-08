@@ -5,5 +5,18 @@
 #include <iostream>
 #include "globals.h"
 
+class CodeGenerator
+{
+  public:
+    CodeGenerator(bool displayable);
+    void generate(TreeNode *node);
+
+  private:
+    bool shouldPrintGeneratedCodeOnScreen;
+    std::string generatedCode;
+    void print(std::string code);
+    void generateCodeForStmtNode(TreeNode * node);
+    void generateCodeForExprNode(TreeNode *node);
+};
 
 #endif
