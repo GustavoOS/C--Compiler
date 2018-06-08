@@ -19,6 +19,9 @@ class CodeGenerator
     bool shouldPrintGeneratedCodeOnScreen;
     std::string generatedCode;
     void print(std::string code);
+    void generateCode(TreeNode * node);
+    void createHeader();
+    void createFooter();
     void generateCodeForStmtNode(TreeNode * node);
     void generateCodeForExprNode(TreeNode *node);
 };

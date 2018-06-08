@@ -23,6 +23,13 @@ void CodeGenerator::print(std::string code)
 
 void CodeGenerator::generate(TreeNode *node)
 {
+    createHeader();
+    generateCode(node);
+    createFooter();
+}
+
+void CodeGenerator::generateCode(TreeNode *node)
+{
     std::cout << "generateFunction\n";
     if (node == NULL)
         return;
@@ -39,12 +46,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     switch (node->kind.stmt)
     {
     case CompoundK:
-
-        generate(node->child[0]);
-        generate(node->child[1]);
+        generateCode(node->child[0]);
+        generateCode(node->child[1]);
         break;
+
     case VetDeclK:
         std::cout << node->child[0]->attr.val << "\n";
+        //TODO GENERATE CODE
+        generateCode(node->sibling);
         break;
 
     default:
@@ -55,4 +64,16 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 void CodeGenerator::generateCodeForExprNode(TreeNode *node)
 {
     std::cout << "This is an expression\n";
+}
+
+//Headers and Footers
+
+void CodeGenerator::createHeader()
+{
+    std::cout << "This is a header\n";
+}
+
+void CodeGenerator::createFooter()
+{
+    std::cout << "This is a footer\n";
 }
