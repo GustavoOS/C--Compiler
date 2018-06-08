@@ -12,6 +12,10 @@ class CodeGenerator
     void generate(TreeNode *node);
 
   private:
+    //Registers
+    int HeapArrayRegister, AcumulatorRegister;
+
+    //Private methods
     bool shouldPrintGeneratedCodeOnScreen;
     std::string generatedCode;
     void print(std::string code);

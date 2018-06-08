@@ -6,6 +6,10 @@
 CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
+
+    //Registers
+    HeapArrayRegister = 1;
+    AcumulatorRegister = 2;
 }
 
 void CodeGenerator::print(std::string code)
@@ -38,6 +42,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
         generate(node->child[0]);
         generate(node->child[1]);
+        break;
+    case VetDeclK:
+        std::cout << node->child[0]->attr.val << "\n";
         break;
 
     default:
