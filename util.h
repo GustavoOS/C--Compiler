@@ -31,6 +31,7 @@ char * copyString( char * );
 /* procedure printTree prints a syntax tree to the
  * listing file using indentation to indicate subtrees
  */
-void printTree( TreeNode * );
+void printTree( TreeNode * tree);
+void printNode( TreeNode * tree);
 
 #endif

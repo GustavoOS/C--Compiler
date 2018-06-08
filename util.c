@@ -8,6 +8,7 @@
 
 #include "globals.h"
 #include "util.h"
+#include <iostream>
 
 /* Procedure printToken prints a token
  * and its lexeme to the listing file
@@ -143,68 +144,77 @@ void printTree( TreeNode * tree )
   INDENT;
   while (tree != NULL) {
     printSpaces();
-    if (tree->nodekind==StmtK)
-    { switch (tree->kind.stmt) {
-        case IfK:
-          fprintf(listing,"If\n");
-          break;
-        case WhileK:
-          fprintf(listing,"While\n");
-          break;
-        case AssignK:
-          fprintf(listing,"Assignment\n");
-          break;
-        case ReturnK:
-          fprintf(listing,"Return\n");
-          break;
-        case VarDeclK:
-          fprintf(listing,"Variable declaration: %s\n", tree->attr.name);
-          break;
-        case VetDeclK:
-          fprintf(listing,"Vector declaration: %s[]\n", tree->attr.name);
-          break;
-        case VectorParamK:
-          fprintf(listing, "Vector parameter: %s[]\n", tree->attr.name);
-          break;
-
-        case FunDeclK:
-          fprintf(listing,"Function declaration: %s\n", tree->attr.name);
-          break;
-        case FunActiveK:
-          fprintf(listing,"Activation of: %s\n",tree->attr.name);
-          break;
-        case CompoundK:
-          fprintf(listing,"Compound\n");
-          break;
-        default:
-          fprintf(listing,"Unknown ExpNode kind\n");
-          break;
-      }
-    }
-    else if (tree->nodekind==ExpK)
-    { switch (tree->kind.exp) {
-        case OpK:
-          fprintf(listing,"Op: ");
-          printToken(tree->attr.op,"\0");
-          break;
-        case ConstK:
-          fprintf(listing,"Const: %d\n",tree->attr.val);
-          break;
-        case VetK:
-          fprintf(listing,"Vet id.: %s[]\n",tree->attr.name);
-          break;
-        case IdK:
-          fprintf(listing,"Id: %s\n",tree->attr.name);
-          break;
-        default:
-          fprintf(listing,"Unknown ExpNode kind\n");
-          break;
-      }
-    }
-    else fprintf(listing,"Unknown node kind\n");
+    
+      printNode(tree);
     for (i=0;i<MAXCHILDREN;i++)
          printTree(tree->child[i]);
     tree = tree->sibling;
   }
   UNINDENT;
+}
+
+void printNode(TreeNode * tree) {
+  if (tree->nodekind == StmtK)
+  {
+    switch (tree->kind.stmt)
+    {
+    case IfK:
+      std::cout << "If\n";
+      break;
+    case WhileK:
+     std::cout << "While\n";
+      break;
+    case AssignK:
+     std::cout << "Assignment\n";
+      break;
+    case ReturnK:
+     std::cout << "Return\n";
+      break;
+    case VarDeclK:
+     std::cout << "Variable declaration: %s\n" << tree->attr.name << "\n";
+      break;
+    case VetDeclK:
+     std::cout << "Vector declaration: %s[]\n" << tree->attr.name << "\n";
+      break;
+    case VectorParamK:
+     std::cout << "Vector parameter: %s[]\n" << tree->attr.name << "\n";
+      break;
+
+    case FunDeclK:
+     std::cout << "Function declaration: %s\n" << tree->attr.name << "\n";
+      break;
+    case FunActiveK:
+     std::cout << "Activation of: %s\n" << tree->attr.name << "\n";
+      break;
+    case CompoundK:
+     std::cout << "Compound\n";
+      break;
+    default:
+     std::cout << "Unknown ExpNode kind\n";
+      break;
+    }
+  }
+  else if (tree->nodekind == ExpK)
+  {
+    switch (tree->kind.exp)
+    {
+    case OpK:
+     std::cout << "Op: ";
+      printToken(tree->attr.op, "\0");
+      break;
+    case ConstK:
+     std::cout << "Const: %d\n", tree->attr.val;
+      break;
+    case VetK:
+     std::cout << "Vet id.: %s[]\n" << tree->attr.name << "\n";
+      break;
+    case IdK:
+     std::cout << "Id: %s\n" << tree->attr.name << "\n";
+      break;
+    default:
+     std::cout << "Unknown ExpNode kind\n";
+      break;
+    }
+  }
+  else std::cout << "Unknown node kind\n";
 }
