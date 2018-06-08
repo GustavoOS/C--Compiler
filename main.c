@@ -6,7 +6,7 @@
 /* Adapted by Gustavo O. Souza                      */
 /****************************************************/
 #include "globals.h"
-
+#include <iostream>
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
 #define NO_PARSE FALSE
 /* set NO_ANALYZE to TRUE to get a parser-only compiler */
@@ -42,7 +42,6 @@ int TraceScan = FALSE;
 int TraceParse = TRUE;
 int TraceAnalyze = TRUE;
 int TraceCode = TRUE;
-// int TraceIntermediate = FALSE;
 
 int Error = FALSE;
 
@@ -87,6 +86,7 @@ int main( int argc, char * argv[] )
   }
   if(!Error){
     CodeGenerator cg = CodeGenerator(TraceCode);
+    std::cout << "\nStarting code generation process\n";
     cg.generate(syntaxTree);
   }
 #if !NO_CODE

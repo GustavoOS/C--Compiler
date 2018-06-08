@@ -5,6 +5,7 @@
 CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
+    
 }
 
 void CodeGenerator::print(std::string code)
@@ -18,6 +19,7 @@ void CodeGenerator::print(std::string code)
 
 void CodeGenerator::generate(TreeNode *node)
 {
+    std::cout << "generateFunction\n";
     if (node == NULL)
         return;
     if (node->nodekind == StmtK)
@@ -28,6 +30,16 @@ void CodeGenerator::generate(TreeNode *node)
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode * node){
     std::cout << "This is a statement\n";
+    switch (node->kind.stmt)
+    {
+    case CompoundK:
+        generate(node->child[0]);
+        generate(node->child[1]);
+        break;
+
+    default:
+        break;
+    }
 }
 
 void CodeGenerator::generateCodeForExprNode(TreeNode *node)
