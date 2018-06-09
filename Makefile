@@ -25,7 +25,7 @@ syntaticErrors.o:
 	g++ -g -Wall -std=c++11 -c syntaticErrors.cc -o obj/syntaticErrors.o
 		
 symtab.o:
-	g++ -g -c -Wall -std=c++11 symtab.c -o obj/symtab.o
+	g++ -g -c -Wall -std=c++11 symtab.cc -o obj/symtab.o
 
 view:
 	dot -Tps calc.dot -o graph.ps; evince graph.ps
