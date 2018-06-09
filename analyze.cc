@@ -4,17 +4,18 @@
 /* for the TINY compiler                            */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
+/* Adapted by Gustavo O. Souza                      */
 /****************************************************/
 
 #include "globals.h"
 #include "symtab.h"
 #include "analyze.h"
 #include "memory.h"
+#include "syntaticErrors.h"
+#include <string>
 
 //current scope, standard is global
 char scope[42] = "global";
-/* counter for variable memory locations */
-static int location = 0;
 
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
@@ -22,8 +23,8 @@ static int location = 0;
  * in postorder to tree pointed to by t
  */
 void traverse(TreeNode *t,
-                     void (*preProc)(TreeNode *),
-                     void (*postProc)(TreeNode *))
+              void (*preProc)(TreeNode *),
+              void (*postProc)(TreeNode *))
 {
   if (t != NULL)
   {
@@ -44,85 +45,7 @@ void traverse(TreeNode *t,
  */
 void nullProc(TreeNode *t)
 {
-  if (t == NULL || t != NULL)
-    return;
-}
-
-static void IntInvalidReturnError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" is an int one, yet it is not returning anything at line %d.\n", scope, t->lineno);
-  Error = TRUE;
-}
-
-static void VoidInvalidReturnError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" is a void one, yet it is returning something at line %d.\n", scope, t->lineno);
-  Error = TRUE;
-}
-
-static void funcAlreadyDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" already defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void varAlreadyDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Variable \" %s \" already defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void varNotDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Variable \" %s \" not defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void funcNotDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" not defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void DeclaredTypeNotVectorError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" is not a vector at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void isNotVarError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" is not a variable at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void isNotFuncError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" is not a function at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void VoidVarError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" variable has a forbidden type at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void VoidVecError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" vector has a forbidden type at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
+  return;
 }
 
 static void exitScope(TreeNode *t)
@@ -166,6 +89,7 @@ static void insertNode(TreeNode *t)
         if (isTreeNodeTypeInt(t))
         {
           st_declare(t->attr.name, t->lineno, dataSection->allocateVariable(scope), VARIABLE, scope);
+          t->scope = std::string(scope);
         }
         else
         {
@@ -193,6 +117,7 @@ static void insertNode(TreeNode *t)
                          scope),
                      VECTOR,
                      scope);
+          t->scope = std::string(scope);
         }
         else
         {
@@ -218,6 +143,7 @@ static void insertNode(TreeNode *t)
               dataSection->allocateVariable(scope),
               VECTOR,
               scope);
+          t->scope = std::string(scope);
         }
         else
         {
@@ -275,7 +201,7 @@ static void insertNode(TreeNode *t)
       {
         if (t->child[0] != NULL)
         {
-          VoidInvalidReturnError(t);
+          VoidInvalidReturnError(t, scope);
         }
 
         break;
@@ -284,7 +210,7 @@ static void insertNode(TreeNode *t)
       {
         if (t->child[0] == NULL)
         {
-          IntInvalidReturnError(t);
+          IntInvalidReturnError(t, scope);
         }
 
         break;

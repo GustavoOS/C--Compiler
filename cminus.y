@@ -11,7 +11,6 @@
     
     static int savedConstant;
     static ExpType savedType;
-    static int savedLineNo;  /* ditto */
     static TreeNode * savedTree; /* stores syntax tree for later return */
     static int yylex(void);
     int yyerror( const char * message);

@@ -6,12 +6,15 @@
 /* hash table                                       */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
+/* Adapted by Gustavo O. Souza                      */
 /****************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "symtab.h"
+#include <iostream>
+#include <vector>
 /* SIZE is the size of the hash table */
 #define SIZE 211
 
@@ -47,10 +50,8 @@ BucketList st_declare(char *name, int lineno, int loc, IDType type, char *escopo
   int h = hash(name);
   BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
   l->name = name;
-  l->lines = (LineList)malloc(sizeof(struct LineListRec));
-  l->lines->lineno = lineno;
+  l->lines = std::vector<int>(lineno);
   l->memloc = loc;
-  l->lines->next = NULL;
   strcpy(l->scope, escopo);
   l->next = hashTable[h];
   l->vtype = type;
@@ -65,10 +66,8 @@ BucketList st_declare_function(char *name, int lineno, int loc, IDType type, Exp
   int h = hash(name);
   BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
   l->name = name;
-  l->lines = (LineList)malloc(sizeof(struct LineListRec));
-  l->lines->lineno = lineno;
+  l->lines = std::vector<int>(lineno);
   l->memloc = loc;
-  l->lines->next = NULL;
   strcpy(l->scope, escopo);
   l->next = hashTable[h];
   l->vtype = type;
@@ -84,12 +83,13 @@ BucketList advanceNode(BucketList node)
 
 BucketList st_reference(BucketList l, int lineno)
 {
-  LineList t = l->lines;
-  while (t->next != NULL)
-    t = t->next;
-  t->next = (LineList)malloc(sizeof(struct LineListRec));
-  t->next->lineno = lineno;
-  t->next->next = NULL;
+  l->lines.push_back(lineno);
+  // LineList t = l->lines;
+  // while (t->next != NULL)
+  //   t = t->next;
+  // t->next = (LineList)malloc(sizeof(struct LineListRec));
+  // t->next->lineno = lineno;
+  // t->next->next = NULL;
   return l;
 } /* st_insert */
 
@@ -141,7 +141,6 @@ void printSymTab(FILE *listing)
       BucketList l = hashTable[i];
       while (l != NULL)
       {
-        LineList t = l->lines;
         fprintf(listing, "%-14s ", l->name);
         if (l->dtype == Integer)
         {
@@ -157,10 +156,9 @@ void printSymTab(FILE *listing)
         }
         fprintf(listing, "%-8d  ", l->memloc);
         fprintf(listing, "%-10s  ", l->scope);
-        while (t != NULL)
+        for (int line : l->lines)
         {
-          fprintf(listing, "%4d ", t->lineno);
-          t = t->next;
+          fprintf(listing, "%4d ", line);
         }
         fprintf(listing, "\n");
         l = l->next;
