@@ -89,7 +89,6 @@ static void insertNode(TreeNode *t)
         if (isTreeNodeTypeInt(t))
         {
           st_declare(t->attr.name, t->lineno, dataSection->allocateVariable(scope), VARIABLE, scope);
-          t->scope = std::string(scope);
         }
         else
         {
@@ -117,7 +116,6 @@ static void insertNode(TreeNode *t)
                          scope),
                      VECTOR,
                      scope);
-          t->scope = std::string(scope);
         }
         else
         {
@@ -143,7 +141,6 @@ static void insertNode(TreeNode *t)
               dataSection->allocateVariable(scope),
               VECTOR,
               scope);
-          t->scope = std::string(scope);
         }
         else
         {
