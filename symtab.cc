@@ -51,7 +51,8 @@ BucketList st_declare(char *name, int lineno, int loc, IDType type, char *escopo
   int h = hash(name);
   BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
   l->name = name;
-  l->lines = std::vector<int>(lineno);
+  l->lines = std::vector<int>();
+  l->lines.push_back(lineno);
   l->memloc = loc;
   strcpy(l->scope, escopo);
   l->next = hashTable[h];
@@ -67,7 +68,8 @@ BucketList st_declare_function(char *name, int lineno, int loc, IDType type, Exp
   int h = hash(name);
   BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
   l->name = name;
-  l->lines = std::vector<int>(lineno);
+  l->lines = std::vector<int>();
+  l->lines.push_back(lineno);
   l->memloc = loc;
   strcpy(l->scope, escopo);
   l->next = hashTable[h];
