@@ -59,10 +59,12 @@ BucketList st_reference(BucketList l, int lineno);
  */
 BucketList st_find(char *name, char *scope);
 
-/* Procedure printSymTab prints a formatted 
+BucketList st_find_by_lineno(char *name, int lineno); //Used by Code generator
+
+    /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 
  * to the listing file
  */
-void printSymTab(FILE *listing);
+    void printSymTab(FILE *listing);
 
 #endif
