@@ -1,6 +1,7 @@
 #include "codegenerator.h"
 #include "globals.h"
 #include "util.h"
+#include "symtab.h"
 #include <iostream>
 
 CodeGenerator::CodeGenerator(bool displayable)
@@ -51,7 +52,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case VetDeclK:
-        std::cout << node->child[0]->attr.val << "\n";
+        std::cout << "Vector size: "<< node->child[0]->attr.val << "\n";
+        std::cout << "Location: " << st_find_by_lineno(node->attr.name, node->lineno) << "\n";
         //TODO GENERATE CODE
         generateCode(node->sibling);
         break;
