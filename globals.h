@@ -117,7 +117,7 @@ typedef struct treeNode
     char *name;   //Name of a function or variable (ID) ( int peanutbutter )
   } attr;
   ExpType type; /* for type checking of expressions */
-  std::string scope;
+  std::string scope; //Used by code generator
 } TreeNode;
 
 /**************************************************/

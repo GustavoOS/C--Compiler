@@ -58,8 +58,7 @@ BucketList st_reference(BucketList l, int lineno);
    to the bucketlist of the variable or NULL if not found
  */
 BucketList st_find(char *name, char *scope);
-
-BucketList st_find_by_lineno(char *name, int lineno); //Used by Code generator
+BucketList st_find_at_scope(char *name, char *escopo); //Used by code generator
 
     /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 

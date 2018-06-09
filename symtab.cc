@@ -16,6 +16,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <string>
 /* SIZE is the size of the hash table */
 #define SIZE 211
 
@@ -124,28 +125,6 @@ BucketList st_find(char *name, char *escopo)
   if (result == NULL)
     result = st_find_at_scope(name, (char *)"global");
   return result;
-}
-
-int cantMatchNameAndLineNoInRange(BucketList node, char *name, int lineno)
-{
-  return (node != NULL) && (                                      //in range
-                               (strcmp(name, node->name) != 0) || //names don't match
-                               (
-                                   std::binary_search(
-                                       node->lines.begin(),
-                                       node->lines.end(),
-                                       lineno))); //Scopes don't match
-}
-
-BucketList st_find_by_lineno(char *name, int lineno)
-{
-  int hashIndex = hash(name);
-  BucketList EntryNode = hashTable[hashIndex];
-  while (cantMatchNameAndLineNoInRange(EntryNode, name, lineno))
-  {
-    EntryNode = advanceNode(EntryNode);
-  }
-  return EntryNode;
 }
 
 /* Procedure printSymTab prints a formatted 
