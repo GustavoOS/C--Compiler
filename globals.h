@@ -5,6 +5,7 @@
 /* must come before other include files             */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
+/* Adapted by Gustavo O. Souza                      */
 /****************************************************/
 
 #ifndef _GLOBALS_H_
@@ -14,6 +15,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <string>
 
 /* Yacc/Bison generates internally its own values
  * for the tokens. Other files can access these values
@@ -115,6 +117,7 @@ typedef struct treeNode
     char *name;   //Name of a function or variable (ID) ( int peanutbutter )
   } attr;
   ExpType type; /* for type checking of expressions */
+  std::string scope;
 } TreeNode;
 
 /**************************************************/
