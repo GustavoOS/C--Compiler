@@ -53,9 +53,9 @@
 
 typedef int TokenType;
 
-extern "C" FILE* source; /* source code text file */
-extern "C" FILE* listing; /* listing output text file */
-extern "C" FILE* code; /* code text file for TM simulator */
+extern "C" FILE *source;  /* source code text file */
+extern "C" FILE *listing; /* listing output text file */
+extern "C" FILE *code;    /* code text file for TM simulator */
 
 extern "C" int lineno; /* source line number for listing */
 
@@ -63,29 +63,59 @@ extern "C" int lineno; /* source line number for listing */
 /***********   Syntax tree for parsing ************/
 /**************************************************/
 
-typedef enum {StmtK,ExpK} NodeKind; //Bolinha ou quadrado
-typedef enum {IfK,WhileK,AssignK,ReturnK,VarDeclK,VetDeclK,
-              FunDeclK,FunActiveK, CompoundK, VectorParamK} StmtKind;
-typedef enum {OpK, ConstK,IdK,VetK} ExpKind;
+typedef enum
+{
+  StmtK,
+  ExpK
+} NodeKind; //Bolinha ou quadrado
+typedef enum
+{
+  IfK,
+  WhileK,
+  AssignK,
+  ReturnK,
+  VarDeclK,
+  VetDeclK,
+  FunDeclK,
+  FunActiveK,
+  CompoundK,
+  VectorParamK
+} StmtKind;
+typedef enum
+{
+  OpK,
+  ConstK,
+  IdK,
+  VetK
+} ExpKind;
 
 /* ExpType is used for type checking */
-typedef enum {Void = 0,Integer = 1, boolean = 2} ExpType;
+typedef enum
+{
+  Void,
+  Integer,
+  boolean
+} ExpType;
 
 #define MAXCHILDREN 3
 
 typedef struct treeNode
-   { struct treeNode * child[MAXCHILDREN];
-     struct treeNode * sibling;
-     int lineno;
-     NodeKind nodekind;
-     union { StmtKind stmt; ExpKind exp;} kind;
-     union { TokenType op; //Token of logic or arithmetic operator
-             int val; // Value of a constant
-             char * name; //Name of a function or variable (ID) ( int peanutbutter )
-          } attr;
-     ExpType type; /* for type checking of expressions */
-   } TreeNode;
-
+{
+  struct treeNode *child[MAXCHILDREN];
+  struct treeNode *sibling;
+  int lineno;
+  NodeKind nodekind;
+  union {
+    StmtKind stmt;
+    ExpKind exp;
+  } kind;
+  union {
+    TokenType op; //Token of logic or arithmetic operator
+    int val;      // Value of a constant
+    char *name;   //Name of a function or variable (ID) ( int peanutbutter )
+  } attr;
+  ExpType type; /* for type checking of expressions */
+} TreeNode;
 
 /**************************************************/
 /***********   Flags for tracing       ************/
