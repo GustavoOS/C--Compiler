@@ -40,23 +40,27 @@ void CodeGenerator::generateCode(TreeNode *node)
     else
         generateCodeForExprNode(node);
 }
-
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 {
     std::cout << "This is a statement\n";
     switch (node->kind.stmt)
     {
+
     case CompoundK:
         generateCode(node->child[0]);
         generateCode(node->child[1]);
         break;
 
     case VetDeclK:
-        std::cout << "Vector size: "<< node->attr.val << "\n";
+        std::cout << "Vector size: " << node->attr.val << "\n";
         // std::cout << "Location: " << st_find_at_scope(node->attr.name, (char *) node->scope.c_str())->memloc << "\n";
         //TODO GENERATE CODE
         generateCode(node->sibling);
-        break; 
+        break;
+    case VarDeclK:
+        std::cout << "Variable" << node->attr.name << "\n";
+        generateCode(node->sibling);
+        break;
 
     default:
         break;
