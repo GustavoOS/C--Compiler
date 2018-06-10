@@ -227,12 +227,13 @@ void printNode(TreeNode *tree)
     case VarDeclK:
       std::cout << "Variable declaration: "
                 << tree->attr.name
-                << "Size: " << tree->attr.val
                 << "\n";
       break;
     case VetDeclK:
       std::cout << "Vector declaration: "
-                << tree->attr.name << "\n";
+                << tree->attr.name
+                << "Size: " << tree->attr.val
+                << "\n";
       break;
     case VectorParamK:
       std::cout << "Vector parameter: "
