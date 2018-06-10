@@ -112,7 +112,7 @@ class TreeNode
     StmtKind stmt;
     ExpKind exp;
   } kind;
-  union {
+  struct {
     TokenType op; //Token of logic or arithmetic operator
     int val;      // Value of a constant
     char *name;   //Name of a function or variable (ID) ( int peanutbutter )

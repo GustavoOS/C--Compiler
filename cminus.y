@@ -91,8 +91,11 @@ var-declaracao: tipo-especificador ID
                     RBRACE SEMI
                     {
                         $$ = $3;
-                        $$->child[0] = newExpNode(ConstK);
-                        $$->child[0]->attr.val = savedConstant; 
+                        $$->attr.val = savedConstant;
+
+                        //Change to something like this to allow runtime allocation
+                        // $$->child[0] = newExpNode(ConstK);
+                        // $$->child[0]->attr.val = savedConstant; 
                     }
                 ;
 
