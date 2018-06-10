@@ -63,6 +63,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     default:
+        std::cout << "Code not generated for this node";
         break;
     }
 }
