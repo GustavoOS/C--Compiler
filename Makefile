@@ -6,7 +6,7 @@ scanner.o: parser.o
 	g++  -g -std=c++11 -c scanner.c -o obj/lex.yy.o
 
 util.o:
-	g++ -g -Wall -std=c++11 -c util.c -o obj/util.o
+	g++ -g -Wall -std=c++11 -c util.cc -o obj/util.o
 
 parser.o:
 	bison -d cminus.y

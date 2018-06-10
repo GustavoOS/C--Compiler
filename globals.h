@@ -101,10 +101,11 @@ typedef enum
 
 #define MAXCHILDREN 3
 
-typedef struct treeNode
+class TreeNode
 {
-  struct treeNode *child[MAXCHILDREN];
-  struct treeNode *sibling;
+  public:
+  TreeNode *child[MAXCHILDREN];
+  TreeNode *sibling;
   int lineno;
   NodeKind nodekind;
   union {
@@ -118,7 +119,7 @@ typedef struct treeNode
   } attr;
   ExpType type; /* for type checking of expressions */
   std::string scope; //Used by code generator
-} TreeNode;
+};
 
 /**************************************************/
 /***********   Flags for tracing       ************/
@@ -128,30 +129,30 @@ typedef struct treeNode
  * be echoed to the listing file with line numbers
  * during parsing
  */
-extern "C" int EchoSource;
+extern int EchoSource;
 
 /* TraceScan = TRUE causes token information to be
  * printed to the listing file as each token is
  * recognized by the scanner
  */
-extern "C" int TraceScan;
+extern int TraceScan;
 
 /* TraceParse = TRUE causes the syntax tree to be
  * printed to the listing file in linearized form
  * (using indents for children)
  */
-extern "C" int TraceParse;
+extern int TraceParse;
 
 /* TraceAnalyze = TRUE causes symbol table inserts
  * and lookups to be reported to the listing file
  */
-extern "C" int TraceAnalyze;
+extern int TraceAnalyze;
 
 /* TraceCode = TRUE causes comments to be written
  * to the TM code file as code is generated
  */
-extern "C" int TraceCode;
+extern int TraceCode;
 
 /* Error = TRUE prevents further passes if an error occurs */
-extern "C" int Error;
+extern int Error;
 #endif
