@@ -52,7 +52,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case VetDeclK:
-        std::cout << "Vector size: "<< node->child[0]->attr.val << "\n";
+        std::cout << "Vector size: "<< node->attr.val << "\n";
         // std::cout << "Location: " << st_find_at_scope(node->attr.name, (char *) node->scope.c_str())->memloc << "\n";
         //TODO GENERATE CODE
         generateCode(node->sibling);
