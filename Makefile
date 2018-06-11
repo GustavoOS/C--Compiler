@@ -1,4 +1,4 @@
-cminus: scanner.o util.o memory.o analyze.o symtab.o codegenerator.o syntaticErrors.o
+cminus: scanner.o util.o memory.o analyze.o symtab.o codegenerator.o syntaticErrors.o instructions.o
 	g++ -Wall -g -std=c++11 -o bin/cminus obj/*  main.c -ly -lfl
 
 scanner.o: parser.o
@@ -14,6 +14,9 @@ parser.o:
 
 codegenerator.o:
 	g++ -g -Wall -std=c++11 -c codegenerator.cc -o obj/codegenerator.o
+
+instructions.o:
+	g++ -g -Wall -std=c++11 -c instructions.cc -o obj/instructions.o
 
 memory.o:
 	g++ -g -Wall -std=c++11 -c memory.cc -o obj/memory.o

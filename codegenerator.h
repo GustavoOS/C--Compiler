@@ -21,7 +21,7 @@ public:
   int id;
   std::string name, label;
   int regm, regn, regd, condition, immediate, offset;
-  std::string to_string();
+  virtual std::string to_string();
 };
 
 class CodeGenerator
@@ -36,12 +36,40 @@ private:
   bool shouldPrintGeneratedCodeOnScreen;
 
   //Private methods
-  void print(std::string code);
+  void print(Instruction *instruction);
   void generateCode(TreeNode *node);
   void createHeader();
   void createFooter();
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
 };
+
+class TypeAInstruction : public Instruction
+{
+public:
+  TypeAInstruction(
+      int identity,
+      std::string instructionName,
+      int RegisterM,
+      int RegisterN,
+      int RegisterD);
+  std::string to_string();
+};
+
+class TypeBInstruction : public Instruction
+{
+  TypeBInstruction(
+      int identity,
+      std::string instructionName,
+      int RegisterM,
+      int RegisterN,
+      int RegisterD);
+  std::string to_string();
+};
+
+// class TypeCInstruction : public Instruction
+// {
+//   std::string to_string();
+// };
 
 #endif

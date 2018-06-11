@@ -10,13 +10,15 @@ CodeGenerator::CodeGenerator(bool displayable)
     shouldPrintGeneratedCodeOnScreen = displayable;
 }
 
-void CodeGenerator::print(std::string code)
+void CodeGenerator::print(Instruction *instruction)
 {
+    std::string inst = instruction->to_string();
     if (shouldPrintGeneratedCodeOnScreen)
     {
-        std::cout << code << "\n";
+        std::cout << inst;
     }
-    generatedCode += code;
+    generatedCode += inst;
+    code.push_back(*instruction);
 }
 
 void CodeGenerator::generate(TreeNode *node)
@@ -31,7 +33,7 @@ void CodeGenerator::generateCode(TreeNode *node)
     std::cout << "generateFunction\n";
     if (node == NULL)
         return;
-    printNode(node);
+    printNode(node); //Check visited node
     if (node->nodekind == StmtK)
         generateCodeForStmtNode(node);
     else
@@ -56,8 +58,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case VetDeclK:
         // std::cout << "Vector size: " << node->attr.val << "\n";
-        std::cout << "Location: " << getRecordFromSymbleTable(node)->memloc << "\n";
+        // std::cout << "Location: " << getRecordFromSymbleTable(node)->memloc << "\n";
         //TODO GENERATE CODE
+        print(new TypeAInstruction(
+            6,
+            "Add",
+            node->attr.val,
+            HeapArrayRegister,
+            HeapArrayRegister));
         generateCode(node->sibling);
         break;
     case VarDeclK:
@@ -93,80 +101,3 @@ std::string Instruction::to_string()
 {
     return "Generic Instruction";
 }
-
-class TypeAInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(immediate) + " " +
-               std::to_string(regm) + " " + std::to_string(regd) + "\n";
-    }
-};
-
-class TypeBInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(regm) + " " +
-               std::to_string(regn) + " " + std::to_string(regd) + "\n";
-    }
-};
-
-class TypeCInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(immediate) + " " +
-               std::to_string(regm) + " " + std::to_string(regd) + "\n";
-    }
-};
-
-class TypeDInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(regd) + " " +
-               std::to_string(immediate) + "\n";
-    }
-};
-
-class TypeEInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(regm) + " " +
-               std::to_string(regd) + "\n";
-    }
-};
-
-class TypeFInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(condition) + " " +
-               std::to_string(regd) + "\n";
-    }
-};
-
-class TypeGInstruction : public Instruction
-{
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(condition) + " " +
-               std::to_string(offset) + " :" + label + "\n";
-    }
-};
-
-class LabelDefinition: public Instruction
-{
-    std::string to_string(){
-        return label + ":\n";
-    }
-};
