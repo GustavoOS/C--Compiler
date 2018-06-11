@@ -60,10 +60,10 @@ BucketList st_reference(BucketList l, int lineno);
 BucketList st_find(char *name, char *scope);
 BucketList st_find_at_scope(char *name, char *escopo); //Used by code generator
 
-    /* Procedure printSymTab prints a formatted 
+/* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 
  * to the listing file
  */
-    void printSymTab(FILE *listing);
+void printSymTab(FILE *listing);
 
 #endif

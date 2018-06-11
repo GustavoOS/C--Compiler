@@ -7,10 +7,6 @@
 CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
-
-    //Registers
-    HeapArrayRegister = 1;
-    AcumulatorRegister = 2;
 }
 
 void CodeGenerator::print(std::string code)
@@ -40,6 +36,12 @@ void CodeGenerator::generateCode(TreeNode *node)
     else
         generateCodeForExprNode(node);
 }
+
+BucketList getRecordFromSymbleTable(TreeNode *node)
+{
+    return st_find_at_scope(node->attr.name, (char *)node->scope.c_str());
+}
+
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 {
     std::cout << "This is a statement\n";
@@ -53,7 +55,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case VetDeclK:
         // std::cout << "Vector size: " << node->attr.val << "\n";
-        std::cout << "Location: " << st_find_at_scope(node->attr.name, (char *)node->scope.c_str())->memloc << "\n";
+        std::cout << "Location: " << getRecordFromSymbleTable(node)->memloc << "\n";
         //TODO GENERATE CODE
         generateCode(node->sibling);
         break;

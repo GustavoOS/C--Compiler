@@ -5,6 +5,15 @@
 #include <iostream>
 #include "globals.h"
 
+enum Registers
+{
+    HeapArrayRegister = 1,
+    AcumulatorRegister,
+    TemporaryRegister,
+    FramePointer,
+    GlobalPointer
+};
+
 class CodeGenerator
 {
   public:
@@ -12,18 +21,17 @@ class CodeGenerator
     void generate(TreeNode *node);
 
   private:
-    //Registers
-    int HeapArrayRegister, AcumulatorRegister;
+    std::string generatedCode;
+    bool shouldPrintGeneratedCodeOnScreen;
 
     //Private methods
-    bool shouldPrintGeneratedCodeOnScreen;
-    std::string generatedCode;
     void print(std::string code);
-    void generateCode(TreeNode * node);
+    void generateCode(TreeNode *node);
     void createHeader();
     void createFooter();
-    void generateCodeForStmtNode(TreeNode * node);
+    void generateCodeForStmtNode(TreeNode *node);
     void generateCodeForExprNode(TreeNode *node);
+
 };
 
 #endif
