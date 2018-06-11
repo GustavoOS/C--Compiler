@@ -22,6 +22,7 @@ public:
   std::string name, label;
   int regm, regn, regd, condition, immediate, offset;
   virtual std::string to_string();
+  bool isLabel = false;
 };
 
 class CodeGenerator
@@ -58,6 +59,7 @@ public:
 
 class TypeBInstruction : public Instruction
 {
+public:
   TypeBInstruction(
       int identity,
       std::string instructionName,
@@ -67,9 +69,64 @@ class TypeBInstruction : public Instruction
   std::string to_string();
 };
 
-// class TypeCInstruction : public Instruction
-// {
-//   std::string to_string();
-// };
+class TypeCInstruction : public Instruction
+{
+public:
+  std::string to_string();
+  TypeCInstruction(
+      int identity,
+      std::string instructionName,
+      int instructionImmediate,
+      int RegisterM,
+      int RegisterD);
+};
+
+class TypeDInstruction : public Instruction
+{
+public:
+  std::string to_string();
+  TypeDInstruction(
+      int identity,
+      std::string instructionName,
+      int RegisterD,
+      int instructionImmediate);
+};
+
+class TypeEInstruction : public Instruction
+{
+public:
+  TypeEInstruction(
+      int identity,
+      std::string instructionName,
+      int RegisterM,
+      int RegisterD);
+
+  std::string to_string();
+};
+
+class TypeFInstruction : public Instruction
+{
+public:
+  TypeFInstruction(
+      int identity,
+      std::string instructionName,
+      int conditionCode,
+      int RegisterD);
+
+  std::string to_string();
+};
+
+class TypeGInstruction : public Instruction
+{
+public:
+  TypeGInstruction(
+      int identity,
+      std::string instructionName,
+      int conditionCode,
+      int offsetSize,
+      std::string labelTo);
+
+  std::string to_string();
+};
 
 #endif

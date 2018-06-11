@@ -37,60 +37,101 @@ std::string TypeBInstruction::to_string()
            std::to_string(regd) + "\n";
 }
 
-class TypeCInstruction : public Instruction
+TypeCInstruction::TypeCInstruction(
+    int identity,
+    std::string instructionName,
+    int instructionImmediate,
+    int RegisterM,
+    int RegisterD)
 {
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(immediate) + " " +
-               std::to_string(regm) + " " + std::to_string(regd) + "\n";
-    }
-};
+    id = identity;
+    name = instructionName;
+    immediate = instructionImmediate;
+    regm = RegisterM;
+    regd = RegisterD;
+}
 
-class TypeDInstruction : public Instruction
+std::string TypeCInstruction::to_string()
 {
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(regd) + " " +
-               std::to_string(immediate) + "\n";
-    }
-};
+    return "(" + std::to_string(id) + ") " +
+           name + " " + std::to_string(immediate) + " " +
+           std::to_string(regm) + " " + std::to_string(regd) + "\n";
+}
 
-class TypeEInstruction : public Instruction
+std::string TypeDInstruction::to_string()
 {
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(regm) + " " +
-               std::to_string(regd) + "\n";
-    }
-};
+    return "(" + std::to_string(id) + ") " +
+           name + " " + std::to_string(regd) + " " +
+           std::to_string(immediate) + "\n";
+}
 
-class TypeFInstruction : public Instruction
+TypeDInstruction::TypeDInstruction(
+    int identity,
+    std::string instructionName,
+    int RegisterD,
+    int instructionImmediate)
 {
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(condition) + " " +
-               std::to_string(regd) + "\n";
-    }
-};
+    id = identity;
+    name = instructionName;
+    immediate = instructionImmediate;
+    regd = RegisterD;
+}
 
-class TypeGInstruction : public Instruction
+TypeEInstruction::TypeEInstruction(
+    int identity,
+    std::string instructionName,
+    int RegisterM,
+    int RegisterD)
 {
-    std::string to_string()
-    {
-        return "(" + std::to_string(id) + ") " +
-               name + " " + std::to_string(condition) + " " +
-               std::to_string(offset) + " :" + label + "\n";
-    }
-};
+    id = identity;
+    name = instructionName;
+    regm = RegisterM;
+    regd = RegisterD;
+}
 
-class LabelDefinition : public Instruction
+std::string TypeEInstruction::to_string()
 {
-    std::string to_string()
-    {
-        return label + ":\n";
-    }
-};
+    return "(" + std::to_string(id) + ") " +
+           name + " " + std::to_string(regm) + " " +
+           std::to_string(regd) + "\n";
+}
+
+std::string TypeFInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " + std::to_string(condition) + " " +
+           std::to_string(regd) + "\n";
+}
+
+TypeFInstruction::TypeFInstruction(
+    int identity,
+    std::string instructionName,
+    int conditionCode,
+    int RegisterD)
+{
+    id = identity;
+    name = instructionName;
+    condition = conditionCode;
+    regd = RegisterD;
+}
+
+TypeGInstruction::TypeGInstruction(
+    int identity,
+    std::string instructionName,
+    int conditionCode,
+    int offsetSize,
+    std::string labelTo)
+{
+    id = identity;
+    name = instructionName;
+    condition = conditionCode;
+    offset = offsetSize;
+    label = labelTo;
+}
+
+std::string TypeGInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " + std::to_string(condition) + " " +
+           std::to_string(offset) + " :" + label + "\n";
+}
