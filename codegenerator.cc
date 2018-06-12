@@ -81,7 +81,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         generateCode(node->sibling);
         break;
     case VarDeclK:
-        std::cout << "Variable" << node->attr.name << "\n";
+        std::cout << "Variable " << node->attr.name << "\n";
         generateCode(node->sibling);
         break;
 
