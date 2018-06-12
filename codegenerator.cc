@@ -62,7 +62,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         //TODO GENERATE CODE
         print(new TypeCInstruction(
             10,
-            "Add",
+            "ADD",
             0,
             HeapArrayRegister,
             AcumulatorRegister));
@@ -74,7 +74,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             AcumulatorRegister));
         print(new TypeAInstruction(
             6,
-            "Add",
+            "ADD",
             node->attr.val,
             HeapArrayRegister,
             HeapArrayRegister));
