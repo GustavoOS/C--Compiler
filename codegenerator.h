@@ -23,6 +23,8 @@ public:
   int regm, regn, regd, condition, immediate, offset;
   virtual std::string to_string();
   bool isLabel = false;
+  void setlabel(std::string newLabel);
+  std::string to_string_with_label();
 };
 
 class CodeGenerator
@@ -51,8 +53,8 @@ public:
   TypeAInstruction(
       int identity,
       std::string instructionName,
+      int instructionImmediate,
       int RegisterM,
-      int RegisterN,
       int RegisterD);
   std::string to_string();
 };

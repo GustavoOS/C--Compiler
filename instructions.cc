@@ -1,7 +1,23 @@
 #include "codegenerator.h"
 
-TypeAInstruction::TypeAInstruction(int identity, std::string instructionName,
-                                   int instructionImmediate, int RegisterM, int RegisterD)
+void Instruction::setlabel(std::string newLabel)
+{
+    isLabel = true;
+    label = newLabel;
+}
+
+std::string Instruction::to_string_with_label()
+{
+    return isLabel ? label + ": " + this->to_string()
+                   : this->to_string();
+}
+
+TypeAInstruction::TypeAInstruction(
+    int identity,
+    std::string instructionName,
+    int instructionImmediate,
+    int RegisterM,
+    int RegisterD)
 {
     id = identity;
     name = instructionName;

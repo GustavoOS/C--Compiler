@@ -12,7 +12,7 @@ CodeGenerator::CodeGenerator(bool displayable)
 
 void CodeGenerator::print(Instruction *instruction)
 {
-    std::string inst = instruction->to_string();
+    std::string inst = instruction->to_string_with_label();
     if (shouldPrintGeneratedCodeOnScreen)
     {
         std::cout << inst;
@@ -60,6 +60,18 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         // std::cout << "Vector size: " << node->attr.val << "\n";
         // std::cout << "Location: " << getRecordFromSymbleTable(node)->memloc << "\n";
         //TODO GENERATE CODE
+        print(new TypeCInstruction(
+            10,
+            "Add",
+            0,
+            HeapArrayRegister,
+            AcumulatorRegister));
+        print(new TypeAInstruction(
+            48, 
+            "STR", 
+            getRecordFromSymbleTable(node)->memloc + 1,
+            AcumulatorRegister,
+            AcumulatorRegister));
         print(new TypeAInstruction(
             6,
             "Add",
