@@ -61,22 +61,21 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         // std::cout << "Location: " << getRecordFromSymbleTable(node)->memloc << "\n";
         //TODO GENERATE CODE
         print(new TypeCInstruction(
-            10,
+            6,
             "ADD",
             0,
             HeapArrayRegister,
             AcumulatorRegister));
         print(new TypeAInstruction(
-            48, 
-            "STR", 
+            48,
+            "STR",
             getRecordFromSymbleTable(node)->memloc + 1,
             AcumulatorRegister,
             AcumulatorRegister));
-        print(new TypeAInstruction(
-            6,
+        print(new TypeDInstruction(
+            10,
             "ADD",
             node->attr.val * 4,
-            HeapArrayRegister,
             HeapArrayRegister));
         generateCode(node->sibling);
         break;
@@ -94,6 +93,67 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 void CodeGenerator::generateCodeForExprNode(TreeNode *node)
 {
     std::cout << "This is an expression\n";
+
+    switch (node->kind.stmt)
+    {
+    case OpK:
+    {
+        generateCode(node->child[0]);
+        print(
+            new TypeEInstruction(
+                67,
+                "PUSH",
+                0,
+                AcumulatorRegister));
+        generateCode(node->child[1]);
+        print(
+            new TypeEInstruction(
+                68,
+                "POP",
+                0,
+                TemporaryRegister));
+        generateOperationCode(node);
+    }
+    break;
+
+    default:
+        break;
+    }
+}
+void CodeGenerator::generateOperationCode(TreeNode *node)
+{
+
+    switch (node->attr.op)
+    {
+    case PLUS:
+        print(
+            new TypeBInstruction(
+                4,
+                "ADD",
+                AcumulatorRegister,
+                TemporaryRegister,
+                AcumulatorRegister));
+        break;
+    case MINUS:
+        print(
+            new TypeBInstruction(
+                5,
+                "SUB",
+                AcumulatorRegister,
+                TemporaryRegister,
+                AcumulatorRegister));
+        break;
+
+    default:
+        print(
+            new TypeEInstruction(
+                22,
+                "CMP",
+                TemporaryRegister,
+                AcumulatorRegister));
+
+        break;
+    }
 }
 
 //Headers and Footers

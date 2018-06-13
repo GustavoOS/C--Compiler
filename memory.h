@@ -9,9 +9,10 @@ class DataSection
   public:
     int allocateVariable(char * scope);
     int allocateFunction();
-  private:  
+    int getSize(std::string);
+    private:
     static std::map<std::string, int> variableMap;
-    static int functionMap;
+    // static int functionMap;
 };
 
 #endif

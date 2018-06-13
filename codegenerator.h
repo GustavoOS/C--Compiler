@@ -45,6 +45,7 @@ private:
   void createFooter();
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
+  void generateOperationCode(TreeNode *);
 };
 
 class TypeAInstruction : public Instruction
