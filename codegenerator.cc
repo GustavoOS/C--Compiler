@@ -4,6 +4,28 @@
 #include "symtab.h"
 #include <iostream>
 
+int conditionTranslator(int operation)
+{
+
+    switch (operation)
+    {
+    case LESSER:
+        return 11;
+    case LESSEQ:
+        return 9;
+    case GREATER:
+        return 12;
+    case GREATEQ:
+        return 10;
+    case EQCOMP:
+        return 0;
+    case NOTEQ:
+        return 1;
+    default:
+        return 14;
+    }
+}
+
 //Code Generator Class
 CodeGenerator::CodeGenerator(bool displayable)
 {
@@ -140,6 +162,43 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 5,
                 "SUB",
                 AcumulatorRegister,
+                TemporaryRegister,
+                AcumulatorRegister));
+        break;
+    case TIMES:
+        print(
+            new TypeEInstruction(
+                25,
+                "MUL",
+                TemporaryRegister,
+                AcumulatorRegister));
+        break;
+
+    case SLASH:
+        print(new TypeCInstruction(
+            6,
+            "ADD",
+            0,
+            AcumulatorRegister,
+            SwapRegister));
+        print(
+            new TypeCInstruction(
+                6,
+                "ADD",
+                0,
+                TemporaryRegister,
+                AcumulatorRegister));
+        print(
+            new TypeCInstruction(
+                6,
+                "ADD",
+                0,
+                SwapRegister,
+                TemporaryRegister));
+        print(
+            new TypeEInstruction(
+                34,
+                "DIV",
                 TemporaryRegister,
                 AcumulatorRegister));
         break;

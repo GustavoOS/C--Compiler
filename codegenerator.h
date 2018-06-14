@@ -12,8 +12,11 @@ enum Registers
   AcumulatorRegister,
   TemporaryRegister,
   FramePointer,
-  GlobalPointer
+  GlobalPointer,
+  SwapRegister
 };
+
+int conditionTranslator(int operation);
 
 class Instruction
 {
@@ -131,5 +134,6 @@ public:
 
   std::string to_string();
 };
+
 
 #endif
