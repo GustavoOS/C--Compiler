@@ -14,6 +14,12 @@
     static TreeNode * savedTree; /* stores syntax tree for later return */
     static int yylex(void);
     int yyerror( const char * message);
+    int ifcount = 0;
+
+    int newif(){
+        ifcount++;
+        return ifcount-1;
+    }
 
     YYSTYPE findLastSibling(YYSTYPE node){
         while ( node != NULL && node->sibling != NULL) node = node->sibling;
@@ -232,12 +238,14 @@ expressao-decl: expressao SEMI
 selecao-decl:   IF LPAREN expressao RPAREN statement %prec "then"
                     {       
                         $$ = newStmtNode(IfK);
+                        $$->attr.val = newif();
                         $$->child[0] = $3;
                         $$->child[1] = $5;
                     }
                 | IF LPAREN expressao RPAREN statement ELSE statement
                     {       
                         $$ = newStmtNode(IfK);
+                        $$->attr.val = newif();
                         $$->child[0] = $3;
                         $$->child[1] = $5;
                         $$->child[2] = $7;

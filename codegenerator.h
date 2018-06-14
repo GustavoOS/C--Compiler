@@ -16,7 +16,7 @@ enum Registers
   SwapRegister
 };
 
-int conditionTranslator(int operation);
+int translateCondition(int operation);
 
 class Instruction
 {
@@ -29,6 +29,9 @@ public:
   void setlabel(std::string newLabel);
   std::string to_string_with_label();
 };
+
+Instruction *nopWithLabel(std::string label);
+Instruction *pushAcumulator();
 
 class CodeGenerator
 {
@@ -50,7 +53,16 @@ private:
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
 };
+class BranchLabel : public Instruction
+{
+  std::string tolabel;
 
+public:
+  BranchLabel(
+      std::string gotolabel,
+      int conditionCode);
+  std::string to_string();
+};
 class TypeAInstruction : public Instruction
 {
 public:
@@ -134,6 +146,5 @@ public:
 
   std::string to_string();
 };
-
 
 #endif

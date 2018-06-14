@@ -12,6 +12,19 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
+
+  
+    BranchLabel::BranchLabel(
+        std::string gotolabel,
+        int conditionCode){
+            tolabel = gotolabel;
+            condition = conditionCode;
+        }
+    std::string BranchLabel::to_string(){
+        return "B " + std::to_string(condition) + " " + tolabel + "\n";
+    }
+
+
 TypeAInstruction::TypeAInstruction(
     int identity,
     std::string instructionName,

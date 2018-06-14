@@ -4,7 +4,7 @@
 #include "symtab.h"
 #include <iostream>
 
-int conditionTranslator(int operation)
+int translateCondition(int operation)
 {
 
     switch (operation)
@@ -105,6 +105,27 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::cout << "Variable " << node->attr.name << "\n";
         generateCode(node->sibling);
         break;
+    case IfK:
+        generateCode(node->child[0]);
+        print(
+            new BranchLabel(
+                "if_true_" + std::to_string(node->attr.val),
+                node->child[0]->attr.op));
+
+        if (node->child[2] != NULL)
+            generateCode(node->child[2]);
+
+        print(
+            new BranchLabel(
+                "if_end_" + std::to_string(node->attr.val),
+                -1 //Always
+                ));
+            print(nopWithLabel("if_true_"+ std::to_string(node->attr.val)));
+            generateCode(node->child[1]);
+
+        print(nopWithLabel("if_end_" + std::to_string(node->attr.val)));
+
+        break;
 
     default:
         std::cout << "Code not generated for this node\n";
@@ -122,11 +143,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     {
         generateCode(node->child[0]);
         print(
-            new TypeEInstruction(
-                67,
-                "PUSH",
-                0,
-                AcumulatorRegister));
+            pushAcumulator());
         generateCode(node->child[1]);
         print(
             new TypeEInstruction(
@@ -231,4 +248,20 @@ void CodeGenerator::createFooter()
 std::string Instruction::to_string()
 {
     return "Generic Instruction";
+}
+
+Instruction *pushAcumulator()
+{
+    return new TypeEInstruction(
+        67,
+        "PUSH",
+        0,
+        AcumulatorRegister);
+}
+
+Instruction *nopWithLabel(std::string label)
+{
+    Instruction *temp = new TypeDInstruction(74, "NOP", 0, 0);
+    temp->setlabel(label);
+    return temp;
 }
