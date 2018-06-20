@@ -37,13 +37,13 @@ void main( void ) {
   int i;
   i = 0;
   while( i < 10 ) {
-    // x[ i ] = input( );
+    x[ i ] = input( );
     i = i + 1;
   }
   sort( x, 0, 10 );
   i = 0;
   while( i < 10 ) {
-    // output( x[ i ] );
+    output( x[ i ] );
     i = i + 1;
   }
 }

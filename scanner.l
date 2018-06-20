@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "util.h"
 #include "scan.h"
+#include <iostream>
 /* lexeme of identifier or reserved word */
 char tokenString[MAXTOKENLEN+1];
 static int yylex(void);
@@ -45,7 +46,7 @@ static int yylex(void);
 
 [ \t]                               ;
 \n                                  lineno++;
-
+\r                                  ;
 "+"                                 return PLUS;
 "-"                                 return MINUS;
 "*"                                 return TIMES;
@@ -67,7 +68,7 @@ static int yylex(void);
 "]"                                 return RBRACE;
 
 
-.                                   return ERROR;
+.                                   std::cout << "\nERROR: Uncaught character at line " << lineno <<"\n"; return ERROR;
 
 %%
 

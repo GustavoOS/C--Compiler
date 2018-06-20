@@ -159,7 +159,7 @@ static void insertNode(TreeNode *t)
       l = st_find(t->attr.name, scope);
       if ((l == NULL) || (strcmp(scope, l->scope) != 0))
       {
-        BucketList l2 = st_declare_function(t->attr.name, t->lineno, dataSection->allocateFunction(), FUNCTION, t->type, scope);
+        BucketList l2 = st_declare_function(t->attr.name, t->lineno, t->lineno > 0 ? dataSection->allocateFunction() : 0, FUNCTION, t->type, scope);
         l2->dtype = t->type;
         strcpy(scope, t->attr.name);
         // printf("\nAnalyze 168: Entrei no escopo %s", scope);

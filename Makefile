@@ -1,4 +1,4 @@
-cminus: scanner.o util.o memory.o analyze.o symtab.o codegenerator.o syntaticErrors.o instructions.o
+cminus: scanner.o util.o memory.o analyze.o symtab.o codegenerator.o syntaticErrors.o instructions.o library.o
 	g++ -Wall -g -std=c++11 -o bin/cminus obj/*  main.c -ly -lfl
 
 scanner.o: parser.o
@@ -29,6 +29,9 @@ syntaticErrors.o:
 		
 symtab.o:
 	g++ -g -c -Wall -std=c++11 symtab.cc -o obj/symtab.o
+
+library.o:
+	g++ -g -c -Wall -std=c++11 library.cc -o obj/library.o
 
 view:
 	dot -Tps calc.dot -o graph.ps; evince graph.ps
