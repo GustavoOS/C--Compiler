@@ -5,15 +5,16 @@
 class LibraryIncluder
 {
   public:
-    LibraryIncluder(FILE *);
+    LibraryIncluder(std::string sourceFileName);
     FILE *getFinalFile();
 
     int libSize = 0;
 
   private:
-    FILE *originalSource;
+
     FILE *source;
     std::string libraryString;
+    std::string sourceFileName;
 
     void buildLibrary();
 };

@@ -45,7 +45,7 @@ static int yylex(void);
 
 [ \t]                               ;
 \n                                  lineno++;
-
+\r                                  ;
 "+"                                 return PLUS;
 "-"                                 return MINUS;
 "*"                                 return TIMES;

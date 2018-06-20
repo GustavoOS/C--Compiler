@@ -1,29 +1,46 @@
 #include "library.h"
+#include <fstream>
 
-LibraryIncluder::LibraryIncluder(FILE *file)
+LibraryIncluder::LibraryIncluder(std::string sourceFile)
 {
-    originalSource = file;
+    sourceFileName = sourceFile;
 }
 
 void LibraryIncluder::buildLibrary()
 {
-    libraryString += "int input() {}\n"; libSize++;
-    libraryString += "void output(int number) {}\n"; libSize++;
-    libraryString += "void outputLED(int number) {}\n"; libSize++;
+    libraryString += "int input() {}\n";
+    libSize++;
+    libraryString += "void output(int number) {}\n";
+    libSize++;
+    libraryString += "void outputLED(int number) {}\n";
+    libSize++;
 }
 
 FILE *LibraryIncluder::getFinalFile()
 {
-    source = fopen("temporary.o", "w+");
     buildLibrary();
-    std::cout << fprintf(source, (const char *)libraryString.c_str()) << "\n";
-    char c = fgetc(originalSource);
-    while (c != EOF)
-    {
-        // std::cout << c;
-        fputc(c, source);
-        c = fgetc(originalSource);
-    }
-    fclose(originalSource);
+    std::ofstream outputFile("temporary.o");
+    std::ifstream inputFile(sourceFileName);
+    std::string line;
+    // std::stringstream buffer;
+    // buffer << libraryString << inputFile.rdbuf();
+    outputFile << libraryString;
+    if (inputFile.is_open())
+        while (getline(inputFile, line))
+        {
+           outputFile << line << "\n";
+        };
+    outputFile << "\n";
+    inputFile.close();
+    outputFile.close();
+    // std::cout << buffer.str() << std::endl;
+
+    // size_t bufferSize = 0;
+    // char *f_buffer = NULL;
+    // source = open_memstream(&f_buffer, &bufferSize);
+    // snprintf(f_buffer, bufferSize, buffer.str().c_str());
+
+    // source = fopen("temporary.o", "r");
+    source = fopen(sourceFileName.c_str(), "r") ;
     return source;
 }

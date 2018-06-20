@@ -66,10 +66,11 @@ int main(int argc, char *argv[])
     fprintf(stderr, "File %s not found\n", pgm);
     exit(1);
   }
-  LibraryIncluder includer = LibraryIncluder(originalSource);
+  fclose(originalSource);
+  listing = stdout; /* send listing to screen */
+  LibraryIncluder includer = LibraryIncluder(pgm);
   source = includer.getFinalFile();
   lineno = - includer.libSize;
-  listing = stdout; /* send listing to screen */
   fprintf(listing, "\nC- COMPILATION: %s\n", pgm);
 #if NO_PARSE
   while (getToken() != ENDFILE)
