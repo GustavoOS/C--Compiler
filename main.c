@@ -33,7 +33,6 @@
 
 /* allocate global variables */
 int lineno;
-FILE *library;
 FILE *originalSource;
 FILE *source;
 FILE *listing;
