@@ -8,7 +8,7 @@ LibraryIncluder::LibraryIncluder(std::string sourceFile)
 
 void LibraryIncluder::buildLibrary()
 {
-    libraryString += "int input() {}\n";
+    libraryString += "int input(void) {}\n";
     libSize++;
     libraryString += "void output(int number) {}\n";
     libSize++;

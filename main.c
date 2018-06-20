@@ -70,7 +70,8 @@ int main(int argc, char *argv[])
   listing = stdout; /* send listing to screen */
   LibraryIncluder includer = LibraryIncluder(pgm);
   source = includer.getFinalFile();
-  lineno = - includer.libSize;
+  // lineno = - includer.libSize;
+  lineno = 0;
   fprintf(listing, "\nC- COMPILATION: %s\n", pgm);
 #if NO_PARSE
   while (getToken() != ENDFILE)
