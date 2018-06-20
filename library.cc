@@ -40,7 +40,7 @@ FILE *LibraryIncluder::getFinalFile()
     // source = open_memstream(&f_buffer, &bufferSize);
     // snprintf(f_buffer, bufferSize, buffer.str().c_str());
 
-    // source = fopen("temporary.o", "r");
-    source = fopen(sourceFileName.c_str(), "r") ;
+    source = fopen("temporary.o", "r");
+    // source = fopen(sourceFileName.c_str(), "r") ;
     return source;
 }
