@@ -8,12 +8,13 @@
 
 enum Registers
 {
-  HeapArrayRegister = 1,
+  HeapArrayRegister = 0,
   AcumulatorRegister,
   TemporaryRegister,
   FramePointer,
   GlobalPointer,
-  SwapRegister
+  SwapRegister,
+  ReturnAddressRegister
 };
 
 int translateCondition(int operation);
@@ -32,6 +33,7 @@ public:
 
 Instruction *nopWithLabel(std::string label);
 Instruction *pushAcumulator();
+Instruction *pushRegister(int);
 
 class CodeGenerator
 {
@@ -49,6 +51,7 @@ private:
   void generateCode(TreeNode *node);
   void createHeader();
   void createFooter();
+  void generateCodeForAnyNode(TreeNode *);
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);

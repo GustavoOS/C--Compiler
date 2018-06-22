@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "util.h"
 #include "symtab.h"
+#include "memory.h"
 #include <iostream>
 
 int translateCondition(int operation)
@@ -50,16 +51,25 @@ void CodeGenerator::generate(TreeNode *node)
     createFooter();
 }
 
+void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
+{
+    if (node == NULL)
+        return;
+    if (node->nodekind == StmtK)
+        generateCodeForStmtNode(node);
+    else
+        generateCodeForExprNode(node);
+}
+
 void CodeGenerator::generateCode(TreeNode *node)
 {
     std::cout << "generateFunction\n";
     if (node == NULL)
         return;
     printNode(node); //Check visited node
-    if (node->nodekind == StmtK)
-        generateCodeForStmtNode(node);
-    else
-        generateCodeForExprNode(node);
+    generateCodeForAnyNode(node);
+    std::cout << "generateCode visiting brother\n";
+    generateCode(node->sibling);
 }
 
 BucketList getRecordFromSymbleTable(TreeNode *node)
@@ -99,12 +109,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             "ADD",
             node->attr.val * 4,
             HeapArrayRegister));
-        generateCode(node->sibling);
+
         break;
+
     case VarDeclK:
         std::cout << "Variable " << node->attr.name << "\n";
-        generateCode(node->sibling);
+
         break;
+
     case IfK:
         generateCode(node->child[0]);
         print(
@@ -120,15 +132,93 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 "if_end_" + std::to_string(node->attr.val),
                 -1 //Always
                 ));
-            print(nopWithLabel("if_true_"+ std::to_string(node->attr.val)));
-            generateCode(node->child[1]);
+        print(nopWithLabel("if_true_" + std::to_string(node->attr.val)));
+        generateCode(node->child[1]);
 
         print(nopWithLabel("if_end_" + std::to_string(node->attr.val)));
 
         break;
 
+    case FunDeclK:
+    {
+        std::string FunctionName = std::string(node->attr.name);
+        if (FunctionName != "input" && FunctionName != "output" && FunctionName != "outputLED")
+            std::cout << "Missing Implementation to function declaration\n";
+    }
+    break;
+
+    case FunActiveK:
+    {
+        std::string FunctionName = std::string(node->attr.name);
+        generateCode(node->child[0]);
+        if (FunctionName == "input")
+        {
+            print(
+                new TypeEInstruction(
+                    71,
+                    "INSW",
+                    0,
+                    AcumulatorRegister));
+        }
+        else if (FunctionName == "output")
+        {
+            print(
+                new TypeEInstruction(
+                    69,
+                    "OUTSS",
+                    0,
+                    AcumulatorRegister));
+        }
+        else
+        {
+
+            if (FunctionName == "outputLED")
+            {
+                print(
+                    new TypeEInstruction(
+                        70,
+                        "OUTLED",
+                        0,
+                        AcumulatorRegister));
+            }
+            else
+            {
+                DataSection ds;
+                int variableCountInFunction = ds.getSize(node->attr.name);
+                int argumentCount = node->attr.val;
+                print(
+                    pushRegister(FramePointer));
+                //Build activation record
+                print(
+                    new TypeDInstruction(
+                        8,
+                        "MOV",
+                        AcumulatorRegister,
+                        0));
+                for (
+                    int i = 0;
+                    i < variableCountInFunction - argumentCount;
+                    i++)
+                    print(pushAcumulator());
+                TreeNode *argumentNode = node->child[0];
+                for (int i = 0; i < argumentCount; i++)
+                {
+                    generateCodeForAnyNode(argumentNode);
+                    print(pushAcumulator());
+                }
+                //All variables pushed
+                /*TODO save PC count into RA*/
+                /*TODO branch to function definition*/
+
+                std::cout << "Implementation to function activation is a work in progress\n";
+            }
+        }
+    }
+    break;
+
     default:
-        std::cout << "Code not generated for this node\n";
+        std::cout
+            << "Code not generated for this node\n";
         break;
     }
 }
@@ -173,6 +263,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister));
         break;
+
     case MINUS:
         print(
             new TypeBInstruction(
@@ -182,6 +273,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister));
         break;
+
     case TIMES:
         print(
             new TypeEInstruction(
@@ -250,13 +342,17 @@ std::string Instruction::to_string()
     return "Generic Instruction";
 }
 
-Instruction *pushAcumulator()
+Instruction *pushRegister(int reg)
 {
     return new TypeEInstruction(
         67,
         "PUSH",
         0,
-        AcumulatorRegister);
+        reg);
+}
+Instruction *pushAcumulator()
+{
+    return pushRegister(AcumulatorRegister);
 }
 
 Instruction *nopWithLabel(std::string label)

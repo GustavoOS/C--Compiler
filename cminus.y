@@ -421,7 +421,14 @@ ativacao:
             }
             LPAREN args RPAREN
             {       
+                YYSTYPE argument = $4;
+                int argCount = 0;
+                while(argument != NULL){
+                    argCount++;
+                    argument = argument->sibling;
+                }
                 $$ = $2;
+                $$->attr.val = argCount;
                 $$->child[0] = $4;
             }
         ;
@@ -436,14 +443,16 @@ args:   arg-lista
 
 arg-lista:  arg-lista COMMA expressao
                 {       
-                    YYSTYPE t = $1;
-                    if (t != NULL)
-                    { 
-                        t = findLastSibling(t);
-                        t->sibling = $3;
-                        $$ = $1; 
-                    }
-                    else $$ = $3;
+                    // YYSTYPE t = $1;
+                    // if (t != NULL)
+                    // { 
+                    //     t = findLastSibling(t);
+                    //     t->sibling = $3;
+                    //     $$ = $1; 
+                    // }
+                    // else $$ = $3;
+                    $$ = $3;
+                    $$->sibling = $1;
                 }
             | expressao
             ;

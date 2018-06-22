@@ -481,8 +481,8 @@ static const yytype_uint16 yyrline[] =
      225,   226,   227,   228,   231,   232,   238,   245,   255,   264,
      268,   275,   281,   284,   288,   289,   290,   295,   302,   308,
      307,   320,   327,   330,   336,   342,   348,   354,   360,   367,
-     374,   377,   383,   391,   398,   402,   408,   418,   417,   429,
-     431,   437,   448
+     374,   377,   383,   391,   398,   402,   408,   418,   417,   436,
+     438,   444,   457
 };
 #endif
 
@@ -1840,37 +1840,46 @@ yyreduce:
   case 68:
 #line 423 "cminus.y" /* yacc.c:1646  */
     {       
+                YYSTYPE argument = (yyvsp[-1]);
+                int argCount = 0;
+                while(argument != NULL){
+                    argCount++;
+                    argument = argument->sibling;
+                }
                 (yyval) = (yyvsp[-3]);
+                (yyval)->attr.val = argCount;
                 (yyval)->child[0] = (yyvsp[-1]);
             }
-#line 1847 "cminus.tab.c" /* yacc.c:1646  */
+#line 1854 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 432 "cminus.y" /* yacc.c:1646  */
+#line 439 "cminus.y" /* yacc.c:1646  */
     {
                 (yyval) = NULL;
             }
-#line 1855 "cminus.tab.c" /* yacc.c:1646  */
+#line 1862 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 438 "cminus.y" /* yacc.c:1646  */
+#line 445 "cminus.y" /* yacc.c:1646  */
     {       
-                    YYSTYPE t = (yyvsp[-2]);
-                    if (t != NULL)
-                    { 
-                        t = findLastSibling(t);
-                        t->sibling = (yyvsp[0]);
-                        (yyval) = (yyvsp[-2]); 
-                    }
-                    else (yyval) = (yyvsp[0]);
+                    // YYSTYPE t = $1;
+                    // if (t != NULL)
+                    // { 
+                    //     t = findLastSibling(t);
+                    //     t->sibling = $3;
+                    //     $$ = $1; 
+                    // }
+                    // else $$ = $3;
+                    (yyval) = (yyvsp[0]);
+                    (yyval)->sibling = (yyvsp[-2]);
                 }
-#line 1870 "cminus.tab.c" /* yacc.c:1646  */
+#line 1879 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1874 "cminus.tab.c" /* yacc.c:1646  */
+#line 1883 "cminus.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2098,7 +2107,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 451 "cminus.y" /* yacc.c:1906  */
+#line 460 "cminus.y" /* yacc.c:1906  */
 
 
 int yyerror(const char * message)
