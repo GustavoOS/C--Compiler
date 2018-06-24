@@ -46,7 +46,7 @@ static BucketList hashTable[SIZE];
  * first time, otherwise ignored
  */
 
-BucketList st_declare(char *name, int lineno, int loc, IDType type, char *escopo)
+BucketList st_declare(char *name, int lineno, int loc, IDType type, std::string escopo)
 {
   // printf( "%s name %d lineno %d loc %d type %s scope\n",name,  lineno,  loc,  type,  scope);
   int h = hash(name);
@@ -55,7 +55,7 @@ BucketList st_declare(char *name, int lineno, int loc, IDType type, char *escopo
   l->lines = std::vector<int>();
   l->lines.push_back(lineno);
   l->memloc = loc;
-  strcpy(l->scope, escopo);
+  l->scope = escopo;
   l->next = hashTable[h];
   l->vtype = type;
   l->dtype = Integer;
@@ -63,7 +63,7 @@ BucketList st_declare(char *name, int lineno, int loc, IDType type, char *escopo
   return l;
 }
 
-BucketList st_declare_function(char *name, int lineno, int loc, IDType type, ExpType eType, char *escopo)
+BucketList st_declare_function(char *name, int lineno, int loc, IDType type, ExpType eType, std::string escopo)
 {
   // printf( "%s name %d lineno %d loc %d type %s scope\n",name,  lineno,  loc,  type,  scope);
   int h = hash(name);
@@ -72,7 +72,7 @@ BucketList st_declare_function(char *name, int lineno, int loc, IDType type, Exp
   l->lines = std::vector<int>();
   l->lines.push_back(lineno);
   l->memloc = loc;
-  strcpy(l->scope, escopo);
+  l->scope = escopo;
   l->next = hashTable[h];
   l->vtype = type;
   l->dtype = eType;
@@ -97,14 +97,14 @@ BucketList st_reference(BucketList l, int lineno)
   return l;
 } /* st_insert */
 
-int cantMatchNameAndScopeInRange(BucketList node, char *name, char *escopo)
+int cantMatchNameAndScopeInRange(BucketList node, char *name, std::string escopo)
 {
   return (node != NULL) && (                                         //in range
-                               (strcmp(escopo, node->scope) != 0) || //Scopes don't match
+                               (escopo != node->scope) || //Scopes don't match
                                (strcmp(name, node->name) != 0));     //names don't match
 }
 
-BucketList st_find_at_scope(char *name, char *escopo)
+BucketList st_find_at_scope(char *name, std::string escopo)
 {
   int hashIndex = hash(name);
   BucketList EntryNode = hashTable[hashIndex];
@@ -119,7 +119,7 @@ BucketList st_find_at_scope(char *name, char *escopo)
  * global scope.
  * Not finding anything makes it return NULL
  */
-BucketList st_find(char *name, char *escopo)
+BucketList st_find(char *name, std::string escopo)
 {
   BucketList result = st_find_at_scope(name, escopo);
   if (result == NULL)
@@ -157,7 +157,7 @@ void printSymTab(FILE *listing)
           fprintf(listing, "%-10s ", "Void");
         }
         fprintf(listing, "%-8d  ", l->memloc);
-        fprintf(listing, "%-10s  ", l->scope);
+        fprintf(listing, "%-10s  ", l->scope.c_str());
         for (int line : l->lines)
         {
           fprintf(listing, "%4d ", line);

@@ -7,7 +7,7 @@
 class DataSection
 {
   public:
-    int allocateVariable(char * scope);
+    int allocateVariable(std::string scope);
     int allocateFunction();
     int getSize(std::string);
     private:

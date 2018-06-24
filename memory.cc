@@ -4,9 +4,9 @@
 std::map<std::string, int>  DataSection::variableMap;
 // int DataSection::functionMap = 0;
 
-int DataSection::allocateVariable(char *scope){
-    DataSection::variableMap[(std::string)scope] ++;
-    return DataSection::variableMap[(std::string)scope];
+int DataSection::allocateVariable(std::string scope){
+    DataSection::variableMap[scope] ++;
+    return DataSection::variableMap[scope];
 }
 
 int DataSection::allocateFunction(){

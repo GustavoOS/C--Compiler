@@ -15,7 +15,7 @@
 #include <string>
 
 //current scope, standard is global
-char scope[42] = "global";
+std::string scope = (std::string) "global";
 
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
@@ -53,7 +53,7 @@ static void exitScope(TreeNode *t)
   if (t->nodekind == StmtK && t->kind.stmt == FunDeclK)
   {
     // printf("Sai do escopo %s\n", scope);
-    strcpy(scope, "global");
+    scope = std::string("global");
   }
 }
 
@@ -75,7 +75,7 @@ static void insertNode(TreeNode *t)
 {
   DataSection *dataSection = new DataSection();
   BucketList l;
-  char dvariable[42];
+  std::string dvariable;
 
   switch (t->nodekind)
   {
@@ -106,9 +106,9 @@ static void insertNode(TreeNode *t)
 
     case VetDeclK:
       
-      strcpy(dvariable, scope);
+      dvariable = scope;
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      if ((l == NULL) || (scope!= l->scope))
       {
         if (isTreeNodeTypeInt(t))
         {
@@ -132,9 +132,9 @@ static void insertNode(TreeNode *t)
       break;
 
     case VectorParamK:
-      strcpy(dvariable, scope);
+      dvariable = scope;
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      if ((l == NULL) || (scope != l->scope) )
       {
         if (isTreeNodeTypeInt(t))
         {
@@ -158,11 +158,11 @@ static void insertNode(TreeNode *t)
 
     case FunDeclK:
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      if ((l == NULL) ||  (scope != l->scope))
       {
         BucketList l2 = st_declare_function(t->attr.name, t->lineno, t->lineno > 0 ? dataSection->allocateFunction() : 0, FUNCTION, t->type, scope);
         l2->dtype = t->type;
-        strcpy(scope, t->attr.name);
+        scope = t->attr.name;
         // printf("\nAnalyze 168: Entrei no escopo %s", scope);
       }
       else
@@ -194,14 +194,14 @@ static void insertNode(TreeNode *t)
 
     case ReturnK:
     {
-      l = st_find(scope, (char *)"global");
+      l = st_find((char *) scope.c_str(), "global");
       switch (l->dtype)
       {
       case Void:
       {
         if (t->child[0] != NULL)
         {
-          VoidInvalidReturnError(t, scope);
+          VoidInvalidReturnError(t, (char *) scope.c_str());
         }
 
         break;
@@ -210,7 +210,7 @@ static void insertNode(TreeNode *t)
       {
         if (t->child[0] == NULL)
         {
-          IntInvalidReturnError(t, scope);
+          IntInvalidReturnError(t, (char *) scope.c_str());
         }
 
         break;
