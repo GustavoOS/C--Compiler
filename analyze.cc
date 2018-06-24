@@ -75,6 +75,7 @@ static void insertNode(TreeNode *t)
 {
   DataSection *dataSection = new DataSection();
   BucketList l;
+  char dvariable[42];
 
   switch (t->nodekind)
   {
@@ -104,7 +105,7 @@ static void insertNode(TreeNode *t)
       break;
 
     case VetDeclK:
-      char dvariable[42];
+      
       strcpy(dvariable, scope);
       l = st_find(t->attr.name, scope);
       if ((l == NULL) || (strcmp(scope, l->scope) != 0))
