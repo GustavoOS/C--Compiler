@@ -64,8 +64,9 @@ void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 void CodeGenerator::generateCode(TreeNode *node)
 {
     std::cout << "generateFunction\n";
-    if (node == NULL)
-        return;
+    if (node == NULL){
+        std::cout << "This node is NULL, exiting\n";
+        return;}
     printNode(node); //Check visited node
     generateCodeForAnyNode(node);
     std::cout << "generateCode visiting brother\n";
@@ -142,6 +143,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunDeclK:
     {
         std::string FunctionName = std::string(node->attr.name);
+        generateCode(node->child[0]);
+        generateCode(node->child[1]);
         if (FunctionName != "input" && FunctionName != "output" && FunctionName != "outputLED")
             std::cout << "Missing Implementation to function declaration\n";
     }
