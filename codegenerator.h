@@ -17,7 +17,29 @@ enum Registers
   ReturnAddressRegister
 };
 
-int translateCondition(int operation);
+enum ConditionCodes
+{
+  EQ = 0,   //Equal
+  NE,       //NOT EQUAL
+  HS,       //Unsigned Greater than or equal
+  LO,       //Unsigned Lower then
+  MI,       //Negative
+  PL,       //Positive or zero
+  VS,       //Overflow
+  VC,       //No overflow
+  HI,       //Unsigned greater than
+  LS,       //Unsgined lower than or equal
+  GE,       //Signed greater than or equal
+  LT,       //Signed lower than
+  GT,       //Signed greater than
+  LE,       //Signed lower than
+  AL,       //Always
+  NEVER,    //Never
+  CS = 2,   //Unsigned Greater than or equal
+  CC = 3    //Unsigned Lower THan
+};
+
+ConditionCodes translateCondition(int operation);
 
 class Instruction
 {

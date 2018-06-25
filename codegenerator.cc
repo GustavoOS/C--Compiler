@@ -5,25 +5,25 @@
 #include "memory.h"
 #include <iostream>
 
-int translateCondition(int operation)
+ConditionCodes translateCondition(int operation)
 {
 
     switch (operation)
     {
     case LESSER:
-        return 11;
+        return LT;
     case LESSEQ:
-        return 9;
+        return LE;
     case GREATER:
-        return 12;
+        return GT;
     case GREATEQ:
-        return 10;
+        return GE;
     case EQCOMP:
-        return 0;
+        return EQ;
     case NOTEQ:
-        return 1;
+        return NE;
     default:
-        return 14;
+        return AL;
     }
 }
 
@@ -64,9 +64,11 @@ void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 void CodeGenerator::generateCode(TreeNode *node)
 {
     std::cout << "generateFunction\n";
-    if (node == NULL){
+    if (node == NULL)
+    {
         std::cout << "This node is NULL, exiting\n";
-        return;}
+        return;
+    }
     printNode(node); //Check visited node
     generateCodeForAnyNode(node);
     std::cout << "generateCode visiting brother\n";
@@ -210,10 +212,36 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     print(pushAcumulator());
                 }
                 //All variables pushed
-                /*TODO save PC count into RA*/
-                /*TODO branch to function definition*/
+                // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
+                int numberOfCodeLinesBetweenARBuildAndFunctionExecution = 2;
+                print(
+                    new TypeDInstruction(
+                        56,
+                        "ADD",
+                        ReturnAddressRegister,
+                        numberOfCodeLinesBetweenARBuildAndFunctionExecution - 1));
+                //  Branching to function definition
+                //  If number of prints below changes, ...
+                //  ... change the value of variable ...
+                //  ... numberOfCodeLinesBetweenARBuildAndFunctionExecution
+                print(
+                    new TypeAInstruction(
+                        49,
+                        "LDR",
+                        getRecordFromSymbleTable(node)->memloc,
+                        GlobalPointer,
+                        TemporaryRegister));
+                print(
+                    new TypeFInstruction(
+                        38,
+                        "BX",
+                        AL,
+                        TemporaryRegister
 
-                std::cout << "Implementation to function activation is a work in progress\n";
+                        ));
+
+                std::cout
+                    << "Implementation to function activation is a work in progress\n";
             }
         }
     }
