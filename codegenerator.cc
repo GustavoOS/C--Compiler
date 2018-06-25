@@ -54,7 +54,11 @@ void CodeGenerator::generate(TreeNode *node)
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 {
     if (node == NULL)
+    {
+        std::cout << "This node is NULL, exiting generateCodeForAnyNode\n";
         return;
+    }
+    printNode(node); //Check visited node
     if (node->nodekind == StmtK)
         generateCodeForStmtNode(node);
     else
@@ -66,10 +70,9 @@ void CodeGenerator::generateCode(TreeNode *node)
     std::cout << "generateFunction\n";
     if (node == NULL)
     {
-        std::cout << "This node is NULL, exiting\n";
+        std::cout << "This node is NULL, exiting generateCode\n";
         return;
     }
-    printNode(node); //Check visited node
     generateCodeForAnyNode(node);
     std::cout << "generateCode visiting brother\n";
     generateCode(node->sibling);
@@ -101,17 +104,25 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             0,
             HeapArrayRegister,
             AcumulatorRegister));
-        print(new TypeAInstruction(
-            48,
+        print(loadImediateToRegister(TemporaryRegister, getRecordFromSymbleTable(node)->memloc * 4));
+        print(new TypeBInstruction(
+            40,
             "STR",
-            getRecordFromSymbleTable(node)->memloc + 1,
+            TemporaryRegister,
             AcumulatorRegister,
             AcumulatorRegister));
-        print(new TypeDInstruction(
-            10,
+        print(
+            loadImediateToRegister(
+                TemporaryRegister,
+                node->attr.val * 4));
+        print(new TypeBInstruction(
+            4,
             "ADD",
-            node->attr.val * 4,
-            HeapArrayRegister));
+            TemporaryRegister,
+            AcumulatorRegister,
+            HeapArrayRegister
+
+            ));
 
         break;
 
@@ -145,10 +156,21 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunDeclK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        generateCode(node->child[0]);
-        generateCode(node->child[1]);
-        if (FunctionName != "input" && FunctionName != "output" && FunctionName != "outputLED")
-            std::cout << "Missing Implementation to function declaration\n";
+        // generateCode(node->child[0]);
+        // generateCode(node->child[1]);
+        if (
+            (FunctionName != "input") &&
+            (FunctionName != "output") &&
+            (FunctionName != "outputLED"))
+        {
+            //TODO
+            // print(
+            //     new TypeDInstruction(
+            //         56,
+            //         "ADD",
+            //         ReturnAddressRegister,
+            //         numberOfCodeLinesBetweenARBuildAndFunctionExecution - 1));
+        }
     }
     break;
 
@@ -213,7 +235,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 }
                 //All variables pushed
                 // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
-                int numberOfCodeLinesBetweenARBuildAndFunctionExecution = 2;
+                int numberOfCodeLinesBetweenARBuildAndFunctionExecution = 3; //Might be changed
                 print(
                     new TypeDInstruction(
                         56,
@@ -225,10 +247,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 //  ... change the value of variable ...
                 //  ... numberOfCodeLinesBetweenARBuildAndFunctionExecution
                 print(
-                    new TypeAInstruction(
-                        49,
+                    loadImediateToRegister(
+                        TemporaryRegister,
+                        (getRecordFromSymbleTable(node)->memloc) * 4));
+                print(
+                    new TypeBInstruction(
+                        44,
                         "LDR",
-                        getRecordFromSymbleTable(node)->memloc,
+                        TemporaryRegister,
                         GlobalPointer,
                         TemporaryRegister));
                 print(
@@ -381,6 +407,16 @@ Instruction *pushRegister(int reg)
         0,
         reg);
 }
+
+Instruction *loadImediateToRegister(Registers regis, int number)
+{
+    return new TypeDInstruction(
+        8,
+        "MOV",
+        regis,
+        number);
+}
+
 Instruction *pushAcumulator()
 {
     return pushRegister(AcumulatorRegister);
