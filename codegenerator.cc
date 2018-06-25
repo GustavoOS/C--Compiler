@@ -163,13 +163,53 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "output") &&
             (FunctionName != "outputLED"))
         {
-            //TODO
-            // print(
-            //     new TypeDInstruction(
-            //         56,
-            //         "ADD",
-            //         ReturnAddressRegister,
-            //         numberOfCodeLinesBetweenARBuildAndFunctionExecution - 1));
+
+            //Function registration
+            int functionRegistrationLenght = 3;
+            print(
+                new TypeDInstruction(
+                    56,
+                    "ADD",
+                    AcumulatorRegister,
+                    functionRegistrationLenght - 1));
+            print(
+                loadImediateToRegister(
+                    TemporaryRegister,
+                    (getRecordFromSymbleTable(node)->memloc) * 4));
+            print(
+                new TypeBInstruction( //Saves acumulator into address [Global] + [Temporary]
+                    40,
+                    "STR",
+                    GlobalPointer,
+                    TemporaryRegister,
+                    AcumulatorRegister));
+            //Function registered
+
+            print(
+                pushRegister(ReturnAddressRegister));
+            print(
+                new TypeDInstruction(
+                    57,
+                    "ADD",
+                    FramePointer,
+                    0));
+
+            generateCode(node->child[1]);
+
+            print(
+                popRegister(ReturnAddressRegister));
+            //Destroy activation record
+            DataSection ds;
+            int variableCountInFunction = ds.getSize(node->attr.name);
+            for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
+            {
+                print(
+                    popRegister(TemporaryRegister));
+            }
+            print(
+                popRegister(FramePointer));
+            print(
+                jumpToRegister(ReturnAddressRegister));
         }
     }
     break;
@@ -258,13 +298,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                         GlobalPointer,
                         TemporaryRegister));
                 print(
-                    new TypeFInstruction(
-                        38,
-                        "BX",
-                        AL,
-                        TemporaryRegister
-
-                        ));
+                    jumpToRegister(TemporaryRegister));
 
                 std::cout
                     << "Implementation to function activation is a work in progress\n";
@@ -293,11 +327,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
             pushAcumulator());
         generateCode(node->child[1]);
         print(
-            new TypeEInstruction(
-                68,
-                "POP",
-                0,
-                TemporaryRegister));
+            popRegister(TemporaryRegister));
         generateOperationCode(node);
     }
     break;
@@ -397,6 +427,26 @@ void CodeGenerator::createFooter()
 std::string Instruction::to_string()
 {
     return "Generic Instruction";
+}
+
+Instruction *jumpToRegister(Registers reg)
+{
+    return new TypeFInstruction(
+        38,
+        "BX",
+        AL,
+        reg
+
+    );
+}
+
+Instruction *popRegister(Registers reg)
+{
+    return new TypeEInstruction(
+        68,
+        "POP",
+        0,
+        reg);
 }
 
 Instruction *pushRegister(int reg)

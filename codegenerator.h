@@ -57,6 +57,8 @@ Instruction *nopWithLabel(std::string label);
 Instruction *loadImediateToRegister(Registers regis, int number);
 Instruction *pushAcumulator();
 Instruction *pushRegister(int);
+Instruction *popRegister(Registers reg);
+Instruction *jumpToRegister(Registers reg);
 
 class CodeGenerator
 {
