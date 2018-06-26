@@ -338,7 +338,6 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         {
             byteNumber = fullNumber.substr(8 * i, 8);
             std::bitset<8> partialNumber(byteNumber);
-            std::cout << "*********" << (int)partialNumber.to_ulong() << "\n";
             print(
                 loadImediateToRegister(TemporaryRegister, (int)partialNumber.to_ulong()));
             print(
