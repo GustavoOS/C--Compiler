@@ -201,18 +201,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             }
             print(
                 popRegister(ReturnAddressRegister));
-            //Destroy activation record
-            DataSection ds;
-            int variableCountInFunction = ds.getSize(node->attr.name);
-            for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
-            {
-                print(
-                    popRegister(TemporaryRegister));
-            }
-            print(
-                popRegister(FramePointer));
-            print(
-                jumpToRegister(ReturnAddressRegister));
+                
+            DestroyARAndExitFunction(node);
         }
     }
     break;
@@ -275,6 +265,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 {
                     generateCodeForAnyNode(argumentNode);
                     print(pushAcumulator());
+                    argumentNode = argumentNode->sibling;
                 }
                 //All variables pushed
                 // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
@@ -292,7 +283,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 print(
                     loadImediateToRegister(
                         TemporaryRegister,
-                        (getRecordFromSymbleTableAtScope(node)->memloc) * 4));
+                        (getRecordFromSymbleTableAtGlobalScope(node)->memloc) * 4));
                 print(
                     new TypeBInstruction(
                         44,
@@ -498,6 +489,17 @@ void hr(std::string middle)
     std::cout << "------------ " + middle + " ------------\n";
 }
 
-void DestroyARAndExitFunction(TreeNode *)
+void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
+    DataSection ds;
+    int variableCountInFunction = ds.getSize(node->attr.name);
+    for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
+    {
+        print(
+            popRegister(TemporaryRegister));
+    }
+    print(
+        popRegister(FramePointer));
+    print(
+        jumpToRegister(ReturnAddressRegister));
 }
