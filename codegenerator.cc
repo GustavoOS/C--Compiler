@@ -338,27 +338,27 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         {
             byteNumber = fullNumber.substr(8 * i, 8);
             std::bitset<8> partialNumber(byteNumber);
-            print(
-                loadImediateToRegister(TemporaryRegister, (int)partialNumber.to_ulong()));
-            print(
-                loadImediateToRegister(SwapRegister, (24 - (8 * i))));
-            print(
-                new TypeEInstruction(
-                    14,
-                    "LSL",
-                    TemporaryRegister,
-                    SwapRegister
-                )
-            );
-            print(
-                new TypeBInstruction(
-                    4,
-                    "ADD",
-                    SwapRegister,
-                    AcumulatorRegister,
-                    AcumulatorRegister
-                )
-            );
+            int byteAsInt = (int)partialNumber.to_ulong();
+            if (byteAsInt != 0)
+            {
+                print(
+                    loadImediateToRegister(TemporaryRegister, byteAsInt));
+                print(
+                    loadImediateToRegister(SwapRegister, (24 - (8 * i))));
+                print(
+                    new TypeEInstruction(
+                        14,
+                        "LSL",
+                        TemporaryRegister,
+                        SwapRegister));
+                print(
+                    new TypeBInstruction(
+                        4,
+                        "ADD",
+                        SwapRegister,
+                        AcumulatorRegister,
+                        AcumulatorRegister));
+            }
         }
     }
     break;
