@@ -4,6 +4,7 @@
 #include "symtab.h"
 #include "memory.h"
 #include <iostream>
+#include <bitset>
 
 ConditionCodes translateCondition(int operation)
 {
@@ -201,7 +202,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             }
             print(
                 popRegister(ReturnAddressRegister));
-                
+
             DestroyARAndExitFunction(node);
         }
     }
@@ -323,6 +324,43 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         print(
             popRegister(TemporaryRegister));
         generateOperationCode(node);
+    }
+    break;
+    case ConstK:
+    {
+        std::string fullNumber, byteNumber;
+        fullNumber = std::bitset<32>(node->attr.val).to_string();
+        print(
+            loadImediateToRegister(AcumulatorRegister, 0));
+        print(
+            loadImediateToRegister(SwapRegister, 0));
+        for (int i = 0; i < 4; i++)
+        {
+            byteNumber = fullNumber.substr(8 * i, 8);
+            std::bitset<8> partialNumber(byteNumber);
+            std::cout << "*********" << (int)partialNumber.to_ulong() << "\n";
+            print(
+                loadImediateToRegister(TemporaryRegister, (int)partialNumber.to_ulong()));
+            print(
+                loadImediateToRegister(SwapRegister, (24 - (8 * i))));
+            print(
+                new TypeEInstruction(
+                    14,
+                    "LSL",
+                    TemporaryRegister,
+                    SwapRegister
+                )
+            );
+            print(
+                new TypeBInstruction(
+                    4,
+                    "ADD",
+                    SwapRegister,
+                    AcumulatorRegister,
+                    AcumulatorRegister
+                )
+            );
+        }
     }
     break;
 
