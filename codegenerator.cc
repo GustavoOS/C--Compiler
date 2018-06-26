@@ -31,6 +31,7 @@ ConditionCodes translateCondition(int operation)
 CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
+    shouldShowVisitingMessages = true;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -55,10 +56,10 @@ void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 {
     if (node == NULL)
     {
-        std::cout << "This node is NULL, exiting generateCodeForAnyNode\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "This node is NULL, exiting generateCodeForAnyNode\n";
         return;
     }
-    printNode(node); //Check visited node
     if (node->nodekind == StmtK)
         generateCodeForStmtNode(node);
     else
@@ -67,25 +68,44 @@ void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 
 void CodeGenerator::generateCode(TreeNode *node)
 {
-    std::cout << "generateFunction\n";
+    if (shouldShowVisitingMessages)
+        std::cout << "generateFunction\n";
     if (node == NULL)
     {
-        std::cout << "This node is NULL, exiting generateCode\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "This node is NULL, exiting generateCode\n";
         return;
     }
+    if (shouldShowVisitingMessages)
+        printNode(node);
     generateCodeForAnyNode(node);
-    std::cout << "generateCode visiting brother\n";
+    if (shouldShowVisitingMessages)
+        std::cout << "generateCode visiting brother\n";
     generateCode(node->sibling);
 }
 
-BucketList getRecordFromSymbleTable(TreeNode *node)
+BucketList getRecordFromSymbleTableAtScope(TreeNode *node)
 {
     return st_find_at_scope(node->attr.name, (char *)node->scope.c_str());
 }
 
+BucketList getRecordFromSymbleTableAtGlobalScope(TreeNode *node)
+{
+    return st_find_at_scope(node->attr.name, "global");
+}
+
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 {
-    std::cout << "This is a statement\n";
+    if (node == NULL)
+    {
+        if (shouldShowVisitingMessages)
+            std::cout << "Thid node is NULL, exiting\n";
+        return;
+    }
+    if (shouldShowVisitingMessages)
+        printNode(node); //Check visited node
+    if (shouldShowVisitingMessages)
+        std::cout << "This is a statement\n";
     switch (node->kind.stmt)
     {
 
@@ -96,7 +116,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case VetDeclK:
         // std::cout << "Vector size: " << node->attr.val << "\n";
-        // std::cout << "Location: " << getRecordFromSymbleTable(node)->memloc << "\n";
+        // std::cout << "Location: " << getRecordFromSymbleTableAtScope(node)->memloc << "\n";
         //TODO GENERATE CODE
         print(new TypeCInstruction(
             6,
@@ -104,7 +124,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             0,
             HeapArrayRegister,
             AcumulatorRegister));
-        print(loadImediateToRegister(TemporaryRegister, getRecordFromSymbleTable(node)->memloc * 4));
+        print(loadImediateToRegister(TemporaryRegister, getRecordFromSymbleTableAtScope(node)->memloc * 4));
         print(new TypeBInstruction(
             40,
             "STR",
@@ -127,7 +147,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case VarDeclK:
-        std::cout << "Variable " << node->attr.name << "\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "Variable " << node->attr.name << "\n";
 
         break;
 
@@ -156,37 +177,17 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunDeclK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        // generateCode(node->child[0]);
-        // generateCode(node->child[1]);
         if (
             (FunctionName != "input") &&
             (FunctionName != "output") &&
             (FunctionName != "outputLED"))
         {
 
-            //Function registration
-            int functionRegistrationLenght = 3;
-            print(
-                new TypeDInstruction(
-                    56,
-                    "ADD",
-                    AcumulatorRegister,
-                    functionRegistrationLenght - 1));
-            print(
-                loadImediateToRegister(
-                    TemporaryRegister,
-                    (getRecordFromSymbleTable(node)->memloc) * 4));
-            print(
-                new TypeBInstruction( //Saves acumulator into address [Global] + [Temporary]
-                    40,
-                    "STR",
-                    GlobalPointer,
-                    TemporaryRegister,
-                    AcumulatorRegister));
-            //Function registered
+            hr(node->attr.name);
+            Instruction *labelInstruction = pushRegister(ReturnAddressRegister);
+            labelInstruction->setlabel("function_" + std::string(node->attr.name));
 
-            print(
-                pushRegister(ReturnAddressRegister));
+            print(labelInstruction);
             print(
                 new TypeDInstruction(
                     57,
@@ -194,8 +195,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     FramePointer,
                     0));
 
-            generateCode(node->child[1]);
-
+            if (node->child[1] != NULL)
+            {
+                generateCode(node->child[1]);
+            }
             print(
                 popRegister(ReturnAddressRegister));
             //Destroy activation record
@@ -289,7 +292,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 print(
                     loadImediateToRegister(
                         TemporaryRegister,
-                        (getRecordFromSymbleTable(node)->memloc) * 4));
+                        (getRecordFromSymbleTableAtScope(node)->memloc) * 4));
                 print(
                     new TypeBInstruction(
                         44,
@@ -299,25 +302,25 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                         TemporaryRegister));
                 print(
                     jumpToRegister(TemporaryRegister));
-
-                std::cout
-                    << "Implementation to function activation is a work in progress\n";
             }
         }
     }
     break;
 
     default:
-        std::cout
-            << "Code not generated for this node\n";
+        if (shouldShowVisitingMessages)
+            std::cout
+                << "Code not generated for this node\n";
         break;
     }
 }
 
 void CodeGenerator::generateCodeForExprNode(TreeNode *node)
 {
-    std::cout << "This is an expression\n";
-
+    if (shouldShowVisitingMessages)
+        std::cout << "This is an expression\n";
+    if (shouldShowVisitingMessages)
+        printNode(node);
     switch (node->kind.stmt)
     {
     case OpK:
@@ -333,12 +336,21 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     break;
 
     default:
+        if (shouldShowVisitingMessages)
+            std::cout << "Code not generated for this expr\n";
         break;
     }
 }
 void CodeGenerator::generateOperationCode(TreeNode *node)
 {
-
+    if (node == NULL)
+    {
+        if (shouldShowVisitingMessages)
+            std::cout << "Thid node is NULL, exiting\n";
+        return;
+    }
+    if (shouldShowVisitingMessages)
+        printNode(node); //Check visited node
     switch (node->attr.op)
     {
     case PLUS:
@@ -415,12 +427,14 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
 
 void CodeGenerator::createHeader()
 {
-    std::cout << "This is a header\n";
+    if (shouldShowVisitingMessages)
+        std::cout << "This is a header\n";
 }
 
 void CodeGenerator::createFooter()
 {
-    std::cout << "This is a footer\n";
+    if (shouldShowVisitingMessages)
+        std::cout << "This is a footer\n";
 }
 
 //Instruction Class
@@ -477,4 +491,13 @@ Instruction *nopWithLabel(std::string label)
     Instruction *temp = new TypeDInstruction(74, "NOP", 0, 0);
     temp->setlabel(label);
     return temp;
+}
+
+void hr(std::string middle)
+{
+    std::cout << "------------ " + middle + " ------------\n";
+}
+
+void DestroyARAndExitFunction(TreeNode *)
+{
 }

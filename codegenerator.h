@@ -60,6 +60,9 @@ Instruction *pushRegister(int);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 
+
+void hr(std::string);
+
 class CodeGenerator
 {
 public:
@@ -70,6 +73,7 @@ private:
   std::string generatedCode;
   std::vector<Instruction> code;
   bool shouldPrintGeneratedCodeOnScreen;
+  bool shouldShowVisitingMessages;
 
   //Private methods
   void print(Instruction *instruction);
@@ -80,6 +84,8 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
+  
+  void DestroyARAndExitFunction(TreeNode *);
 };
 class BranchLabel : public Instruction
 {

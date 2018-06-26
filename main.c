@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
   {
     CodeGenerator cg = CodeGenerator(TraceCode);
     std::cout << "\nStarting code generation process\n";
+    std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);
   }
 #if !NO_CODE
