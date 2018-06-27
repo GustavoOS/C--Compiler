@@ -526,6 +526,9 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
 
 void CodeGenerator::createHeader()
 {
+    print(
+        new TypeDInstruction(56, "ADD", BaseAddressRegister, 0);
+    );
     if (shouldShowVisitingMessages)
         std::cout << "This is a header\n";
 }
