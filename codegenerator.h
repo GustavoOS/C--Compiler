@@ -5,6 +5,7 @@
 #include <iostream>
 #include "globals.h"
 #include <vector>
+#include <map>
 
 enum Registers
 {
@@ -60,7 +61,6 @@ Instruction *pushRegister(int);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 
-
 void hr(std::string);
 
 class CodeGenerator
@@ -68,10 +68,13 @@ class CodeGenerator
 public:
   CodeGenerator(bool displayable);
   void generate(TreeNode *node);
+  void linker();
 
 private:
   std::string generatedCode;
   std::vector<Instruction> code;
+  std::map<std::string, Instruction *> labelDestMap;
+  std::map<std::string, Instruction *> labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
 
@@ -84,7 +87,7 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
-  
+
   void DestroyARAndExitFunction(TreeNode *);
 };
 class BranchLabel : public Instruction

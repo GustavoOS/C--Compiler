@@ -40,10 +40,16 @@ void main( void ) {
     x[ i ] = input( );
     i = i + 1;
   }
-  sort( x, 0, 10 );
+  sort(x, 1294967295, 10);
   i = 0;
   while( i < 10 ) {
     output( x[ i ] );
     i = i + 1;
+  }
+  if( i == 1)
+  {
+    i = 10;
+  }else{
+    i = 20;
   }
 }

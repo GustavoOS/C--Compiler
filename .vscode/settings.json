@@ -36,6 +36,8 @@
         "fstream": "cpp",
         "numeric": "cpp",
         "sstream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "bitset": "cpp",
+        "cstdarg": "cpp"
     }
 }

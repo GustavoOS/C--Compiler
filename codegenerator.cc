@@ -32,7 +32,7 @@ ConditionCodes translateCondition(int operation)
 CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
-    shouldShowVisitingMessages = true;
+    shouldShowVisitingMessages = false;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -51,6 +51,23 @@ void CodeGenerator::generate(TreeNode *node)
     createHeader();
     generateCode(node);
     createFooter();
+}
+
+void CodeGenerator::linker()
+{
+    for (auto item : labelOriginMap)
+    {
+        std::string label = item.first;
+        Instruction *label_dest = item.second;
+        std::cout << label << " -> " << label_dest->name << std::endl;
+    }
+
+    for (auto item : labelDestMap)
+    {
+        std::string label = item.first;
+        Instruction *label_dest = item.second;
+        std::cout << label << " -> " << label_dest->name << std::endl;
+    }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -152,28 +169,46 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             std::cout << "Variable " << node->attr.name << "\n";
 
         break;
+    case WhileK:
+        generateCode(node->child[1]);
+        break;
 
     case IfK:
+    {
         generateCode(node->child[0]);
-        print(
-            new BranchLabel(
-                "if_true_" + std::to_string(node->attr.val),
-                node->child[0]->attr.op));
+        std::string if_true_label_name = "if_true_" + std::to_string(node->attr.val);
+        std::string if_end_label_name = "if_end_" + std::to_string(node->attr.val);
+
+        Instruction *if_true_origin = new BranchLabel(if_true_label_name, node->child[0]->attr.op);
+
+        print(if_true_origin);
+
+        // Generate code for ELSE code
 
         if (node->child[2] != NULL)
             generateCode(node->child[2]);
 
-        print(
-            new BranchLabel(
-                "if_end_" + std::to_string(node->attr.val),
-                -1 //Always
-                ));
-        print(nopWithLabel("if_true_" + std::to_string(node->attr.val)));
+        Instruction *if_end_origin = new BranchLabel(if_end_label_name, AL /* Always */);
+        print(if_end_origin);
+
+        Instruction *if_true_dest = nopWithLabel(if_true_label_name);
+        print(if_true_dest);
+
+        // Generate code for THEN code
+
         generateCode(node->child[1]);
 
-        print(nopWithLabel("if_end_" + std::to_string(node->attr.val)));
+        Instruction *if_end_dest = nopWithLabel(if_end_label_name);
+        print(if_end_dest);
 
-        break;
+        // Adding labels to map
+        labelOriginMap[if_true_label_name] = if_true_origin;
+        labelDestMap[if_true_label_name] = if_true_dest;
+
+        labelOriginMap[if_end_label_name] = if_end_origin;
+        labelDestMap[if_end_label_name] = if_end_dest;
+    }
+    break;
 
     case FunDeclK:
     {
@@ -299,6 +334,18 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     }
     break;
 
+    case AssignK:
+    {
+        std::cout << "This is Assign\n";
+        // BucketList record = getRecordFromSymbleTableAtScope(node->child[0]);
+        // record = record == NULL ? getRecordFromSymbleTableAtGlobalScope(node->child[0]) : record;
+        // std::cout << record->memloc << "\n";
+        generateCode(node->child[0]);
+        std::cout << "Back to assign\n";
+        generateCode(node->child[1]);
+    }
+    break;
+
     default:
         if (shouldShowVisitingMessages)
             std::cout
@@ -328,6 +375,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     break;
     case ConstK:
     {
+        std::cout << "****************************************START\n*";
         std::string fullNumber, byteNumber;
         fullNumber = std::bitset<32>(node->attr.val).to_string();
         print(
@@ -360,6 +408,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
                         AcumulatorRegister));
             }
         }
+        std::cout << "****************************************END\n*";
     }
     break;
 
@@ -518,6 +567,7 @@ Instruction *nopWithLabel(std::string label)
 {
     Instruction *temp = new TypeDInstruction(74, "NOP", 0, 0);
     temp->setlabel(label);
+
     return temp;
 }
 

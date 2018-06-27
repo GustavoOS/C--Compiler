@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);
+    cg.linker();
   }
 #if !NO_CODE
   if (!Error)
