@@ -14,8 +14,9 @@ enum Registers
   TemporaryRegister,
   FramePointer,
   GlobalPointer,
-  SwapRegister,
-  ReturnAddressRegister
+  BaseAddressRegister,
+  ReturnAddressRegister,
+  SwapRegister = 0
 };
 
 enum ConditionCodes

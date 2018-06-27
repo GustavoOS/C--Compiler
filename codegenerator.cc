@@ -336,12 +336,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case AssignK:
     {
-        std::cout << "This is Assign\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "This is Assign\n";
         // BucketList record = getRecordFromSymbleTableAtScope(node->child[0]);
         // record = record == NULL ? getRecordFromSymbleTableAtGlobalScope(node->child[0]) : record;
         // std::cout << record->memloc << "\n";
         generateCode(node->child[0]);
-        std::cout << "Back to assign\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "Back to assign\n";
         generateCode(node->child[1]);
     }
     break;
@@ -364,51 +366,68 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     {
     case OpK:
     {
-        generateCode(node->child[0]);
-        print(
-            pushAcumulator());
-        generateCode(node->child[1]);
-        print(
-            popRegister(TemporaryRegister));
-        generateOperationCode(node);
+
+        if (node->attr.op == SLASH)
+        {
+            generateCode(node->child[0]);
+            print(
+                pushAcumulator());
+            generateCode(node->child[1]);
+            print(
+                popRegister(TemporaryRegister));
+            generateOperationCode(node);
+        }
+        else
+        {
+            generateCode(node->child[0]);
+            print(
+                pushAcumulator());
+            generateCode(node->child[1]);
+            print(
+                popRegister(TemporaryRegister));
+            generateOperationCode(node);
+        }
     }
     break;
     case ConstK:
     {
-        std::cout << "****************************************START\n*";
+
         std::string fullNumber, byteNumber;
         fullNumber = std::bitset<32>(node->attr.val).to_string();
-        print(
-            loadImediateToRegister(AcumulatorRegister, 0));
-        print(
-            loadImediateToRegister(SwapRegister, 0));
+
         for (int i = 0; i < 4; i++)
         {
             byteNumber = fullNumber.substr(8 * i, 8);
             std::bitset<8> partialNumber(byteNumber);
             int byteAsInt = (int)partialNumber.to_ulong();
-            if (byteAsInt != 0)
+
+            if (i == 0)
+            {
+                print(loadImediateToRegister(AcumulatorRegister, byteAsInt));
+            }
+            else
             {
                 print(
-                    loadImediateToRegister(TemporaryRegister, byteAsInt));
-                print(
-                    loadImediateToRegister(SwapRegister, (24 - (8 * i))));
-                print(
-                    new TypeEInstruction(
-                        14,
+                    new TypeAInstruction(
+                        1,
                         "LSL",
-                        TemporaryRegister,
-                        SwapRegister));
-                print(
-                    new TypeBInstruction(
-                        4,
-                        "ADD",
-                        SwapRegister,
+                        8,
                         AcumulatorRegister,
                         AcumulatorRegister));
+                if (byteAsInt != 0)
+                {
+                    print(
+                        loadImediateToRegister(TemporaryRegister, byteAsInt));
+                    print(
+                        new TypeBInstruction(
+                            4,
+                            "ADD",
+                            TemporaryRegister,
+                            AcumulatorRegister,
+                            AcumulatorRegister));
+                }
             }
         }
-        std::cout << "****************************************END\n*";
     }
     break;
 
@@ -460,12 +479,14 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
         break;
 
     case SLASH:
-        print(new TypeCInstruction(
-            6,
-            "ADD",
-            0,
-            AcumulatorRegister,
-            SwapRegister));
+        print(
+            new TypeEInstruction(
+                36,
+                "MOV",
+                AcumulatorRegister,
+                SwapRegister
+            )
+        );
         print(
             new TypeCInstruction(
                 6,
@@ -474,12 +495,13 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister));
         print(
-            new TypeCInstruction(
-                6,
-                "ADD",
-                0,
+            new TypeEInstruction(
+                35,
+                "MOV",
                 SwapRegister,
-                TemporaryRegister));
+                TemporaryRegister
+            )
+        );
         print(
             new TypeEInstruction(
                 34,
