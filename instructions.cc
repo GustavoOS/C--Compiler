@@ -12,18 +12,16 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(
-    std::string gotolabel,
-    int conditionCode)
+BranchLabel::BranchLabel(std::string gotolabel, TypeDInstruction *lByte, TypeDInstruction *rByte)
 {
     tolabel = gotolabel;
-    name = "Branch to " + tolabel;
-    condition = conditionCode;
+    leftByte = lByte;
+    rightByte = rByte;
 }
 
 std::string BranchLabel::to_string()
 {
-    return "B " + std::to_string(condition) + " " + tolabel + "\n";
+    return "Branch to " +  tolabel + "\n";
 }
 
 TypeAInstruction::TypeAInstruction(

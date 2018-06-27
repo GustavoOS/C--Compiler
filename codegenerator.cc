@@ -43,7 +43,7 @@ void CodeGenerator::print(Instruction *instruction)
         std::cout << inst;
     }
     generatedCode += inst;
-    code.push_back(*instruction);
+    code.push_back(instruction);
 }
 
 void CodeGenerator::generate(TreeNode *node)
@@ -55,19 +55,47 @@ void CodeGenerator::generate(TreeNode *node)
 
 void CodeGenerator::linker()
 {
-    for (auto item : labelOriginMap)
-    {
-        std::string label = item.first;
-        Instruction *label_dest = item.second;
-        std::cout << label << " -> " << label_dest->name << std::endl;
-    }
-
     for (auto item : labelDestMap)
     {
         std::string label = item.first;
         Instruction *label_dest = item.second;
         std::cout << label << " -> " << label_dest->name << std::endl;
     }
+    int i = 0;
+    for (Instruction *inst : code)
+    {
+        inst->relativeAddress = i++;
+    }
+
+    for (auto item : labelOriginMap)
+    {
+        std::string label = item.first;
+        BranchLabel *label_dest = item.second;
+        int destinationAddress = labelDestMap[label]->relativeAddress;
+        std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
+        std::string byteNumber = fullNumber.substr(0, 8);
+        std::bitset<8> partialNumber(byteNumber);
+        int byteAsInt = (int)partialNumber.to_ulong();
+        label_dest->leftByte->immediate = byteAsInt;
+
+        std::string byteNumber2 = fullNumber.substr(8, 8);
+        std::bitset<8> partialNumber2(byteNumber2);
+        int byteAsInt2 = (int)partialNumber2.to_ulong();
+
+        label_dest->rightByte->immediate = byteAsInt2;
+        std::cout << label << " -> " << label_dest->to_string() << std::endl;
+
+        std::cout << "destinationAddress: " << destinationAddress << std::endl;
+        std::cout << "left : " << label_dest->leftByte->to_string() << std::endl;
+        std::cout << "right: " << label_dest->rightByte->to_string() << std::endl;
+    }
+
+    // printf("AFTER LINKER:");
+
+    // for (Instruction *inst : code)
+    // {
+    //     std::cout << inst->to_string();
+    // }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -110,6 +138,61 @@ BucketList getRecordFromSymbleTableAtScope(TreeNode *node)
 BucketList getRecordFromSymbleTableAtGlobalScope(TreeNode *node)
 {
     return st_find_at_scope(node->attr.name, "global");
+}
+
+void CodeGenerator::generateCodeForBranch(std::string branch_name)
+{
+    std::cout << "+++++++++++++ Branch start +++++++++++++" << std::endl;
+    print(
+        new TypeEInstruction(
+            36,
+            "MOV",
+            AcumulatorRegister,
+            SwapRegister));
+
+    TypeDInstruction *leftByte = new TypeDInstruction(8, "MOV", TemporaryRegister, 0);
+
+    TypeDInstruction *rightByte = new TypeDInstruction(8, "MOV", TemporaryRegister, 0);
+
+    print(leftByte);
+
+    print(
+        new TypeAInstruction(
+            1,
+            "LSL",
+            8,
+            TemporaryRegister,
+            TemporaryRegister));
+
+    print(rightByte);
+
+    print(new TypeBInstruction(
+        4,
+        "ADD",
+        TemporaryRegister,
+        AcumulatorRegister,
+        TemporaryRegister));
+
+    print(new TypeBInstruction(
+        4,
+        "ADD",
+        TemporaryRegister,
+        BaseAddressRegister,
+        TemporaryRegister));
+
+    BranchLabel *branchLabel = new BranchLabel(branch_name, leftByte, rightByte);
+
+    print(
+        new TypeEInstruction(
+            35,
+            "MOV",
+            SwapRegister,
+            AcumulatorRegister));
+
+    print(new TypeFInstruction(38, "BX", AL, TemporaryRegister));
+
+    labelOriginMap[branch_name] = branchLabel;
+    std::cout << "+++++++++++++ Branch end +++++++++++++" << std::endl;
 }
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
@@ -178,18 +261,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         generateCode(node->child[0]);
         std::string if_true_label_name = "if_true_" + std::to_string(node->attr.val);
         std::string if_end_label_name = "if_end_" + std::to_string(node->attr.val);
-
-        Instruction *if_true_origin = new BranchLabel(if_true_label_name, node->child[0]->attr.op);
-
-        print(if_true_origin);
+        generateCodeForBranch(if_true_label_name);
 
         // Generate code for ELSE code
 
         if (node->child[2] != NULL)
             generateCode(node->child[2]);
 
-        Instruction *if_end_origin = new BranchLabel(if_end_label_name, AL /* Always */);
-        print(if_end_origin);
+        generateCodeForBranch(if_end_label_name);
 
         Instruction *if_true_dest = nopWithLabel(if_true_label_name);
         print(if_true_dest);
@@ -202,10 +281,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         print(if_end_dest);
 
         // Adding labels to map
-        labelOriginMap[if_true_label_name] = if_true_origin;
         labelDestMap[if_true_label_name] = if_true_dest;
-
-        labelOriginMap[if_end_label_name] = if_end_origin;
         labelDestMap[if_end_label_name] = if_end_dest;
     }
     break;
@@ -484,9 +560,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 36,
                 "MOV",
                 AcumulatorRegister,
-                SwapRegister
-            )
-        );
+                SwapRegister));
         print(
             new TypeCInstruction(
                 6,
@@ -499,9 +573,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 35,
                 "MOV",
                 SwapRegister,
-                TemporaryRegister
-            )
-        );
+                TemporaryRegister));
         print(
             new TypeEInstruction(
                 34,
@@ -527,8 +599,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
 void CodeGenerator::createHeader()
 {
     print(
-        new TypeDInstruction(56, "ADD", BaseAddressRegister, 0);
-    );
+        new TypeDInstruction(56, "ADD", BaseAddressRegister, 0));
     if (shouldShowVisitingMessages)
         std::cout << "This is a header\n";
 }

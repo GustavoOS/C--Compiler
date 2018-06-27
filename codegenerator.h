@@ -53,7 +53,12 @@ public:
   bool isLabel = false;
   void setlabel(std::string newLabel);
   std::string to_string_with_label();
+
+  int relativeAddress;
 };
+
+class BranchLabel;
+class TypeDInstruction;
 
 Instruction *nopWithLabel(std::string label);
 Instruction *loadImediateToRegister(Registers regis, int number);
@@ -73,9 +78,9 @@ public:
 
 private:
   std::string generatedCode;
-  std::vector<Instruction> code;
+  std::vector<Instruction*> code;
   std::map<std::string, Instruction *> labelDestMap;
-  std::map<std::string, Instruction *> labelOriginMap;
+  std::map<std::string, BranchLabel *> labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
 
@@ -88,19 +93,24 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
+  void generateCodeForBranch(std::string branch_name);
 
   void DestroyARAndExitFunction(TreeNode *);
 };
-class BranchLabel : public Instruction
+
+
+class BranchLabel
 {
   std::string tolabel;
 
 public:
-  BranchLabel(
-      std::string gotolabel,
-      int conditionCode);
+  TypeDInstruction *leftByte;
+  TypeDInstruction *rightByte;
+
+  BranchLabel(std::string gotolabel, TypeDInstruction *lByte, TypeDInstruction *rByte);
   std::string to_string();
 };
+
 class TypeAInstruction : public Instruction
 {
 public:
