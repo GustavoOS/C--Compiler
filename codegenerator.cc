@@ -443,26 +443,23 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     case OpK:
     {
 
-        if (node->attr.op == SLASH)
-        {
-            generateCode(node->child[0]);
-            print(
-                pushAcumulator());
-            generateCode(node->child[1]);
-            print(
-                popRegister(TemporaryRegister));
-            generateOperationCode(node);
-        }
-        else
-        {
-            generateCode(node->child[0]);
-            print(
-                pushAcumulator());
-            generateCode(node->child[1]);
-            print(
-                popRegister(TemporaryRegister));
-            generateOperationCode(node);
-        }
+        generateCode(node->child[0]);
+
+        print(
+            pushAcumulator());
+
+        generateCode(node->child[1]);
+
+        print(
+            moveToLowRegister(
+                AcumulatorRegister,
+                TemporaryRegister));
+
+        print(
+            popRegister(
+                AcumulatorRegister));
+
+        generateOperationCode(node);
     }
     break;
     case ConstK:
@@ -557,25 +554,6 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
     case SLASH:
         print(
             new TypeEInstruction(
-                36,
-                "MOV",
-                AcumulatorRegister,
-                SwapRegister));
-        print(
-            new TypeCInstruction(
-                6,
-                "ADD",
-                0,
-                TemporaryRegister,
-                AcumulatorRegister));
-        print(
-            new TypeEInstruction(
-                35,
-                "MOV",
-                SwapRegister,
-                TemporaryRegister));
-        print(
-            new TypeEInstruction(
                 34,
                 "DIV",
                 TemporaryRegister,
@@ -665,6 +643,16 @@ Instruction *nopWithLabel(std::string label)
     temp->setlabel(label);
 
     return temp;
+}
+
+Instruction *moveToLowRegister(Registers origin, Registers destination)
+{
+    return new TypeCInstruction(
+        6,
+        "ADD",
+        0,
+        origin,
+        destination);
 }
 
 void hr(std::string middle)

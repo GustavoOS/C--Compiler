@@ -66,6 +66,7 @@ Instruction *pushAcumulator();
 Instruction *pushRegister(int);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
+Instruction *moveToLowRegister(Registers origin, Registers destination);
 
 void hr(std::string);
 
@@ -78,7 +79,7 @@ public:
 
 private:
   std::string generatedCode;
-  std::vector<Instruction*> code;
+  std::vector<Instruction *> code;
   std::map<std::string, Instruction *> labelDestMap;
   std::map<std::string, BranchLabel *> labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
@@ -97,7 +98,6 @@ private:
 
   void DestroyARAndExitFunction(TreeNode *);
 };
-
 
 class BranchLabel
 {
