@@ -6,7 +6,7 @@
 #include <iostream>
 #include <bitset>
 
-ConditionCodes translateCondition(int operation)
+ConditionCodes translateCondition(TokenType operation)
 {
 
     switch (operation)
@@ -59,7 +59,7 @@ void CodeGenerator::linker()
     {
         std::string label = item.first;
         Instruction *label_dest = item.second;
-        std::cout << label << " -> " << label_dest->name << std::endl;
+        std::cout << label << " -> " << label_dest->name << "\n";
     }
     int i = 0;
     for (Instruction *inst : code)
@@ -83,11 +83,11 @@ void CodeGenerator::linker()
         int byteAsInt2 = (int)partialNumber2.to_ulong();
 
         label_dest->rightByte->immediate = byteAsInt2;
-        std::cout << label << " -> " << label_dest->to_string() << std::endl;
+        std::cout << label << " -> " << label_dest->to_string() << "\n";
 
-        std::cout << "destinationAddress: " << destinationAddress << std::endl;
-        std::cout << "left : " << label_dest->leftByte->to_string() << std::endl;
-        std::cout << "right: " << label_dest->rightByte->to_string() << std::endl;
+        std::cout << "destinationAddress: " << destinationAddress << "\n";
+        std::cout << "left : " << label_dest->leftByte->to_string() << "\n";
+        std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
     }
 
     // printf("AFTER LINKER:");
@@ -132,7 +132,9 @@ void CodeGenerator::generateCode(TreeNode *node)
 
 BucketList getRecordFromSymbleTableAtScope(TreeNode *node)
 {
-    return st_find_at_scope(node->attr.name, (char *)node->scope.c_str());
+    return st_find_at_scope(
+        node->attr.name,
+        node->scope);
 }
 
 BucketList getRecordFromSymbleTableAtGlobalScope(TreeNode *node)
@@ -140,9 +142,15 @@ BucketList getRecordFromSymbleTableAtGlobalScope(TreeNode *node)
     return st_find_at_scope(node->attr.name, "global");
 }
 
-void CodeGenerator::generateCodeForBranch(std::string branch_name)
+BucketList getRecordFromSymbleTable(TreeNode *node)
 {
-    std::cout << "+++++++++++++ Branch start +++++++++++++" << std::endl;
+    return st_find(node->attr.name,
+                   node->scope);
+}
+void CodeGenerator::generateCodeForBranch(std::string branch_name, ConditionCodes condition)
+{
+    std::cout << "+++++++++++++ Branch start +++++++++++++"
+              << "\n";
     print(
         new TypeEInstruction(
             36,
@@ -189,10 +197,11 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name)
             SwapRegister,
             AcumulatorRegister));
 
-    print(new TypeFInstruction(38, "BX", AL, TemporaryRegister));
+    print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
 
     labelOriginMap[branch_name] = branchLabel;
-    std::cout << "+++++++++++++ Branch end +++++++++++++" << std::endl;
+    std::cout << "+++++++++++++ Branch end +++++++++++++"
+              << "\n";
 }
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
@@ -261,14 +270,16 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         generateCode(node->child[0]);
         std::string if_true_label_name = "if_true_" + std::to_string(node->attr.val);
         std::string if_end_label_name = "if_end_" + std::to_string(node->attr.val);
-        generateCodeForBranch(if_true_label_name);
+        generateCodeForBranch(if_true_label_name,
+                              translateCondition(
+                                  node->child[0]->attr.op));
 
         // Generate code for ELSE code
 
         if (node->child[2] != NULL)
             generateCode(node->child[2]);
 
-        generateCodeForBranch(if_end_label_name);
+        generateCodeForBranch(if_end_label_name, AL);
 
         Instruction *if_true_dest = nopWithLabel(if_true_label_name);
         print(if_true_dest);
@@ -412,14 +423,56 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case AssignK:
     {
-        if (shouldShowVisitingMessages)
-            std::cout << "This is Assign\n";
-        // BucketList record = getRecordFromSymbleTableAtScope(node->child[0]);
-        // record = record == NULL ? getRecordFromSymbleTableAtGlobalScope(node->child[0]) : record;
-        // std::cout << record->memloc << "\n";
-        generateCode(node->child[0]);
-        if (shouldShowVisitingMessages)
-            std::cout << "Back to assign\n";
+        // if (shouldShowVisitingMessages)
+        std::cout << "This is Assign\n";
+        // printNode(node->child[0]);
+        printNode(node->child[1]);
+        BucketList record = getRecordFromSymbleTable(node->child[0]);
+
+        generateCode(node->child[1]);
+
+        TreeNode *varToBeAssignedInto = node->child[0];
+        std::cout << "Back to assign from value\n";
+        switch (varToBeAssignedInto->kind.exp)
+        {
+        case IdK:
+        {
+            std::cout << "VARIABLE\n";
+            print(
+                loadImediateToRegister(TemporaryRegister, record->memloc * 4));
+            if (varToBeAssignedInto->scope != "global")
+                print(
+                    new TypeEInstruction(
+                        21,
+                        "NEG",
+                        TemporaryRegister,
+                        TemporaryRegister));
+            print(
+                new TypeBInstruction(
+                    40,
+                    "STR",
+                    varToBeAssignedInto->scope == "global" ? GlobalPointer : FramePointer,
+                    TemporaryRegister,
+                    AcumulatorRegister
+                )
+            );
+        }
+        break;
+        case VetK:
+            std::cout << "VECTOR\n";
+            break;
+
+        default:
+            std::cout << "&$#$*&$#@#$*( ERROR assigning into "
+                      << node->child[0]->kind.exp
+                      << "@#$*(*&$#$*\n";
+            break;
+        }
+
+        std::cout << record->memloc << "\n";
+
+        // if (shouldShowVisitingMessages)
+
         generateCode(node->child[1]);
     }
     break;
@@ -657,7 +710,8 @@ Instruction *moveToLowRegister(Registers origin, Registers destination)
 
 void hr(std::string middle)
 {
-    std::cout << "------------ " + middle + " ------------\n";
+    std::string rule = "-----------------------------";
+    std::cout << rule << " FUNCTION " + middle + " " << rule << "\n";
 }
 
 void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)

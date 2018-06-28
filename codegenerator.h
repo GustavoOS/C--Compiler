@@ -94,7 +94,7 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
-  void generateCodeForBranch(std::string branch_name);
+  void generateCodeForBranch(std::string branch_name, ConditionCodes condition);
 
   void DestroyARAndExitFunction(TreeNode *);
 };

@@ -244,6 +244,7 @@ static void insertNode(TreeNode *t)
         {
           t->type = l->dtype;
           st_reference(l, t->lineno);
+          t->scope = scope;
         }
         else
         {
@@ -266,7 +267,7 @@ static void insertNode(TreeNode *t)
         // {
         t->type = l->dtype;
         st_reference(l, t->lineno);
-        //t->scope = std::string(scope);
+        t->scope = scope;
         // }
         // else
         // {

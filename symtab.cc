@@ -38,7 +38,7 @@ static int hash(char *key)
 }
 
 /* the hash table */
-static BucketList hashTable[SIZE];
+BucketList hashTable[SIZE];
 
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table
@@ -106,8 +106,7 @@ int cantMatchNameAndScopeInRange(BucketList node, char *name, std::string escopo
 
 BucketList st_find_at_scope(char *name, std::string escopo)
 {
-  int hashIndex = hash(name);
-  BucketList EntryNode = hashTable[hashIndex];
+  BucketList EntryNode = hashTable[hash(name)];
   while (cantMatchNameAndScopeInRange(EntryNode, name, escopo))
   {
     EntryNode = advanceNode(EntryNode);
@@ -123,7 +122,7 @@ BucketList st_find(char *name, std::string escopo)
 {
   BucketList result = st_find_at_scope(name, escopo);
   if (result == NULL)
-    result = st_find_at_scope(name, (char *)"global");
+    result = st_find_at_scope(name, "global");
   return result;
 }
 
