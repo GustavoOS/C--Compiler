@@ -41,7 +41,7 @@ FILE *code;
 /* allocate and set tracing flags */
 int EchoSource = FALSE;
 int TraceScan = FALSE;
-int TraceParse = TRUE;
+int TraceParse = FALSE;
 int TraceAnalyze = TRUE;
 int TraceCode = TRUE;
 
@@ -50,28 +50,28 @@ int Error = FALSE;
 int main(int argc, char *argv[])
 {
   TreeNode *syntaxTree;
-  char pgm[120]; /* source code file name */
+  std::string pgm; /* source code file name */
   if (argc != 2)
   {
     fprintf(stderr, "usage: %s <filename>\n", argv[0]);
     exit(1);
   }
-  strcpy(pgm, argv[1]);
-  if (strchr(pgm, '.') == NULL)
-    strcat(pgm, ".tny");
-  originalSource = fopen(pgm, "r");
+  pgm = std::string(argv[1]);
+  if (pgm.find('.') == std::string::npos)
+    pgm = pgm + ".c";
+  originalSource = fopen(pgm.c_str(), "r");
   if (originalSource == NULL)
   {
-    fprintf(stderr, "File %s not found\n", pgm);
+    fprintf(stderr, "File %s not found\n", pgm.c_str());
     exit(1);
   }
   fclose(originalSource);
   listing = stdout; /* send listing to screen */
   LibraryIncluder includer = LibraryIncluder(pgm);
   source = includer.getFinalFile();
-  lineno = - includer.libSize;
+  lineno = -includer.libSize;
   // lineno = 0;
-  fprintf(listing, "\nC- COMPILATION: %s\n", pgm);
+  fprintf(listing, "\nC- COMPILATION: %s\n", pgm.c_str());
 #if NO_PARSE
   while (getToken() != ENDFILE)
     ;
