@@ -527,8 +527,8 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
             new TypeBInstruction(
                 4,
                 "ADD",
-                AcumulatorRegister,
                 TemporaryRegister,
+                AcumulatorRegister,
                 AcumulatorRegister));
         break;
 
@@ -537,8 +537,8 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
             new TypeBInstruction(
                 5,
                 "SUB",
-                AcumulatorRegister,
                 TemporaryRegister,
+                AcumulatorRegister,
                 AcumulatorRegister));
         break;
 
@@ -565,8 +565,8 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
             new TypeEInstruction(
                 22,
                 "CMP",
-                TemporaryRegister,
-                AcumulatorRegister));
+                AcumulatorRegister,
+                TemporaryRegister));
 
         break;
     }
