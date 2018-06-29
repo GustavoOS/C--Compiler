@@ -273,10 +273,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         generateCode(node->child[1]);
         generateCodeForBranch(while_end_label_name, AL);
 
-        Instruction * while_end_dest = nopWithLabel(while_end_label_name);
+        Instruction *while_end_dest = nopWithLabel(while_end_label_name);
         print(while_end_dest);
-
-        
 
         //Destination registration
         labelDestMap[while_label_name] = while_dest;
