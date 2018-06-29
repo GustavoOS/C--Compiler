@@ -242,9 +242,10 @@ static void insertNode(TreeNode *t)
 
         if (l->vtype == VECTOR)
         {
+          BucketList ref;
           t->type = l->dtype;
-          st_reference(l, t->lineno);
-          t->scope = scope;
+          ref = st_reference(l, t->lineno);
+          t->scope = ref->scope;
         }
         else
         {
@@ -263,16 +264,10 @@ static void insertNode(TreeNode *t)
       }
       else
       {
-        // if (l->vtype == VARIABLE)
-        // {
+        BucketList ref;
         t->type = l->dtype;
-        st_reference(l, t->lineno);
-        t->scope = scope;
-        // }
-        // else
-        // {
-        //   isNotVarError(t);
-        // }
+        ref = st_reference(l, t->lineno);
+        t->scope = ref->scope;
       }
     }
     break;

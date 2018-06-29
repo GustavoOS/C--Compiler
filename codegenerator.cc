@@ -152,9 +152,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name, ConditionCode
     std::cout << "+++++++++++++ Branch start +++++++++++++"
               << "\n";
     print(
-        new TypeEInstruction(
-            36,
-            "MOV",
+        moveLowToHigh(
             AcumulatorRegister,
             SwapRegister));
 
@@ -191,11 +189,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name, ConditionCode
     BranchLabel *branchLabel = new BranchLabel(branch_name, leftByte, rightByte);
 
     print(
-        new TypeEInstruction(
-            35,
-            "MOV",
-            SwapRegister,
-            AcumulatorRegister));
+        moveHighToLow(AcumulatorRegister, SwapRegister));
 
     print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
 
@@ -423,13 +417,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case AssignK:
     {
-        // if (shouldShowVisitingMessages)
-        std::cout << "This is Assign\n";
-        // printNode(node->child[0]);
-        printNode(node->child[1]);
-        BucketList record = getRecordFromSymbleTable(node->child[0]);
 
-        generateCode(node->child[1]);
+        std::cout << "This is Assign\n";
 
         TreeNode *varToBeAssignedInto = node->child[0];
         std::cout << "Back to assign from value\n";
@@ -438,29 +427,57 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         case IdK:
         {
             std::cout << "VARIABLE\n";
-            print(
-                loadImediateToRegister(TemporaryRegister, record->memloc * 4));
-            if (varToBeAssignedInto->scope != "global")
-                print(
-                    new TypeEInstruction(
-                        21,
-                        "NEG",
-                        TemporaryRegister,
-                        TemporaryRegister));
+            generateCode(node->child[1]);
+            fetchVarOffset(varToBeAssignedInto, TemporaryRegister);
             print(
                 new TypeBInstruction(
                     40,
                     "STR",
-                    varToBeAssignedInto->scope == "global" ? GlobalPointer : FramePointer,
+                    varToBeAssignedInto->scope == "global"
+                        ? GlobalPointer
+                        : FramePointer,
                     TemporaryRegister,
-                    AcumulatorRegister
-                )
-            );
+                    AcumulatorRegister));
         }
         break;
         case VetK:
+        {
             std::cout << "VECTOR\n";
-            break;
+            loadVariable(varToBeAssignedInto, TemporaryRegister);
+            print(
+                pushRegister(TemporaryRegister));
+            generateCode(varToBeAssignedInto->child[0]);
+            print(
+                pushAcumulator());
+            generateCode(node->child[1]);
+            print(
+                moveLowToHigh(AcumulatorRegister, SwapRegister));
+            print(popRegister(AcumulatorRegister));
+            print(popRegister(TemporaryRegister));
+            print(
+                new TypeBInstruction(
+                    4,
+                    "ADD",
+                    AcumulatorRegister,
+                    TemporaryRegister,
+                    TemporaryRegister));
+            print(
+                moveHighToLow(
+                    AcumulatorRegister,
+                    SwapRegister));
+            print(
+                new TypeAInstruction(
+                    48,
+                    "STR",
+                    0,
+                    TemporaryRegister,
+                    AcumulatorRegister));
+
+            print(
+                moveLowToHigh(AcumulatorRegister, SwapRegister));
+                
+        }
+        break;
 
         default:
             std::cout << "&$#$*&$#@#$*( ERROR assigning into "
@@ -469,11 +486,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             break;
         }
 
-        std::cout << record->memloc << "\n";
-
         // if (shouldShowVisitingMessages)
-
-        generateCode(node->child[1]);
+        std::cout << "Assign end\n";
     }
     break;
 
@@ -504,7 +518,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         generateCode(node->child[1]);
 
         print(
-            moveToLowRegister(
+            moveLowToLowRegister(
                 AcumulatorRegister,
                 TemporaryRegister));
 
@@ -667,7 +681,7 @@ Instruction *popRegister(Registers reg)
         reg);
 }
 
-Instruction *pushRegister(int reg)
+Instruction *pushRegister(Registers reg)
 {
     return new TypeEInstruction(
         67,
@@ -698,7 +712,7 @@ Instruction *nopWithLabel(std::string label)
     return temp;
 }
 
-Instruction *moveToLowRegister(Registers origin, Registers destination)
+Instruction *moveLowToLowRegister(Registers origin, Registers destination)
 {
     return new TypeCInstruction(
         6,
@@ -706,6 +720,54 @@ Instruction *moveToLowRegister(Registers origin, Registers destination)
         0,
         origin,
         destination);
+}
+
+Instruction *moveLowToHigh(Registers low, Registers high)
+{
+    return new TypeEInstruction(
+        36,
+        "MOV",
+        low,
+        high);
+}
+
+Instruction *moveHighToLow(Registers low, Registers high)
+{
+    return new TypeEInstruction(
+        35,
+        "MOV",
+        high,
+        low);
+}
+
+void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
+{
+    fetchVarOffset(node, reg);
+    print(
+        new TypeBInstruction(
+            44,
+            "LDR",
+            TemporaryRegister,
+            node->scope == "global"
+                ? GlobalPointer
+                : FramePointer,
+            reg));
+}
+void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
+{
+    BucketList record = getRecordFromSymbleTable(node);
+    print(
+        loadImediateToRegister(reg, record->memloc * 4));
+    if (node->scope != "global")
+    {
+        std::cout << "Entrou\n";
+        print(
+            new TypeEInstruction(
+                21,
+                "NEG",
+                reg,
+                reg));
+    }
 }
 
 void hr(std::string middle)
