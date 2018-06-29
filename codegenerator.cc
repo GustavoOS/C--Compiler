@@ -254,13 +254,36 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case WhileK:
-        {
-            std::string while_label_name = "while_" + std::to_string(node->attr.val);
-            std::string while_do_label_name = "while_do_" + std::to_string(node->attr.val);
-            std::string while_end_label_name = "while_end_" + std::to_string(node->attr.val);
-            std::cout << "Missing implementation on WHILE\n";
-        }
-        break;
+    {
+        //Label names
+        std::string while_label_name = "while_" + std::to_string(node->attr.val);
+        std::string while_do_label_name = "while_do_" + std::to_string(node->attr.val);
+        std::string while_end_label_name = "while_end_" + std::to_string(node->attr.val);
+        Instruction *while_dest = nopWithLabel(while_label_name);
+        print(while_dest);
+        generateCode(node->child[0]);
+        generateCodeForBranch(
+            while_do_label_name,
+            translateCondition(node->child[0]->attr.op));
+        generateCodeForBranch(
+            while_end_label_name,
+            AL);
+        Instruction *while_do_dest = nopWithLabel(while_do_label_name);
+
+        generateCode(node->child[1]);
+        generateCodeForBranch(while_end_label_name, AL);
+
+        Instruction * while_end_dest = nopWithLabel(while_end_label_name);
+        print(while_end_dest);
+
+        
+
+        //Destination registration
+        labelDestMap[while_label_name] = while_dest;
+        labelDestMap[while_do_label_name] = while_do_dest;
+        labelDestMap[while_end_label_name] = while_end_dest;
+    }
+    break;
 
     case IfK:
     {
