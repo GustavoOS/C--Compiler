@@ -219,9 +219,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case VetDeclK:
-        // std::cout << "Vector size: " << node->attr.val << "\n";
-        // std::cout << "Location: " << getRecordFromSymbleTableAtScope(node)->memloc << "\n";
-        //TODO GENERATE CODE
         print(new TypeCInstruction(
             6,
             "ADD",
@@ -255,6 +252,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             std::cout << "Variable " << node->attr.name << "\n";
 
         break;
+
     case WhileK:
         generateCode(node->child[1]);
         break;
@@ -475,7 +473,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
             print(
                 moveLowToHigh(AcumulatorRegister, SwapRegister));
-                
         }
         break;
 
@@ -492,9 +489,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     break;
 
     default:
-        if (shouldShowVisitingMessages)
-            std::cout
-                << "Code not generated for this node\n";
+        // if (shouldShowVisitingMessages)
+        std::cout
+            << "Code not generated for this node\n";
         break;
     }
 }
@@ -570,10 +567,29 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         }
     }
     break;
+    case IdK:
+    {
+        loadVariable(node, AcumulatorRegister);
+    }
+    break;
+
+    case VetK:
+    {
+        generateCode(node->child[0]);
+        loadVariable(node, TemporaryRegister);
+        print(
+            new TypeBInstruction(
+                44,
+                "LDR",
+                TemporaryRegister,
+                AcumulatorRegister,
+                AcumulatorRegister));
+    }
+    break;
 
     default:
-        if (shouldShowVisitingMessages)
-            std::cout << "Code not generated for this expr\n";
+        // if (shouldShowVisitingMessages)
+        std::cout << "Code not generated for this expr\n";
         break;
     }
 }
@@ -747,7 +763,7 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
         new TypeBInstruction(
             44,
             "LDR",
-            TemporaryRegister,
+            reg,
             node->scope == "global"
                 ? GlobalPointer
                 : FramePointer,
