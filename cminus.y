@@ -15,7 +15,14 @@
     static int yylex(void);
     int yyerror( const char * message);
     int ifcount = 0;
+    int whilecount = 0;
 
+    int newWhile()
+    {
+        int k = whilecount;
+        whilecount++;
+        return k;
+    }
     int newif(){
         ifcount++;
         return ifcount-1;
@@ -255,6 +262,7 @@ selecao-decl:   IF LPAREN expressao RPAREN statement %prec "then"
 iteracao-decl:  WHILE LPAREN expressao RPAREN statement
                     {       
                         $$ = newStmtNode(WhileK);
+                        $$->attr.val = newWhile();
                         $$->child[0] = $3;
                         $$->child[1] = $5;
                     }

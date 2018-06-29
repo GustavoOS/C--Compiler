@@ -254,7 +254,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case WhileK:
-        generateCode(node->child[1]);
+        {
+            std::string while_label_name = "while_" + std::to_string(node->attr.val);
+            std::string while_do_label_name = "while_do_" + std::to_string(node->attr.val);
+            std::string while_end_label_name = "while_end_" + std::to_string(node->attr.val);
+            std::cout << "Missing implementation on WHILE\n";
+        }
         break;
 
     case IfK:
