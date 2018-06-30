@@ -320,6 +320,20 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     }
     break;
 
+    case ReturnK:
+        {
+            
+            if (node->child[0]!=NULL) {
+                generateCode(node->child[0]);
+            }
+            else {
+                print(
+                    loadImediateToRegister(AcumulatorRegister, 0)
+                );
+            }
+        }
+    break;
+
     case FunDeclK:
     {
         std::string FunctionName = std::string(node->attr.name);

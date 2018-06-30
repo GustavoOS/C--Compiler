@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/bin/cminus",
-            "args": ["${workspaceRoot}/tests/programa2.c"],
+            "args": ["${workspaceRoot}/tests/testLibrary/test1.c"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
