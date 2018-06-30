@@ -60,7 +60,7 @@ public:
 class BranchLabel;
 class TypeDInstruction;
 
-Instruction *nopWithLabel(std::string label);
+Instruction *nop();
 Instruction *loadImediateToRegister(Registers regis, int number);
 Instruction *pushAcumulator();
 Instruction *pushRegister(Registers reg);
@@ -71,7 +71,7 @@ Instruction *moveLowToLowRegister(Registers origin, Registers destination);
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
 
-    void hr(std::string);
+void hr(std::string);
 
 class CodeGenerator
 {
@@ -98,9 +98,11 @@ private:
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
   void generateCodeForBranch(std::string branch_name, ConditionCodes condition);
+  void registerLabelInstruction(std::string label, Instruction *Instruction);
 
-  void fetchVarOffset(TreeNode * node, Registers reg);
+  void fetchVarOffset(TreeNode *node, Registers reg);
   void loadVariable(TreeNode *node, Registers reg);
+  void printLabelNop(std::string);
 
   void DestroyARAndExitFunction(TreeNode *);
 };

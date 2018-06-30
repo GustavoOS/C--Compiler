@@ -147,7 +147,8 @@ BucketList getRecordFromSymbleTable(TreeNode *node)
     return st_find(node->attr.name,
                    node->scope);
 }
-void CodeGenerator::generateCodeForBranch(std::string branch_name, ConditionCodes condition)
+void CodeGenerator::
+    generateCodeForBranch(std::string branch_name, ConditionCodes condition)
 {
     std::cout << "+++++++++++++ Branch start +++++++++++++"
               << "\n";
@@ -259,27 +260,24 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string while_label_name = "while_" + std::to_string(node->attr.val);
         std::string while_do_label_name = "while_do_" + std::to_string(node->attr.val);
         std::string while_end_label_name = "while_end_" + std::to_string(node->attr.val);
-        Instruction *while_dest = nopWithLabel(while_label_name);
-        print(while_dest);
+
+        printLabelNop(while_label_name);
+
         generateCode(node->child[0]);
         generateCodeForBranch(
             while_do_label_name,
             translateCondition(node->child[0]->attr.op));
+
         generateCodeForBranch(
             while_end_label_name,
             AL);
-        Instruction *while_do_dest = nopWithLabel(while_do_label_name);
+
+        printLabelNop(while_do_label_name);
 
         generateCode(node->child[1]);
-        generateCodeForBranch(while_end_label_name, AL);
+        generateCodeForBranch(while_label_name, AL);
 
-        Instruction *while_end_dest = nopWithLabel(while_end_label_name);
-        print(while_end_dest);
-
-        //Destination registration
-        labelDestMap[while_label_name] = while_dest;
-        labelDestMap[while_do_label_name] = while_do_dest;
-        labelDestMap[while_end_label_name] = while_end_dest;
+        printLabelNop(while_end_label_name);
     }
     break;
 
@@ -299,19 +297,13 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
         generateCodeForBranch(if_end_label_name, AL);
 
-        Instruction *if_true_dest = nopWithLabel(if_true_label_name);
-        print(if_true_dest);
+        printLabelNop(if_true_label_name);
 
         // Generate code for THEN code
 
         generateCode(node->child[1]);
 
-        Instruction *if_end_dest = nopWithLabel(if_end_label_name);
-        print(if_end_dest);
-
-        // Adding labels to map
-        labelDestMap[if_true_label_name] = if_true_dest;
-        labelDestMap[if_end_label_name] = if_end_dest;
+        printLabelNop(if_end_label_name);
     }
     break;
 
@@ -323,10 +315,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "output") &&
             (FunctionName != "outputLED"))
         {
-
             hr(node->attr.name);
+            std::string func_decl_label = "function_" + std::string(node->attr.name);
             Instruction *labelInstruction = pushRegister(ReturnAddressRegister);
-            labelInstruction->setlabel("function_" + std::string(node->attr.name));
+            registerLabelInstruction(func_decl_label, labelInstruction);
 
             print(labelInstruction);
             print(
@@ -746,12 +738,9 @@ Instruction *pushAcumulator()
     return pushRegister(AcumulatorRegister);
 }
 
-Instruction *nopWithLabel(std::string label)
+Instruction *nop()
 {
-    Instruction *temp = new TypeDInstruction(74, "NOP", 0, 0);
-    temp->setlabel(label);
-
-    return temp;
+    return new TypeDInstruction(74, "NOP", 0, 0);
 }
 
 Instruction *moveLowToLowRegister(Registers origin, Registers destination)
@@ -831,4 +820,17 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
         popRegister(FramePointer));
     print(
         jumpToRegister(ReturnAddressRegister));
+}
+
+void CodeGenerator::registerLabelInstruction(std::string label, Instruction *Instruction)
+{
+    Instruction->setlabel(label);
+    labelDestMap[label] = Instruction;
+}
+
+void CodeGenerator::printLabelNop(std::string label)
+{
+    Instruction *nopInstruction = nop();
+    registerLabelInstruction(label, nopInstruction);
+    print(nopInstruction);
 }
