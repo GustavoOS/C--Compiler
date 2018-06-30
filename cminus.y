@@ -83,7 +83,7 @@ declaracao: var-declaracao
 var-declaracao: tipo-especificador ID
                     {
                         $$ = newStmtNode(VarDeclK);
-                        $$->attr.name = copyString(tokenString);
+                        $$->attr.name = tokenString;
                         $$->type = savedType;
                     }
                     SEMI
@@ -94,7 +94,7 @@ var-declaracao: tipo-especificador ID
                 |tipo-especificador ID
                     {
                         $$ = newStmtNode(VetDeclK);
-                        $$->attr.name = copyString(tokenString);
+                        $$->attr.name = tokenString;
                         $$->type = savedType;
                     }
                     LBRACE NUM
@@ -126,7 +126,7 @@ tipo-especificador: INT
 fun-declaracao: tipo-especificador ID
                 {
                     $$ = newStmtNode(FunDeclK);
-                    $$->attr.name =  copyString(tokenString);;
+                    $$->attr.name =  "fun_" + (std::string) tokenString;
                     $$->type = savedType;
                 } 
                 LPAREN params RPAREN composto-decl
@@ -165,14 +165,14 @@ param-lista:    param-lista COMMA param
 param:  tipo-especificador ID
             { 
                 $$ = newStmtNode(VarDeclK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
                 $$->type = savedType;
             }
 
         | tipo-especificador ID 
             { 
                 $$ = newStmtNode(VectorParamK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
                 $$->type = savedType;
             }
             LBRACE RBRACE
@@ -310,12 +310,12 @@ fator:  LPAREN expressao RPAREN
 var:    ID
             { 
                 $$ = newExpNode(IdK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
             }
         | ID
             {
                 $$ = newExpNode(VetK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
             }
             LBRACE expressao RBRACE
             { 
@@ -425,7 +425,7 @@ ativacao:
         ID 
             {
                 $$ = newStmtNode(FunActiveK);
-                $$->attr.name= copyString(tokenString);
+                $$->attr.name= "fun_" + (std::string) tokenString;
             }
             LPAREN args RPAREN
             {       
@@ -451,14 +451,6 @@ args:   arg-lista
 
 arg-lista:  arg-lista COMMA expressao
                 {       
-                    // YYSTYPE t = $1;
-                    // if (t != NULL)
-                    // { 
-                    //     t = findLastSibling(t);
-                    //     t->sibling = $3;
-                    //     $$ = $1; 
-                    // }
-                    // else $$ = $3;
                     $$ = $3;
                     $$->sibling = $1;
                 }

@@ -115,7 +115,7 @@ class TreeNode
   struct {
     TokenType op; //Token of logic or arithmetic operator
     int val;      // Value of a constant
-    char *name;   //Name of a function or variable (ID) ( int peanutbutter )
+    std::string name;   //Name of a function or variable (ID) ( int peanutbutter )
   } attr;
   ExpType type; /* for type checking of expressions */
   std::string scope; //Used by code generator

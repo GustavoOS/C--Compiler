@@ -33,6 +33,12 @@ CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
+    mainActivation = newStmtNode(FunActiveK);
+    mainActivation->attr.name = "fun_main";
+    mainActivation->type = Integer;
+    mainActivation->attr.val = 0;
+    mainActivation->child[0] = NULL;
+    mainActivation->scope = "global";
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -70,6 +76,7 @@ void CodeGenerator::linker()
     for (auto item : labelOriginMap)
     {
         std::string label = item.first;
+        // std::cout << "label" << label << "\n";
         BranchLabel *label_dest = item.second;
         int destinationAddress = labelDestMap[label]->relativeAddress;
         std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
@@ -220,31 +227,37 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case VetDeclK:
-        print(new TypeCInstruction(
-            6,
-            "ADD",
-            0,
-            HeapArrayRegister,
-            AcumulatorRegister));
-        print(loadImediateToRegister(TemporaryRegister, getRecordFromSymbleTableAtScope(node)->memloc * 4));
-        print(new TypeBInstruction(
-            40,
-            "STR",
-            TemporaryRegister,
-            AcumulatorRegister,
-            AcumulatorRegister));
+
+        fetchVarOffset(node, AcumulatorRegister);
+
+        print(
+            new TypeBInstruction(
+                40,
+                "STR",
+                node->scope == "global" ? GlobalPointer : FramePointer,
+                AcumulatorRegister,
+                HeapArrayRegister));
+
         print(
             loadImediateToRegister(
                 TemporaryRegister,
-                node->attr.val * 4));
-        print(new TypeBInstruction(
-            4,
-            "ADD",
-            TemporaryRegister,
-            AcumulatorRegister,
-            HeapArrayRegister
+                node->attr.val));
+        print(
+            new TypeAInstruction(
+                1,
+                "LSL",
+                2,
+                TemporaryRegister,
+                TemporaryRegister));
+        print(
+            new TypeBInstruction(
+                4,
+                "ADD",
+                TemporaryRegister,
+                HeapArrayRegister,
+                HeapArrayRegister
 
-            ));
+                ));
 
         break;
 
@@ -316,9 +329,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "outputLED"))
         {
             hr(node->attr.name);
-            std::string func_decl_label = "function_" + std::string(node->attr.name);
+
             Instruction *labelInstruction = pushRegister(ReturnAddressRegister);
-            registerLabelInstruction(func_decl_label, labelInstruction);
+            registerLabelInstruction(FunctionName, labelInstruction);
 
             print(labelInstruction);
             print(
@@ -343,6 +356,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunActiveK:
     {
         std::string FunctionName = std::string(node->attr.name);
+        std::string func_decl_label = "function_" + FunctionName;
         generateCode(node->child[0]);
         if (FunctionName == "input")
         {
@@ -376,56 +390,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             }
             else
             {
-                DataSection ds;
-                int variableCountInFunction = ds.getSize(node->attr.name);
-                int argumentCount = node->attr.val;
-                print(
-                    pushRegister(FramePointer));
-                //Build activation record
-                print(
-                    new TypeDInstruction(
-                        8,
-                        "MOV",
-                        AcumulatorRegister,
-                        0));
-                for (
-                    int i = 0;
-                    i < variableCountInFunction - argumentCount;
-                    i++)
-                    print(pushAcumulator());
-                TreeNode *argumentNode = node->child[0];
-                for (int i = 0; i < argumentCount; i++)
-                {
-                    generateCodeForAnyNode(argumentNode);
-                    print(pushAcumulator());
-                    argumentNode = argumentNode->sibling;
-                }
-                //All variables pushed
-                // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
-                int numberOfCodeLinesBetweenARBuildAndFunctionExecution = 3; //Might be changed
-                print(
-                    new TypeDInstruction(
-                        56,
-                        "ADD",
-                        ReturnAddressRegister,
-                        numberOfCodeLinesBetweenARBuildAndFunctionExecution - 1));
-                //  Branching to function definition
-                //  If number of prints below changes, ...
-                //  ... change the value of variable ...
-                //  ... numberOfCodeLinesBetweenARBuildAndFunctionExecution
-                print(
-                    loadImediateToRegister(
-                        TemporaryRegister,
-                        (getRecordFromSymbleTableAtGlobalScope(node)->memloc) * 4));
-                print(
-                    new TypeBInstruction(
-                        44,
-                        "LDR",
-                        TemporaryRegister,
-                        GlobalPointer,
-                        TemporaryRegister));
-                print(
-                    jumpToRegister(TemporaryRegister));
+                generateCodeForFunctionActivation(node);
             }
         }
     }
@@ -677,10 +642,13 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
 
 void CodeGenerator::createHeader()
 {
+    int headerSize = 1;
     print(
-        new TypeDInstruction(56, "ADD", BaseAddressRegister, 0));
+        new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize - 1));
+    generateRunTimeSystem();
+
     if (shouldShowVisitingMessages)
-        std::cout << "This is a header\n";
+        std::cout << "Code above me is header code\n";
 }
 
 void CodeGenerator::createFooter()
@@ -833,4 +801,95 @@ void CodeGenerator::printLabelNop(std::string label)
     Instruction *nopInstruction = nop();
     registerLabelInstruction(label, nopInstruction);
     print(nopInstruction);
+}
+void CodeGenerator::generateGlobalAR()
+{
+    DataSection ds;
+    int globalCount = ds.getSize("global");
+    print(
+        new TypeDInstruction(
+            8,
+            "MOV",
+            AcumulatorRegister,
+            0));
+
+    for (
+        int i = 0;
+        i != globalCount;
+        i++)
+    {
+        print(pushAcumulator());
+        if (i == 0)
+            print(
+                new TypeDInstruction(
+                    57,
+                    "ADD",
+                    GlobalPointer,
+                    0));
+    }
+}
+void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
+{
+    DataSection ds;
+    std::string FunctionName = node->attr.name;
+    int variableCountInFunction = ds.getSize(FunctionName);
+    int argumentCount = node->attr.val;
+    print(
+        pushRegister(FramePointer));
+    //Build activation record
+    print(
+        new TypeDInstruction(
+            8,
+            "MOV",
+            AcumulatorRegister,
+            0));
+    for (
+        int i = 0;
+        i < variableCountInFunction - argumentCount;
+        i++)
+        print(pushAcumulator());
+    TreeNode *argumentNode = node->child[0];
+    for (int i = 0; i < argumentCount; i++)
+    {
+        generateCodeForAnyNode(argumentNode);
+        print(pushAcumulator());
+        argumentNode = argumentNode->sibling;
+    }
+    //All variables pushed
+    // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
+    int numberOfCodeLinesBetweenARBuildAndFunctionExecution = 8; //Might be changed
+    print(
+        new TypeDInstruction(
+            56,
+            "ADD",
+            ReturnAddressRegister,
+            numberOfCodeLinesBetweenARBuildAndFunctionExecution - 1));
+    generateCodeForBranch(FunctionName, AL);
+}
+
+void CodeGenerator::generateRunTimeSystem()
+{
+    generateGlobalAR();
+    generateCodeForFunctionActivation(mainActivation);
+    destroyGlobalAR();
+    print(
+        //What the program will do after main
+        new TypeDInstruction(
+            75,
+            "HLT",
+            0,
+            0));
+}
+
+void CodeGenerator::destroyGlobalAR()
+{
+    DataSection ds;
+    int globalCount = ds.getSize("global");
+    for (
+        int i = 0;
+        i != globalCount;
+        i++)
+    {
+        print(popRegister(TemporaryRegister));
+    }
 }

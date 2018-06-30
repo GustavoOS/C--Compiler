@@ -147,14 +147,12 @@ TypeGInstruction::TypeGInstruction(
     int identity,
     std::string instructionName,
     int conditionCode,
-    int offsetSize,
-    std::string labelTo)
+    int offsetSize)
 {
     id = identity;
     name = instructionName;
     condition = conditionCode;
     offset = offsetSize;
-    label = labelTo;
 }
 
 std::string TypeGInstruction::to_string()

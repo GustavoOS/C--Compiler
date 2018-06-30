@@ -87,6 +87,7 @@ private:
   std::map<std::string, BranchLabel *> labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
+  TreeNode * mainActivation;
 
   //Private methods
   void print(Instruction *instruction);
@@ -105,6 +106,10 @@ private:
   void printLabelNop(std::string);
 
   void DestroyARAndExitFunction(TreeNode *);
+  void generateGlobalAR();
+  void generateCodeForFunctionActivation(TreeNode *node);
+  void generateRunTimeSystem();
+  void destroyGlobalAR();
 };
 
 class BranchLabel
@@ -197,8 +202,7 @@ public:
       int identity,
       std::string instructionName,
       int conditionCode,
-      int offsetSize,
-      std::string labelTo);
+      int offsetSize);
 
   std::string to_string();
 };

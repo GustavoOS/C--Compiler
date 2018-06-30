@@ -489,7 +489,7 @@ static const yytype_uint16 yyrline[] =
      276,   283,   289,   292,   296,   297,   298,   303,   310,   316,
      315,   328,   335,   338,   344,   350,   356,   362,   368,   375,
      382,   385,   391,   399,   406,   410,   416,   426,   425,   444,
-     446,   452,   465
+     446,   452,   457
 };
 #endif
 
@@ -1390,7 +1390,7 @@ yyreduce:
 #line 84 "cminus.y" /* yacc.c:1646  */
     {
                         (yyval) = newStmtNode(VarDeclK);
-                        (yyval)->attr.name = copyString(tokenString);
+                        (yyval)->attr.name = tokenString;
                         (yyval)->type = savedType;
                     }
 #line 1397 "cminus.tab.c" /* yacc.c:1646  */
@@ -1408,7 +1408,7 @@ yyreduce:
 #line 95 "cminus.y" /* yacc.c:1646  */
     {
                         (yyval) = newStmtNode(VetDeclK);
-                        (yyval)->attr.name = copyString(tokenString);
+                        (yyval)->attr.name = tokenString;
                         (yyval)->type = savedType;
                     }
 #line 1415 "cminus.tab.c" /* yacc.c:1646  */
@@ -1455,7 +1455,7 @@ yyreduce:
 #line 127 "cminus.y" /* yacc.c:1646  */
     {
                     (yyval) = newStmtNode(FunDeclK);
-                    (yyval)->attr.name =  copyString(tokenString);;
+                    (yyval)->attr.name =  "fun_" + (std::string) tokenString;
                     (yyval)->type = savedType;
                 }
 #line 1462 "cminus.tab.c" /* yacc.c:1646  */
@@ -1506,7 +1506,7 @@ yyreduce:
 #line 166 "cminus.y" /* yacc.c:1646  */
     { 
                 (yyval) = newStmtNode(VarDeclK);
-                (yyval)->attr.name = copyString(tokenString);
+                (yyval)->attr.name = tokenString;
                 (yyval)->type = savedType;
             }
 #line 1513 "cminus.tab.c" /* yacc.c:1646  */
@@ -1516,7 +1516,7 @@ yyreduce:
 #line 173 "cminus.y" /* yacc.c:1646  */
     { 
                 (yyval) = newStmtNode(VectorParamK);
-                (yyval)->attr.name = copyString(tokenString);
+                (yyval)->attr.name = tokenString;
                 (yyval)->type = savedType;
             }
 #line 1523 "cminus.tab.c" /* yacc.c:1646  */
@@ -1693,7 +1693,7 @@ yyreduce:
 #line 311 "cminus.y" /* yacc.c:1646  */
     { 
                 (yyval) = newExpNode(IdK);
-                (yyval)->attr.name = copyString(tokenString);
+                (yyval)->attr.name = tokenString;
             }
 #line 1699 "cminus.tab.c" /* yacc.c:1646  */
     break;
@@ -1702,7 +1702,7 @@ yyreduce:
 #line 316 "cminus.y" /* yacc.c:1646  */
     {
                 (yyval) = newExpNode(VetK);
-                (yyval)->attr.name = copyString(tokenString);
+                (yyval)->attr.name = tokenString;
             }
 #line 1708 "cminus.tab.c" /* yacc.c:1646  */
     break;
@@ -1840,7 +1840,7 @@ yyreduce:
 #line 426 "cminus.y" /* yacc.c:1646  */
     {
                 (yyval) = newStmtNode(FunActiveK);
-                (yyval)->attr.name= copyString(tokenString);
+                (yyval)->attr.name= "fun_" + (std::string) tokenString;
             }
 #line 1846 "cminus.tab.c" /* yacc.c:1646  */
     break;
@@ -1872,22 +1872,14 @@ yyreduce:
   case 71:
 #line 453 "cminus.y" /* yacc.c:1646  */
     {       
-                    // YYSTYPE t = $1;
-                    // if (t != NULL)
-                    // { 
-                    //     t = findLastSibling(t);
-                    //     t->sibling = $3;
-                    //     $$ = $1; 
-                    // }
-                    // else $$ = $3;
                     (yyval) = (yyvsp[0]);
                     (yyval)->sibling = (yyvsp[-2]);
                 }
-#line 1887 "cminus.tab.c" /* yacc.c:1646  */
+#line 1879 "cminus.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1891 "cminus.tab.c" /* yacc.c:1646  */
+#line 1883 "cminus.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2115,7 +2107,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 468 "cminus.y" /* yacc.c:1906  */
+#line 460 "cminus.y" /* yacc.c:1906  */
 
 
 int yyerror(const char * message)

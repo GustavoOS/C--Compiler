@@ -39,7 +39,7 @@ typedef enum
 class BucketListRec
 {
 public:
-  char *name;
+  std::string name;
   std::vector<int> lines;
   int memloc; /* memory location for variable */
   struct BucketListRec *next;
@@ -53,14 +53,14 @@ typedef BucketListRec *BucketList;
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-BucketList st_declare(char *name, int lineno, int loc, IDType type, std::string scope);
-BucketList st_declare_function(char *name, int lineno, int loc, IDType type, ExpType eType, std::string escopo);
+BucketList st_declare(std::string name, int lineno, int loc, IDType type, std::string scope);
+BucketList st_declare_function(std::string name, int lineno, int loc, IDType type, ExpType eType, std::string escopo);
 BucketList st_reference(BucketList l, int lineno);
 /* Function st_find returns the memory reference 
    to the bucketlist of the variable or NULL if not found
  */
-BucketList st_find(char *name, std::string scope);
-BucketList st_find_at_scope(char *name, std::string escopo); //Used by code generator
+BucketList st_find(std::string name, std::string scope);
+BucketList st_find_at_scope(std::string name, std::string escopo); //Used by code generator
 
 /* Procedure printSymTab prints a formatted 
  * listing of the symbol table contents 

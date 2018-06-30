@@ -194,14 +194,14 @@ static void insertNode(TreeNode *t)
 
     case ReturnK:
     {
-      l = st_find((char *) scope.c_str(), "global");
+      l = st_find( scope, "global");
       switch (l->dtype)
       {
       case Void:
       {
         if (t->child[0] != NULL)
         {
-          VoidInvalidReturnError(t, (char *) scope.c_str());
+          VoidInvalidReturnError(t, scope);
         }
 
         break;
@@ -210,7 +210,7 @@ static void insertNode(TreeNode *t)
       {
         if (t->child[0] == NULL)
         {
-          IntInvalidReturnError(t, (char *) scope.c_str());
+          IntInvalidReturnError(t,  scope);
         }
 
         break;
@@ -284,7 +284,7 @@ static void insertNode(TreeNode *t)
 //
 void mainVerify()
 {
-  BucketList myList = st_find((char *)"main", scope);
+  BucketList myList = st_find("fun_main", scope);
   if (myList == NULL)
   {
     Error = TRUE;
@@ -313,9 +313,9 @@ void buildSymtab(TreeNode *syntaxTree)
   }
 }
 
-static void typeError(TreeNode *t, char *message)
+static void typeError(TreeNode *t, std::string message)
 {
-  fprintf(listing, "Type error at line %d: %s\n", t->lineno, message);
+  fprintf(listing, "Type error at line %d: %s\n", t->lineno, message.c_str());
   Error = TRUE;
 }
 
@@ -332,7 +332,7 @@ static void checkNode(TreeNode *t)
     case OpK:
       if ((t->child[0]->type != Integer) ||
           (t->child[1]->type != Integer))
-        typeError(t, (char *)"Op applied to non-integer");
+        typeError(t, "Op applied to non-integer");
       switch (t->attr.op)
       {
       case LESSEQ:
@@ -370,18 +370,18 @@ static void checkNode(TreeNode *t)
     case IfK:
       if (t->child[0] == NULL)
       {
-        typeError(t->child[0], (char *)"if test invalid");
+        typeError(t->child[0], "if test invalid");
       }
       else if (t->child[0]->type != boolean)
-        typeError(t->child[0], (char *)"if test is not boolean");
+        typeError(t->child[0], "if test is not boolean");
       break;
     case AssignK:
       if (t->child[1]->type != Integer)
-        typeError(t->child[1], (char *)"assignment of non-integer value");
+        typeError(t->child[1], "assignment of non-integer value");
       break;
     case WhileK:
       if (t->child[0]->type != boolean)
-        typeError(t->child[0], (char *)"while test is not boolean");
+        typeError(t->child[0], "while test is not boolean");
       break;
     default:
       break;
