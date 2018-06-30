@@ -257,27 +257,27 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case WhileK:
     {
         //Label names
-        std::string while_label_name = "while_" + std::to_string(node->attr.val);
-        std::string while_do_label_name = "while_do_" + std::to_string(node->attr.val);
-        std::string while_end_label_name = "while_end_" + std::to_string(node->attr.val);
+        std::string while_label = "while_" + std::to_string(node->attr.val);
+        std::string do_label = "w_do_" + std::to_string(node->attr.val);
+        std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
-        printLabelNop(while_label_name);
+        printLabelNop(while_label);
 
         generateCode(node->child[0]);
         generateCodeForBranch(
-            while_do_label_name,
+            do_label,
             translateCondition(node->child[0]->attr.op));
 
         generateCodeForBranch(
-            while_end_label_name,
+            while_end_label,
             AL);
 
-        printLabelNop(while_do_label_name);
+        printLabelNop(do_label);
 
         generateCode(node->child[1]);
-        generateCodeForBranch(while_label_name, AL);
+        generateCodeForBranch(while_label, AL);
 
-        printLabelNop(while_end_label_name);
+        printLabelNop(while_end_label);
     }
     break;
 
