@@ -925,8 +925,8 @@ void CodeGenerator::generateBinaryCode()
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
         printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
-        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << std::endl;
-        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << std::endl;
+        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
+        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
     }
 }
 
