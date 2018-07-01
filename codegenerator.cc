@@ -167,9 +167,9 @@ void CodeGenerator::
             AcumulatorRegister,
             SwapRegister));
 
-    TypeDInstruction *leftByte = new TypeDInstruction(8, "MOV", TemporaryRegister, 0);
+    Instruction *leftByte = loadImediateToRegister(TemporaryRegister, 0);
 
-    TypeDInstruction *rightByte = new TypeDInstruction(8, "MOV", TemporaryRegister, 0);
+    Instruction *rightByte = loadImediateToRegister(AcumulatorRegister, 0);
 
     print(leftByte);
 
@@ -183,12 +183,13 @@ void CodeGenerator::
 
     print(rightByte);
 
-    print(new TypeBInstruction(
-        4,
-        "ADD",
-        TemporaryRegister,
-        AcumulatorRegister,
-        TemporaryRegister));
+    print(
+        new TypeBInstruction(
+            4,
+            "ADD",
+            TemporaryRegister,
+            AcumulatorRegister,
+            TemporaryRegister));
 
     print(new TypeBInstruction(
         4,
