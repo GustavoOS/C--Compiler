@@ -37,11 +37,12 @@ TypeAInstruction::TypeAInstruction(
     regm = RegisterM;
     regd = RegisterD;
 }
+
 std::string TypeAInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
            name + " " + std::to_string(immediate) + " " +
-           std::to_string(regm) + " " + std::to_string(regd) + "\n";
+           printRegister(regm) + " " + printRegister(regd) + "\n";
 };
 
 TypeBInstruction::TypeBInstruction(
@@ -60,9 +61,9 @@ TypeBInstruction::TypeBInstruction(
 std::string TypeBInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(regm) + " " +
-           std::to_string(regn) + " " +
-           std::to_string(regd) + "\n";
+           name + " " + printRegister(regm) + " " +
+           printRegister(regn) + " " +
+           printRegister(regd) + "\n";
 }
 
 TypeCInstruction::TypeCInstruction(
@@ -83,13 +84,13 @@ std::string TypeCInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
            name + " " + std::to_string(immediate) + " " +
-           std::to_string(regm) + " " + std::to_string(regd) + "\n";
+           printRegister(regm) + " " + printRegister(regd) + "\n";
 }
 
 std::string TypeDInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(regd) + " " +
+           name + " " + printRegister(regd) + " " +
            std::to_string(immediate) + "\n";
 }
 
@@ -120,15 +121,15 @@ TypeEInstruction::TypeEInstruction(
 std::string TypeEInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(regm) + " " +
-           std::to_string(regd) + "\n";
+           name + " " + printRegister(regm) + " " +
+           printRegister(regd) + "\n";
 }
 
 std::string TypeFInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
            name + " " + std::to_string(condition) + " " +
-           std::to_string(regd) + "\n";
+           printRegister(regd) + "\n";
 }
 
 TypeFInstruction::TypeFInstruction(

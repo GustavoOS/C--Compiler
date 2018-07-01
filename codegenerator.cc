@@ -99,10 +99,10 @@ void CodeGenerator::linker()
 
     // printf("AFTER LINKER:");
 
-    // for (Instruction *inst : code)
-    // {
-    //     std::cout << inst->to_string();
-    // }
+    for (Instruction *inst : code)
+    {
+        std::cout << inst->relativeAddress << " : " << inst->to_string();
+    }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -321,17 +321,18 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     break;
 
     case ReturnK:
+    {
+
+        if (node->child[0] != NULL)
         {
-            
-            if (node->child[0]!=NULL) {
-                generateCode(node->child[0]);
-            }
-            else {
-                print(
-                    loadImediateToRegister(AcumulatorRegister, 0)
-                );
-            }
+            generateCode(node->child[0]);
         }
+        else
+        {
+            print(
+                loadImediateToRegister(AcumulatorRegister, 0));
+        }
+    }
     break;
 
     case FunDeclK:
@@ -821,11 +822,7 @@ void CodeGenerator::generateGlobalAR()
     DataSection ds;
     int globalCount = ds.getSize("global");
     print(
-        new TypeDInstruction(
-            8,
-            "MOV",
-            AcumulatorRegister,
-            0));
+        loadImediateToRegister(AcumulatorRegister, 0));
 
     for (
         int i = 0;
@@ -906,4 +903,28 @@ void CodeGenerator::destroyGlobalAR()
     {
         print(popRegister(TemporaryRegister));
     }
+}
+
+std::string printRegister( int reg )
+{
+    switch (reg)
+    {
+    case HeapArrayRegister:
+        return "$H0";
+    case AcumulatorRegister:
+        return "$A0";
+    case TemporaryRegister:
+        return "$T1";
+    case FramePointer:
+        return "$FP";
+    case GlobalPointer:
+        return "$GP";
+    case BaseAddressRegister:
+        return "$BA";
+    case ReturnAddressRegister:
+        return "$RA";
+    case SwapRegister:
+        return "$SR";
+    }
+    return "!UNKNOWN!";
 }

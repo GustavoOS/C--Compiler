@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 
-enum Registers
+enum Registers : int
 {
   HeapArrayRegister = 0,
   AcumulatorRegister,
@@ -16,8 +16,11 @@ enum Registers
   GlobalPointer,
   BaseAddressRegister,
   ReturnAddressRegister,
-  SwapRegister = 0
+  SwapRegister = 8
 };
+
+std::string printRegister( int reg );
+
 
 enum ConditionCodes
 {

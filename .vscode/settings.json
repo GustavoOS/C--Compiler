@@ -38,6 +38,7 @@
         "sstream": "cpp",
         "cinttypes": "cpp",
         "bitset": "cpp",
-        "cstdarg": "cpp"
+        "cstdarg": "cpp",
+        "map": "cpp"
     }
 }
