@@ -44,7 +44,7 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(std::string gotolabel, TypeDInstruction *lByte, TypeDInstruction *rByte)
+BranchLabel::BranchLabel(std::string gotolabel, Instruction *lByte, Instruction *rByte)
 {
     tolabel = gotolabel;
     leftByte = lByte;
