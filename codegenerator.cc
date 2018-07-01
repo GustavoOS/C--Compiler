@@ -345,9 +345,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     {
         std::string FunctionName = std::string(node->attr.name);
         if (
-            (FunctionName != "input") &&
-            (FunctionName != "output") &&
-            (FunctionName != "outputLED"))
+            (FunctionName != "fun_input") &&
+            (FunctionName != "fun_output") &&
+            (FunctionName != "fun_outputLED"))
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
@@ -380,7 +380,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string FunctionName = std::string(node->attr.name);
         std::string func_decl_label = "function_" + FunctionName;
         generateCode(node->child[0]);
-        if (FunctionName == "input")
+        if (FunctionName == "fun_input")
         {
             print(
                 new TypeEInstruction(
@@ -389,7 +389,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     0,
                     AcumulatorRegister));
         }
-        else if (FunctionName == "output")
+        else if (FunctionName == "fun_output")
         {
             print(
                 new TypeEInstruction(
@@ -401,7 +401,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         else
         {
 
-            if (FunctionName == "outputLED")
+            if (FunctionName == "fun_outputLED")
             {
                 print(
                     new TypeEInstruction(
@@ -882,7 +882,7 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
             56,
             "ADD",
             ReturnAddressRegister,
-            numberOfCodeLinesBetweenARBuildAndFunctionExecution - 1));
+            numberOfCodeLinesBetweenARBuildAndFunctionExecution));
     generateCodeForBranch(FunctionName, AL);
 }
 
@@ -906,7 +906,7 @@ void CodeGenerator::destroyGlobalAR()
     int globalCount = ds.getSize("global");
     for (
         int i = 0;
-        i != globalCount;
+        i < globalCount + 1;
         i++)
     {
         print(popRegister(TemporaryRegister));
