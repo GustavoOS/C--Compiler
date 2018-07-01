@@ -129,10 +129,10 @@ class BranchLabel
   std::string tolabel;
 
 public:
-  TypeDInstruction *leftByte;
-  TypeDInstruction *rightByte;
+  Instruction *leftByte;
+  Instruction *rightByte;
 
-  BranchLabel(std::string gotolabel, TypeDInstruction *lByte, TypeDInstruction *rByte);
+  BranchLabel(std::string gotolabel, Instruction *lByte, Instruction *rByte);
   std::string to_string();
 };
 
