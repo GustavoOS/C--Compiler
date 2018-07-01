@@ -47,6 +47,7 @@ public:
   IDType vtype;
   ExpType dtype;
 };
+
 typedef BucketListRec *BucketList;
 /* Procedure st_insert inserts line numbers and
  * memory locations into the symbol table

@@ -27,7 +27,7 @@
 /* the hash function */
 static int hash(std::string name)
 {
-  char * key = (char *) name.c_str();
+  char *key = (char *)name.c_str();
   int temp = 0;
   int i = 0;
   while (key[i] != '\0')
@@ -51,7 +51,7 @@ BucketList st_declare(std::string name, int lineno, int loc, IDType type, std::s
 {
   // printf( "%s name %d lineno %d loc %d type %s scope\n",name,  lineno,  loc,  type,  scope);
   int h = hash(name);
-  BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
+  BucketList l = new BucketListRec();
   l->name = name;
   l->lines = std::vector<int>();
   l->lines.push_back(lineno);
@@ -68,7 +68,7 @@ BucketList st_declare_function(std::string name, int lineno, int loc, IDType typ
 {
   // printf( "%s name %d lineno %d loc %d type %s scope\n",name,  lineno,  loc,  type,  scope);
   int h = hash(name);
-  BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
+  BucketList l = new BucketListRec();
   l->name = name;
   l->lines = std::vector<int>();
   l->lines.push_back(lineno);
@@ -100,7 +100,7 @@ BucketList st_reference(BucketList l, int lineno)
 
 int cantMatchNameAndScopeInRange(BucketList node, std::string name, std::string escopo)
 {
-  return (node != NULL) && (                                         //in range
+  return (node != NULL) && (                              //in range
                                (escopo != node->scope) || //Scopes don't match
                                (name != node->name));     //names don't match
 }
