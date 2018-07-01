@@ -420,10 +420,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case AssignK:
     {
-
+        if(shouldShowVisitingMessages)
         std::cout << "This is Assign\n";
 
         TreeNode *varToBeAssignedInto = node->child[0];
+        if(shouldShowVisitingMessages)
         std::cout << "Back to assign from value\n";
         switch (varToBeAssignedInto->kind.exp)
         {
@@ -488,7 +489,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             break;
         }
 
-        // if (shouldShowVisitingMessages)
+        if (shouldShowVisitingMessages)
         std::cout << "Assign end\n";
     }
     break;
