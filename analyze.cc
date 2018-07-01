@@ -195,6 +195,7 @@ static void insertNode(TreeNode *t)
     case ReturnK:
     {
       l = st_find( scope, "global");
+      t->scope = scope;
       switch (l->dtype)
       {
       case Void:
