@@ -4,7 +4,6 @@
 #include <vector>
 #include <iostream>
 #include "globals.h"
-#include <vector>
 #include <map>
 
 enum Registers : int
@@ -52,12 +51,21 @@ public:
   int id;
   std::string name, label;
   int regm, regn, regd, condition, immediate, offset;
-  virtual std::string to_string();
+  virtual std::string to_string() = 0;
+  virtual std::string to_binary() {
+    return getOpCode(id);
+  };
+
   bool isLabel = false;
   void setlabel(std::string newLabel);
   std::string to_string_with_label();
 
   int relativeAddress;
+
+  static std::string getOpCode( int id );
+  static std::string getOpBit( int id );
+  static std::string getFunct2( int id );
+  static std::string getFunct1( int id );
 };
 
 class BranchLabel;
@@ -82,6 +90,7 @@ public:
   CodeGenerator(bool displayable);
   void generate(TreeNode *node);
   void linker();
+  void generateBinaryCode();
 
 private:
   std::string generatedCode;
@@ -137,6 +146,7 @@ public:
       int RegisterM,
       int RegisterD);
   std::string to_string();
+  std::string to_binary();
 };
 
 class TypeBInstruction : public Instruction
@@ -149,29 +159,37 @@ public:
       int RegisterN,
       int RegisterD);
   std::string to_string();
+  std::string to_binary();
 };
 
 class TypeCInstruction : public Instruction
 {
 public:
-  std::string to_string();
+  
   TypeCInstruction(
       int identity,
       std::string instructionName,
       int instructionImmediate,
       int RegisterM,
       int RegisterD);
+
+  std::string to_string();
+
+  std::string to_binary();
 };
 
 class TypeDInstruction : public Instruction
 {
 public:
-  std::string to_string();
   TypeDInstruction(
       int identity,
       std::string instructionName,
       int RegisterD,
       int instructionImmediate);
+
+  std::string to_string();
+
+  std::string to_binary();
 };
 
 class TypeEInstruction : public Instruction
@@ -184,6 +202,8 @@ public:
       int RegisterD);
 
   std::string to_string();
+
+  std::string to_binary();
 };
 
 class TypeFInstruction : public Instruction
@@ -196,6 +216,8 @@ public:
       int RegisterD);
 
   std::string to_string();
+
+  std::string to_binary();
 };
 
 class TypeGInstruction : public Instruction
@@ -208,6 +230,7 @@ public:
       int offsetSize);
 
   std::string to_string();
+  std::string to_binary();
 };
 
 #endif

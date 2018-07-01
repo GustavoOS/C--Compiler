@@ -5,6 +5,8 @@
 #include "memory.h"
 #include <iostream>
 #include <bitset>
+#include <assert.h>
+#include <fstream>
 
 ConditionCodes translateCondition(TokenType operation)
 {
@@ -46,7 +48,7 @@ void CodeGenerator::print(Instruction *instruction)
     std::string inst = instruction->to_string_with_label();
     if (shouldPrintGeneratedCodeOnScreen)
     {
-        std::cout << inst;
+        std::cout << inst << "\n";
     }
     generatedCode += inst;
     code.push_back(instruction);
@@ -99,10 +101,10 @@ void CodeGenerator::linker()
 
     // printf("AFTER LINKER:");
 
-    for (Instruction *inst : code)
-    {
-        std::cout << inst->relativeAddress << " : " << inst->to_string();
-    }
+    // for (Instruction *inst : code)
+    // {
+    //     std::cout << inst->relativeAddress << " : " << inst->to_string() << "\n";
+    // }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -902,6 +904,22 @@ void CodeGenerator::destroyGlobalAR()
         i++)
     {
         print(popRegister(TemporaryRegister));
+    }
+}
+
+void CodeGenerator::generateBinaryCode()
+{
+    printf("\n\n +++++ Code generator! +++++ \n\n");
+
+    std::ofstream outputStream ( "output.txt" );
+    int ramCounter = 0;
+    for (Instruction *inst : code)
+    {
+        std::string bin = inst->to_binary();
+        assert(bin.size() == 16);
+        printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(),  bin.c_str());
+        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << std::endl;
+        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << std::endl;
     }
 }
 

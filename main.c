@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);
     cg.linker();
+    cg.generateBinaryCode();
   }
 #if !NO_CODE
   if (!Error)
