@@ -4,25 +4,27 @@
 /* for the TINY compiler                            */
 /* Compiler Construction: Principles and Practice   */
 /* Kenneth C. Louden                                */
+/* Adapted by Gustavo O. Souza                      */
 /****************************************************/
 
 #include "globals.h"
 #include "symtab.h"
 #include "analyze.h"
+#include "memory.h"
+#include "syntaticErrors.h"
+#include <string>
 
 //current scope, standard is global
-char scope[42] = "global";
-/* counter for variable memory locations */
-static int location = 0;
+std::string scope = (std::string) "global";
 
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc 
  * in postorder to tree pointed to by t
  */
-static void traverse(TreeNode *t,
-                     void (*preProc)(TreeNode *),
-                     void (*postProc)(TreeNode *))
+void traverse(TreeNode *t,
+              void (*preProc)(TreeNode *),
+              void (*postProc)(TreeNode *))
 {
   if (t != NULL)
   {
@@ -41,87 +43,9 @@ static void traverse(TreeNode *t,
  * generate preorder-only or postorder-only
  * traversals from traverse
  */
-static void nullProc(TreeNode *t)
+void nullProc(TreeNode *t)
 {
-  if (t == NULL || t != NULL)
-    return;
-}
-
-static void IntInvalidReturnError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" is an int one, yet it is not returning anything at line %d.\n", scope, t->lineno);
-  Error = TRUE;
-}
-
-static void VoidInvalidReturnError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" is a void one, yet it is returning something at line %d.\n", scope, t->lineno);
-  Error = TRUE;
-}
-
-static void funcAlreadyDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" already defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void varAlreadyDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Variable \" %s \" already defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void varNotDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Variable \" %s \" not defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void funcNotDefinedError(TreeNode *t)
-{
-  printf(
-      "\nError: Function \" %s \" not defined at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void DeclaredTypeNotVectorError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" is not a vector at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void isNotVarError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" is not a variable at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void isNotFuncError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" is not a function at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void VoidVarError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" variable has a forbidden type at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
-}
-
-static void VoidVecError(TreeNode *t)
-{
-  printf(
-      "\nError: \" %s \" vector has a forbidden type at line %d.\n", t->attr.name, t->lineno);
-  Error = TRUE;
+  return;
 }
 
 static void exitScope(TreeNode *t)
@@ -129,7 +53,7 @@ static void exitScope(TreeNode *t)
   if (t->nodekind == StmtK && t->kind.stmt == FunDeclK)
   {
     // printf("Sai do escopo %s\n", scope);
-    strcpy(scope, "global");
+    scope = std::string("global");
   }
 }
 
@@ -149,7 +73,9 @@ int isTreeNodeTypeInt(TreeNode *node)
  */
 static void insertNode(TreeNode *t)
 {
+  DataSection *dataSection = new DataSection();
   BucketList l;
+  std::string dvariable;
 
   switch (t->nodekind)
   {
@@ -163,7 +89,8 @@ static void insertNode(TreeNode *t)
       {
         if (isTreeNodeTypeInt(t))
         {
-          st_declare(t->attr.name, t->lineno, location++, VARIABLE, scope);
+          st_declare(t->attr.name, t->lineno, dataSection->allocateVariable(scope), VARIABLE, scope);
+          t->scope = (std::string)scope;
         }
         else
         {
@@ -174,17 +101,49 @@ static void insertNode(TreeNode *t)
       {
         varAlreadyDefinedError(t);
       }
+
       break;
 
     case VetDeclK:
-      char dvariable[42];
-      strcpy(dvariable, scope);
+      
+      dvariable = scope;
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      if ((l == NULL) || (scope!= l->scope))
       {
         if (isTreeNodeTypeInt(t))
         {
-          st_declare(t->attr.name, t->lineno, location++, VECTOR, scope);
+          st_declare(t->attr.name,
+                     t->lineno,
+                     dataSection->allocateVariable(
+                         scope),
+                     VECTOR,
+                     scope);
+          t->scope = (std::string)scope;
+        }
+        else
+        {
+          VoidVecError(t);
+        }
+      }
+      else
+      {
+        varAlreadyDefinedError(t);
+      }
+      break;
+
+    case VectorParamK:
+      dvariable = scope;
+      l = st_find(t->attr.name, scope);
+      if ((l == NULL) || (scope != l->scope) )
+      {
+        if (isTreeNodeTypeInt(t))
+        {
+          st_declare(
+              t->attr.name,
+              t->lineno,
+              dataSection->allocateVariable(scope),
+              VECTOR,
+              scope);
         }
         else
         {
@@ -199,11 +158,11 @@ static void insertNode(TreeNode *t)
 
     case FunDeclK:
       l = st_find(t->attr.name, scope);
-      if ((l == NULL) || (strcmp(scope, l->scope) != 0))
+      if ((l == NULL) ||  (scope != l->scope))
       {
-        BucketList l2 = st_declare_function(t->attr.name, t->lineno, location++, FUNCTION, t->type, scope);
+        BucketList l2 = st_declare_function(t->attr.name, t->lineno, t->lineno > 0 ? dataSection->allocateFunction() : 0, FUNCTION, t->type, scope);
         l2->dtype = t->type;
-        strcpy(scope, t->attr.name);
+        scope = t->attr.name;
         // printf("\nAnalyze 168: Entrei no escopo %s", scope);
       }
       else
@@ -235,14 +194,15 @@ static void insertNode(TreeNode *t)
 
     case ReturnK:
     {
-      l = st_find(scope, (char *)"global");
+      l = st_find( scope, "global");
+      t->scope = scope;
       switch (l->dtype)
       {
       case Void:
       {
         if (t->child[0] != NULL)
         {
-          VoidInvalidReturnError(t);
+          VoidInvalidReturnError(t, scope);
         }
 
         break;
@@ -251,7 +211,7 @@ static void insertNode(TreeNode *t)
       {
         if (t->child[0] == NULL)
         {
-          IntInvalidReturnError(t);
+          IntInvalidReturnError(t,  scope);
         }
 
         break;
@@ -283,8 +243,10 @@ static void insertNode(TreeNode *t)
 
         if (l->vtype == VECTOR)
         {
+          BucketList ref;
           t->type = l->dtype;
-          st_reference(l, t->lineno);
+          ref = st_reference(l, t->lineno);
+          t->scope = ref->scope;
         }
         else
         {
@@ -303,15 +265,10 @@ static void insertNode(TreeNode *t)
       }
       else
       {
-        // if (l->vtype == VARIABLE)
-        // {
+        BucketList ref;
         t->type = l->dtype;
-        st_reference(l, t->lineno);
-        // }
-        // else
-        // {
-        //   isNotVarError(t);
-        // }
+        ref = st_reference(l, t->lineno);
+        t->scope = ref->scope;
       }
     }
     break;
@@ -328,7 +285,7 @@ static void insertNode(TreeNode *t)
 //
 void mainVerify()
 {
-  BucketList myList = st_find((char *)"main", scope);
+  BucketList myList = st_find("fun_main", scope);
   if (myList == NULL)
   {
     Error = TRUE;
@@ -357,9 +314,9 @@ void buildSymtab(TreeNode *syntaxTree)
   }
 }
 
-static void typeError(TreeNode *t, char *message)
+static void typeError(TreeNode *t, std::string message)
 {
-  fprintf(listing, "Type error at line %d: %s\n", t->lineno, message);
+  fprintf(listing, "Type error at line %d: %s\n", t->lineno, message.c_str());
   Error = TRUE;
 }
 
@@ -376,7 +333,7 @@ static void checkNode(TreeNode *t)
     case OpK:
       if ((t->child[0]->type != Integer) ||
           (t->child[1]->type != Integer))
-        typeError(t, (char *)"Op applied to non-integer");
+        typeError(t, "Op applied to non-integer");
       switch (t->attr.op)
       {
       case LESSEQ:
@@ -414,18 +371,18 @@ static void checkNode(TreeNode *t)
     case IfK:
       if (t->child[0] == NULL)
       {
-        typeError(t->child[0], (char *)"if test invalid");
+        typeError(t->child[0], "if test invalid");
       }
       else if (t->child[0]->type != boolean)
-        typeError(t->child[0], (char *)"if test is not boolean");
+        typeError(t->child[0], "if test is not boolean");
       break;
     case AssignK:
       if (t->child[1]->type != Integer)
-        typeError(t->child[1], (char *)"assignment of non-integer value");
+        typeError(t->child[1], "assignment of non-integer value");
       break;
     case WhileK:
       if (t->child[0]->type != boolean)
-        typeError(t->child[0], (char *)"while test is not boolean");
+        typeError(t->child[0], "while test is not boolean");
       break;
     default:
       break;

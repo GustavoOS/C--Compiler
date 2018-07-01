@@ -11,10 +11,22 @@
     
     static int savedConstant;
     static ExpType savedType;
-    static int savedLineNo;  /* ditto */
     static TreeNode * savedTree; /* stores syntax tree for later return */
     static int yylex(void);
     int yyerror( const char * message);
+    int ifcount = 0;
+    int whilecount = 0;
+
+    int newWhile()
+    {
+        int k = whilecount;
+        whilecount++;
+        return k;
+    }
+    int newif(){
+        ifcount++;
+        return ifcount-1;
+    }
 
     YYSTYPE findLastSibling(YYSTYPE node){
         while ( node != NULL && node->sibling != NULL) node = node->sibling;
@@ -71,7 +83,7 @@ declaracao: var-declaracao
 var-declaracao: tipo-especificador ID
                     {
                         $$ = newStmtNode(VarDeclK);
-                        $$->attr.name = copyString(tokenString);
+                        $$->attr.name = tokenString;
                         $$->type = savedType;
                     }
                     SEMI
@@ -82,7 +94,7 @@ var-declaracao: tipo-especificador ID
                 |tipo-especificador ID
                     {
                         $$ = newStmtNode(VetDeclK);
-                        $$->attr.name = copyString(tokenString);
+                        $$->attr.name = tokenString;
                         $$->type = savedType;
                     }
                     LBRACE NUM
@@ -92,8 +104,11 @@ var-declaracao: tipo-especificador ID
                     RBRACE SEMI
                     {
                         $$ = $3;
-                        $$->child[0] = newExpNode(ConstK);
-                        $$->child[0]->attr.val = savedConstant; 
+                        $$->attr.val = savedConstant;
+
+                        //Change to something like this to allow runtime allocation
+                        // $$->child[0] = newExpNode(ConstK);
+                        // $$->child[0]->attr.val = savedConstant; 
                     }
                 ;
 
@@ -111,7 +126,7 @@ tipo-especificador: INT
 fun-declaracao: tipo-especificador ID
                 {
                     $$ = newStmtNode(FunDeclK);
-                    $$->attr.name =  copyString(tokenString);;
+                    $$->attr.name =  "fun_" + (std::string) tokenString;
                     $$->type = savedType;
                 } 
                 LPAREN params RPAREN composto-decl
@@ -150,14 +165,14 @@ param-lista:    param-lista COMMA param
 param:  tipo-especificador ID
             { 
                 $$ = newStmtNode(VarDeclK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
                 $$->type = savedType;
             }
 
         | tipo-especificador ID 
             { 
-                $$ = newStmtNode(VetDeclK);
-                $$->attr.name = copyString(tokenString);
+                $$ = newStmtNode(VectorParamK);
+                $$->attr.name = tokenString;
                 $$->type = savedType;
             }
             LBRACE RBRACE
@@ -175,6 +190,7 @@ composto-decl:  LBRACKET local-declaracoes statement-lista RBRACKET
                         $$ = newStmtNode(CompoundK);
                         $$->child[0] = $2;
                         $$->child[1] = $3;
+                        
                     }
                 ;
 
@@ -229,12 +245,14 @@ expressao-decl: expressao SEMI
 selecao-decl:   IF LPAREN expressao RPAREN statement %prec "then"
                     {       
                         $$ = newStmtNode(IfK);
+                        $$->attr.val = newif();
                         $$->child[0] = $3;
                         $$->child[1] = $5;
                     }
                 | IF LPAREN expressao RPAREN statement ELSE statement
                     {       
                         $$ = newStmtNode(IfK);
+                        $$->attr.val = newif();
                         $$->child[0] = $3;
                         $$->child[1] = $5;
                         $$->child[2] = $7;
@@ -244,6 +262,7 @@ selecao-decl:   IF LPAREN expressao RPAREN statement %prec "then"
 iteracao-decl:  WHILE LPAREN expressao RPAREN statement
                     {       
                         $$ = newStmtNode(WhileK);
+                        $$->attr.val = newWhile();
                         $$->child[0] = $3;
                         $$->child[1] = $5;
                     }
@@ -291,12 +310,12 @@ fator:  LPAREN expressao RPAREN
 var:    ID
             { 
                 $$ = newExpNode(IdK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
             }
         | ID
             {
                 $$ = newExpNode(VetK);
-                $$->attr.name = copyString(tokenString);
+                $$->attr.name = tokenString;
             }
             LBRACE expressao RBRACE
             { 
@@ -406,11 +425,18 @@ ativacao:
         ID 
             {
                 $$ = newStmtNode(FunActiveK);
-                $$->attr.name= copyString(tokenString);
+                $$->attr.name= "fun_" + (std::string) tokenString;
             }
             LPAREN args RPAREN
             {       
+                YYSTYPE argument = $4;
+                int argCount = 0;
+                while(argument != NULL){
+                    argCount++;
+                    argument = argument->sibling;
+                }
                 $$ = $2;
+                $$->attr.val = argCount;
                 $$->child[0] = $4;
             }
         ;
@@ -425,14 +451,8 @@ args:   arg-lista
 
 arg-lista:  arg-lista COMMA expressao
                 {       
-                    YYSTYPE t = $1;
-                    if (t != NULL)
-                    { 
-                        t = findLastSibling(t);
-                        t->sibling = $3;
-                        $$ = $1; 
-                    }
-                    else $$ = $3;
+                    $$ = $3;
+                    $$->sibling = $1;
                 }
             | expressao
             ;

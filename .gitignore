@@ -5,3 +5,5 @@ bin/*
 *.tab.c
 *.tab.h
 scanner.c
+/tests/temporary.o
+temporary.o
