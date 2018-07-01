@@ -159,8 +159,9 @@ BucketList getRecordFromSymbleTable(TreeNode *node)
 void CodeGenerator::
     generateCodeForBranch(std::string branch_name, ConditionCodes condition)
 {
-    std::cout << "+++++++++++++ Branch start +++++++++++++"
-              << "\n";
+    if (shouldShowVisitingMessages)
+        std::cout << "+++++++++++++ Branch start +++++++++++++"
+                  << "\n";
     print(
         moveLowToHigh(
             AcumulatorRegister,
@@ -204,8 +205,9 @@ void CodeGenerator::
     print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
 
     labelOriginMap[branch_name] = branchLabel;
-    std::cout << "+++++++++++++ Branch end +++++++++++++"
-              << "\n";
+    if (shouldShowVisitingMessages)
+        std::cout << "+++++++++++++ Branch end +++++++++++++"
+                  << "\n";
 }
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
@@ -346,7 +348,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "output") &&
             (FunctionName != "outputLED"))
         {
-            hr(node->attr.name);
+            if (shouldShowVisitingMessages)
+                hr(node->attr.name);
 
             Instruction *labelInstruction = pushRegister(ReturnAddressRegister);
             registerLabelInstruction(FunctionName, labelInstruction);
@@ -666,7 +669,7 @@ void CodeGenerator::createHeader()
     generateRunTimeSystem();
 
     if (shouldShowVisitingMessages)
-        std::cout << "Code above me is header code\n";
+        hr("Code above me is header code");
 }
 
 void CodeGenerator::createFooter()
@@ -777,7 +780,6 @@ void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
         loadImediateToRegister(reg, record->memloc * 4));
     if (node->scope != "global")
     {
-        std::cout << "Entrou\n";
         print(
             new TypeEInstruction(
                 21,
@@ -796,8 +798,9 @@ void hr(std::string middle)
 void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
     DataSection ds;
-    int variableCountInFunction = ds.getSize(node->attr.name +);
-    printLabelNop("end_" + node->attr.name);
+    int variableCountInFunction = ds.getSize(node->attr.name);
+    std::string label = "end_" + node->attr.name;
+    printLabelNop(label);
     for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
     {
         print(
@@ -830,7 +833,7 @@ void CodeGenerator::generateGlobalAR()
 
     for (
         int i = 0;
-        i != globalCount;
+        i < globalCount + 1;
         i++)
     {
         print(pushAcumulator());
@@ -913,19 +916,19 @@ void CodeGenerator::generateBinaryCode()
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    std::ofstream outputStream ( "output.txt" );
+    std::ofstream outputStream("output.txt");
     int ramCounter = 0;
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
-        printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(),  bin.c_str());
+        printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
         outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << std::endl;
         outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << std::endl;
     }
 }
 
-std::string printRegister( int reg )
+std::string printRegister(int reg)
 {
     switch (reg)
     {

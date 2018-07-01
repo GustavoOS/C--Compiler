@@ -1,5 +1,7 @@
+int a;
 int main(void)
 {
-    output(1);
-    return 1;
+    a = 1;
+    output(a);
+    return a;
 }
