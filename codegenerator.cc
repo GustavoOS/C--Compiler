@@ -334,6 +334,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             print(
                 loadImediateToRegister(AcumulatorRegister, 0));
         }
+        generateCodeForBranch("end_" + node->scope, AL);
     }
     break;
 
@@ -795,7 +796,8 @@ void hr(std::string middle)
 void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
     DataSection ds;
-    int variableCountInFunction = ds.getSize(node->attr.name);
+    int variableCountInFunction = ds.getSize(node->attr.name +);
+    printLabelNop("end_" + node->attr.name);
     for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
     {
         print(
