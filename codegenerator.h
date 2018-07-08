@@ -49,7 +49,7 @@ class Instruction
 {
 public:
   int id;
-  std::string name, label;
+  std::string name, label, debugname;
   int regm, regn, regd, condition, immediate, offset;
   virtual std::string to_string() = 0;
   virtual std::string to_binary() {
@@ -111,11 +111,14 @@ private:
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
   void generateCodeForBranch(std::string branch_name, ConditionCodes condition);
+  void generateCodeForPop(Registers reg);
   void registerLabelInstruction(std::string label, Instruction *Instruction);
 
   void fetchVarOffset(TreeNode *node, Registers reg);
   void loadVariable(TreeNode *node, Registers reg);
   void printLabelNop(std::string);
+
+  void setDebugName( std::string name );
 
   void DestroyARAndExitFunction(TreeNode *);
   void generateGlobalAR();

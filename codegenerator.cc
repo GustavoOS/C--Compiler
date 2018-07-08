@@ -54,6 +54,15 @@ void CodeGenerator::print(Instruction *instruction)
     code.push_back(instruction);
 }
 
+void CodeGenerator::setDebugName( std::string name )
+{
+    if( code.size() > 0)
+    {
+        Instruction * lastInst = code.back();
+        lastInst->debugname = name;
+    }
+}
+
 void CodeGenerator::generate(TreeNode *node)
 {
     createHeader();
@@ -166,6 +175,7 @@ void CodeGenerator::
         moveLowToHigh(
             AcumulatorRegister,
             SwapRegister));
+    setDebugName("begin Branch");
 
     Instruction *leftByte = loadImediateToRegister(TemporaryRegister, 0);
 
@@ -204,11 +214,18 @@ void CodeGenerator::
         moveHighToLow(AcumulatorRegister, SwapRegister));
 
     print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
-
+    
+    setDebugName("end Branch");
     labelOriginMap[branch_name] = branchLabel;
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch end +++++++++++++"
                   << "\n";
+}
+
+void CodeGenerator::generateCodeForPop(Registers reg)
+{
+    print(popRegister(reg));
+    print(nop());
 }
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
@@ -356,6 +373,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             registerLabelInstruction(FunctionName, labelInstruction);
 
             print(labelInstruction);
+            setDebugName("begin FunDeclK " + FunctionName);
             print(
                 new TypeDInstruction(
                     57,
@@ -367,10 +385,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             {
                 generateCode(node->child[1]);
             }
-            print(
-                popRegister(ReturnAddressRegister));
+            generateCodeForPop(ReturnAddressRegister);
 
             DestroyARAndExitFunction(node);
+            setDebugName("end FunDeclK " + FunctionName);
         }
     }
     break;
@@ -398,22 +416,18 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     0,
                     AcumulatorRegister));
         }
+        else if (FunctionName == "fun_outputLED")
+        {
+            print(
+                new TypeEInstruction(
+                    70,
+                    "OUTLED",
+                    0,
+                    AcumulatorRegister));
+        }
         else
         {
-
-            if (FunctionName == "fun_outputLED")
-            {
-                print(
-                    new TypeEInstruction(
-                        70,
-                        "OUTLED",
-                        0,
-                        AcumulatorRegister));
-            }
-            else
-            {
-                generateCodeForFunctionActivation(node);
-            }
+            generateCodeForFunctionActivation(node);
         }
     }
     break;
@@ -456,8 +470,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             generateCode(node->child[1]);
             print(
                 moveLowToHigh(AcumulatorRegister, SwapRegister));
-            print(popRegister(AcumulatorRegister));
-            print(popRegister(TemporaryRegister));
+            generateCodeForPop(AcumulatorRegister);
+            generateCodeForPop(TemporaryRegister);
             print(
                 new TypeBInstruction(
                     4,
@@ -525,9 +539,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
                 AcumulatorRegister,
                 TemporaryRegister));
 
-        print(
-            popRegister(
-                AcumulatorRegister));
+        generateCodeForPop(AcumulatorRegister);
 
         generateOperationCode(node);
     }
@@ -547,6 +559,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
             if (i == 0)
             {
                 print(loadImediateToRegister(AcumulatorRegister, byteAsInt));
+                setDebugName("begin ConstK");
             }
             else
             {
@@ -571,6 +584,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
                 }
             }
         }
+        setDebugName("end ConstK");
     }
     break;
     case IdK:
@@ -590,6 +604,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister,
                 AcumulatorRegister));
+        print(nop());
     }
     break;
 
@@ -667,11 +682,13 @@ void CodeGenerator::createHeader()
 {
     int headerSize = 1;
     print(
-        new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize - 1));
+        new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize));
+    setDebugName("begin Header");
     generateRunTimeSystem();
 
     if (shouldShowVisitingMessages)
         hr("Code above me is header code");
+    setDebugName("end Header");
 }
 
 void CodeGenerator::createFooter()
@@ -774,6 +791,7 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
                 ? GlobalPointer
                 : FramePointer,
             reg));
+    print(nop());
 }
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
@@ -805,11 +823,9 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
     printLabelNop(label);
     for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
     {
-        print(
-            popRegister(TemporaryRegister));
+        generateCodeForPop(TemporaryRegister);
     }
-    print(
-        popRegister(FramePointer));
+    generateCodeForPop(FramePointer);
     print(
         jumpToRegister(ReturnAddressRegister));
 }
@@ -832,7 +848,7 @@ void CodeGenerator::generateGlobalAR()
     int globalCount = ds.getSize("global");
     print(
         loadImediateToRegister(AcumulatorRegister, 0));
-
+    setDebugName("begin GlobalAR");
     for (
         int i = 0;
         i < globalCount + 1;
@@ -847,6 +863,7 @@ void CodeGenerator::generateGlobalAR()
                     GlobalPointer,
                     0));
     }
+    setDebugName("end GlobalAR");
 }
 void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 {
@@ -856,6 +873,7 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
     int argumentCount = node->attr.val;
     print(
         pushRegister(FramePointer));
+    setDebugName("begin Activation " + FunctionName );
     //Build activation record
     print(
         new TypeDInstruction(
@@ -883,8 +901,9 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
             56,
             "ADD",
             ReturnAddressRegister,
-            numberOfCodeLinesBetweenARBuildAndFunctionExecution));
+            numberOfCodeLinesBetweenARBuildAndFunctionExecution + 1));
     generateCodeForBranch(FunctionName, AL);
+    setDebugName("end Activation " + FunctionName );
 }
 
 void CodeGenerator::generateRunTimeSystem()
@@ -910,7 +929,7 @@ void CodeGenerator::destroyGlobalAR()
         i < globalCount + 1;
         i++)
     {
-        print(popRegister(TemporaryRegister));
+        generateCodeForPop(TemporaryRegister);
     }
 }
 
@@ -918,16 +937,23 @@ void CodeGenerator::generateBinaryCode()
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    std::ofstream outputStream("output.txt");
+    std::ofstream outputStream("output.txt", std::ofstream::out);
     int ramCounter = 0;
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
-        printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
-        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
-        outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
+        printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str() );
+        outputStream << bin << " -- " << inst->to_string();
+        if( ! inst->debugname.empty() )
+        {
+            outputStream << " (" << inst->debugname << ")";
+        }
+        outputStream << "\n";
+        // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
+        // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
     }
+    outputStream.close();
 }
 
 std::string printRegister(int reg)

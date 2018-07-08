@@ -39,6 +39,20 @@
         "cinttypes": "cpp",
         "bitset": "cpp",
         "cstdarg": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "typeindex": "cpp",
+        "csignal": "cpp",
+        "cstddef": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "atomic": "cpp",
+        "strstream": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "condition_variable": "cpp",
+        "memory": "cpp",
+        "mutex": "cpp",
+        "ratio": "cpp",
+        "thread": "cpp"
     }
 }
