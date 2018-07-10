@@ -78,6 +78,7 @@ Instruction *pushRegister(Registers reg);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 Instruction *moveLowToLowRegister(Registers origin, Registers destination);
+Instruction *subImeditateFromRegister(int value, Registers destination);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
@@ -90,7 +91,7 @@ public:
   CodeGenerator(bool displayable);
   void generate(TreeNode *node);
   void linker();
-  void generateBinaryCode();
+  void generateBinaryCode(std::string outputFile);
 
 private:
   std::string generatedCode;
@@ -173,7 +174,7 @@ public:
       int identity,
       std::string instructionName,
       int instructionImmediate,
-      int RegisterM,
+      int RegisterN,
       int RegisterD);
 
   std::string to_string();

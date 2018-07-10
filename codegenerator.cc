@@ -207,7 +207,6 @@ void CodeGenerator::
         TemporaryRegister,
         BaseAddressRegister,
         TemporaryRegister));
-
     BranchLabel *branchLabel = new BranchLabel(branch_name, leftByte, rightByte);
 
     print(
@@ -251,6 +250,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case VetDeclK:
 
         fetchVarOffset(node, AcumulatorRegister);
+        setDebugName("begin VetDeclK " + node->attr.val);
 
         print(
             new TypeBInstruction(
@@ -280,7 +280,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 HeapArrayRegister
 
                 ));
-
+        setDebugName("end VetDeclK " + node->attr.val);
         break;
 
     case VarDeclK:
@@ -380,6 +380,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     "ADD",
                     FramePointer,
                     0));
+            print(
+                new TypeEInstruction(
+                    69,
+                    "OUTSS",
+                    0,
+                    FramePointer));
 
             if (node->child[1] != NULL)
             {
@@ -680,9 +686,17 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
 
 void CodeGenerator::createHeader()
 {
-    int headerSize = 1;
+    int headerSize = 0;
+    print(nop());
     print(
         new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize));
+    print( subImeditateFromRegister(1, BaseAddressRegister) );
+    print(
+            new TypeEInstruction(
+                69,
+                "OUTSS",
+                0,
+                BaseAddressRegister));    
     setDebugName("begin Header");
     generateRunTimeSystem();
 
@@ -758,6 +772,22 @@ Instruction *moveLowToLowRegister(Registers origin, Registers destination)
         "ADD",
         0,
         origin,
+        destination);
+}
+
+Instruction *subImeditateFromRegister(int value, Registers destination)
+{
+    // return new TypeDInstruction(
+    //     11,
+    //     "SUB",
+    //     destination,
+    //     value
+    // );
+    return new TypeCInstruction(
+        7,
+        "SUB",
+        value,
+        destination,
         destination);
 }
 
@@ -901,7 +931,13 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
             56,
             "ADD",
             ReturnAddressRegister,
-            numberOfCodeLinesBetweenARBuildAndFunctionExecution + 1));
+            numberOfCodeLinesBetweenARBuildAndFunctionExecution + 2));
+    print(
+                new TypeEInstruction(
+                    69,
+                    "OUTSS",
+                    0,
+                    ReturnAddressRegister));
     generateCodeForBranch(FunctionName, AL);
     setDebugName("end Activation " + FunctionName );
 }
@@ -913,11 +949,11 @@ void CodeGenerator::generateRunTimeSystem()
     destroyGlobalAR();
     print(
         //What the program will do after main
-        new TypeDInstruction(
-            75,
-            "HLT",
-            0,
-            0));
+    new TypeDInstruction(
+        75,
+        "HLT",
+        0,
+        0));
 }
 
 void CodeGenerator::destroyGlobalAR()
@@ -933,27 +969,52 @@ void CodeGenerator::destroyGlobalAR()
     }
 }
 
-void CodeGenerator::generateBinaryCode()
+void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    std::ofstream outputStream("output.txt", std::ofstream::out);
-    int ramCounter = 0;
+    std::ofstream outputStream(outputFile.c_str(), std::ofstream::out);
+    std::string mifHeader = "-- begin_signature\n"
+                            "-- Memory\n"
+                            "-- end_signature\n"
+                            "WIDTH=32;\n"
+                            "DEPTH=16384;\n"
+                            "\n"
+                            "ADDRESS_RADIX=UNS;\n"
+                            "DATA_RADIX=BIN;\n"
+                            "\n"
+                            "CONTENT BEGIN\n";
+    outputStream << mifHeader;
+    
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
+        if( ! inst->debugname.empty() ){
+            printf("%s\n", inst->debugname.c_str());
+        }
         printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str() );
-        outputStream << bin << " -- " << inst->to_string();
+        
+        outputStream << "    " << inst->relativeAddress << " : ";
+        outputStream << "0000000000000000" << bin << "; -- " << inst->to_string();
         if( ! inst->debugname.empty() )
         {
             outputStream << " (" << inst->debugname << ")";
         }
         outputStream << "\n";
+        
         // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
         // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
     }
+    
+    for(int i = code.size(); i < 16384; ++i )
+    {
+        outputStream << "    " << i << " : ";
+        outputStream << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX;\n";
+    }
+    outputStream << "END;\n" << std::endl;
     outputStream.close();
+    printf("\n\n Output saved on %s \n\n", outputFile.c_str());
 }
 
 std::string printRegister(int reg)
