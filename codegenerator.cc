@@ -84,28 +84,30 @@ void CodeGenerator::linker()
         inst->relativeAddress = i++;
     }
 
-    for (auto item : labelOriginMap)
+    for (auto origin : labelOriginMap)
     {
-        std::string label = item.first;
-        // std::cout << "label" << label << "\n";
-        BranchLabel *label_dest = item.second;
-        int destinationAddress = labelDestMap[label]->relativeAddress;
-        std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
-        std::string byteNumber = fullNumber.substr(0, 8);
-        std::bitset<8> partialNumber(byteNumber);
-        int byteAsInt = (int)partialNumber.to_ulong();
-        label_dest->leftByte->immediate = byteAsInt;
+        std::string label = origin.first;
+        for( BranchLabel *label_dest: origin.second )
+        {
+            // std::cout << "label" << label << "\n";
+            int destinationAddress = labelDestMap[label]->relativeAddress;
+            std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
+            std::string byteNumber = fullNumber.substr(0, 8);
+            std::bitset<8> partialNumber(byteNumber);
+            int byteAsInt = (int)partialNumber.to_ulong();
+            label_dest->leftByte->immediate = byteAsInt;
 
-        std::string byteNumber2 = fullNumber.substr(8, 8);
-        std::bitset<8> partialNumber2(byteNumber2);
-        int byteAsInt2 = (int)partialNumber2.to_ulong();
+            std::string byteNumber2 = fullNumber.substr(8, 8);
+            std::bitset<8> partialNumber2(byteNumber2);
+            int byteAsInt2 = (int)partialNumber2.to_ulong();
 
-        label_dest->rightByte->immediate = byteAsInt2;
-        std::cout << label << " -> " << label_dest->to_string() << "\n";
+            label_dest->rightByte->immediate = byteAsInt2;
+            std::cout << label << " -> " << label_dest->to_string() << "\n";
 
-        std::cout << "destinationAddress: " << destinationAddress << "\n";
-        std::cout << "left : " << label_dest->leftByte->to_string() << "\n";
-        std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
+            std::cout << "destinationAddress: " << destinationAddress << "\n";
+            std::cout << "left : " << label_dest->leftByte->to_string() << "\n";
+            std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
+        }
     }
 
     // printf("AFTER LINKER:");
@@ -148,19 +150,19 @@ void CodeGenerator::generateCode(TreeNode *node)
     generateCode(node->sibling);
 }
 
-BucketList getRecordFromSymbleTableAtScope(TreeNode *node)
+BucketList getRecordFromSymbolTableAtScope(TreeNode *node)
 {
     return st_find_at_scope(
         node->attr.name,
         node->scope);
 }
 
-BucketList getRecordFromSymbleTableAtGlobalScope(TreeNode *node)
+BucketList getRecordFromSymbolTableAtGlobalScope(TreeNode *node)
 {
     return st_find_at_scope(node->attr.name, "global");
 }
 
-BucketList getRecordFromSymbleTable(TreeNode *node)
+BucketList getRecordFromSymbolTable(TreeNode *node)
 {
     return st_find(node->attr.name,
                    node->scope);
@@ -215,7 +217,7 @@ void CodeGenerator::
     print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
     
     setDebugName("end Branch");
-    labelOriginMap[branch_name] = branchLabel;
+    labelOriginMap[branch_name].push_back(branchLabel);
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch end +++++++++++++"
                   << "\n";
@@ -391,7 +393,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             {
                 generateCode(node->child[1]);
             }
-            generateCodeForPop(ReturnAddressRegister);
 
             DestroyARAndExitFunction(node);
             setDebugName("end FunDeclK " + FunctionName);
@@ -402,7 +403,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunActiveK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        std::string func_decl_label = "function_" + FunctionName;
         generateCode(node->child[0]);
         if (FunctionName == "fun_input")
         {
@@ -412,6 +412,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     "INSW",
                     0,
                     AcumulatorRegister));
+            setDebugName("INPUT");
         }
         else if (FunctionName == "fun_output")
         {
@@ -421,6 +422,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     "OUTSS",
                     0,
                     AcumulatorRegister));
+            setDebugName("OUTPUT");
         }
         else if (FunctionName == "fun_outputLED")
         {
@@ -691,12 +693,12 @@ void CodeGenerator::createHeader()
     print(
         new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize));
     print( subImeditateFromRegister(1, BaseAddressRegister) );
-    print(
-            new TypeEInstruction(
-                69,
-                "OUTSS",
-                0,
-                BaseAddressRegister));    
+    // print(
+    //         new TypeEInstruction(
+    //             69,
+    //             "OUTSS",
+    //             0,
+    //             BaseAddressRegister));    
     setDebugName("begin Header");
     generateRunTimeSystem();
 
@@ -823,20 +825,21 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
             reg));
     print(nop());
 }
+
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
-    BucketList record = getRecordFromSymbleTable(node);
+    BucketList record = getRecordFromSymbolTable(node);
     print(
         loadImediateToRegister(reg, record->memloc * 4));
-    if (node->scope != "global")
-    {
-        print(
-            new TypeEInstruction(
-                21,
-                "NEG",
-                reg,
-                reg));
-    }
+    // if (node->scope != "global")
+    // {
+    //     print(
+    //         new TypeEInstruction(
+    //             21,
+    //             "NEG",
+    //             reg,
+    //             reg));
+    // }
 }
 
 void hr(std::string middle)
@@ -849,13 +852,25 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
     DataSection ds;
     int variableCountInFunction = ds.getSize(node->attr.name);
+    
+    //Return redirects to here
     std::string label = "end_" + node->attr.name;
     printLabelNop(label);
+
+    generateCodeForPop(ReturnAddressRegister);
     for (int recordInAR = 0; recordInAR < variableCountInFunction; recordInAR++)
     {
         generateCodeForPop(TemporaryRegister);
     }
     generateCodeForPop(FramePointer);
+    
+    print(
+            new TypeEInstruction(
+                69,
+                "OUTSS",
+                0,
+                ReturnAddressRegister));
+    
     print(
         jumpToRegister(ReturnAddressRegister));
 }
@@ -885,16 +900,18 @@ void CodeGenerator::generateGlobalAR()
         i++)
     {
         print(pushAcumulator());
-        if (i == 0)
-            print(
-                new TypeDInstruction(
-                    57,
-                    "ADD",
-                    GlobalPointer,
-                    0));
     }
+    
+    print(
+        new TypeDInstruction(
+            57,
+            "ADD",
+            GlobalPointer,
+            0));
+    
     setDebugName("end GlobalAR");
 }
+
 void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 {
     DataSection ds;
@@ -904,18 +921,30 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
     print(
         pushRegister(FramePointer));
     setDebugName("begin Activation " + FunctionName );
+
+    int localVariableCount = variableCountInFunction - argumentCount;
+    
     //Build activation record
-    print(
-        new TypeDInstruction(
-            8,
-            "MOV",
-            AcumulatorRegister,
-            0));
-    for (
-        int i = 0;
-        i < variableCountInFunction - argumentCount;
-        i++)
-        print(pushAcumulator());
+
+    //Declaring local variables, if any
+    if( localVariableCount > 0 )
+    {
+        print(
+            new TypeDInstruction(
+                8,
+                "MOV",
+                AcumulatorRegister,
+                0 )
+        );
+        
+        // Inserting the local vars into the AR
+        for (int i = 0; i < localVariableCount; ++i)
+        {
+            print(pushAcumulator());
+        }
+    }
+
+    // Inserting the arguments into the AR
     TreeNode *argumentNode = node->child[0];
     for (int i = 0; i < argumentCount; i++)
     {
@@ -923,15 +952,16 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
         print(pushAcumulator());
         argumentNode = argumentNode->sibling;
     }
+
     //All variables pushed
     // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
-    int numberOfCodeLinesBetweenARBuildAndFunctionExecution = 8; //Might be changed
+    int branchCodeSize = 8; //Might be changed
     print(
         new TypeDInstruction(
             56,
             "ADD",
             ReturnAddressRegister,
-            numberOfCodeLinesBetweenARBuildAndFunctionExecution + 2));
+            branchCodeSize + 2));
     print(
                 new TypeEInstruction(
                     69,
@@ -993,7 +1023,7 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
         if( ! inst->debugname.empty() ){
             printf("%s\n", inst->debugname.c_str());
         }
-        printf("% 3d: % -22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str() );
+        printf("% 3d: %-22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str() );
         
         outputStream << "    " << inst->relativeAddress << " : ";
         outputStream << "0000000000000000" << bin << "; -- " << inst->to_string();

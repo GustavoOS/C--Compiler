@@ -97,7 +97,7 @@ private:
   std::string generatedCode;
   std::vector<Instruction *> code;
   std::map<std::string, Instruction *> labelDestMap;
-  std::map<std::string, BranchLabel *> labelOriginMap;
+  std::map<std::string, std::vector< BranchLabel *> > labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
   TreeNode * mainActivation;
