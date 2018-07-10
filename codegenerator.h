@@ -111,7 +111,7 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
-  void generateCodeForBranch(std::string branch_name, ConditionCodes condition);
+  void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode * child = NULL);
   void generateCodeForPop(Registers reg);
   void registerLabelInstruction(std::string label, Instruction *Instruction);
 

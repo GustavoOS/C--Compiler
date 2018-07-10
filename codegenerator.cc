@@ -14,13 +14,13 @@ ConditionCodes translateCondition(TokenType operation)
     switch (operation)
     {
     case LESSER:
-        return LT;
+        return CC;
     case LESSEQ:
-        return LE;
+        return LS;
     case GREATER:
-        return GT;
+        return HI;
     case GREATEQ:
-        return GE;
+        return CS;
     case EQCOMP:
         return EQ;
     case NOTEQ:
@@ -54,11 +54,11 @@ void CodeGenerator::print(Instruction *instruction)
     code.push_back(instruction);
 }
 
-void CodeGenerator::setDebugName( std::string name )
+void CodeGenerator::setDebugName(std::string name)
 {
-    if( code.size() > 0)
+    if (code.size() > 0)
     {
-        Instruction * lastInst = code.back();
+        Instruction *lastInst = code.back();
         lastInst->debugname = name;
     }
 }
@@ -87,7 +87,7 @@ void CodeGenerator::linker()
     for (auto origin : labelOriginMap)
     {
         std::string label = origin.first;
-        for( BranchLabel *label_dest: origin.second )
+        for (BranchLabel *label_dest : origin.second)
         {
             // std::cout << "label" << label << "\n";
             int destinationAddress = labelDestMap[label]->relativeAddress;
@@ -167,16 +167,19 @@ BucketList getRecordFromSymbolTable(TreeNode *node)
     return st_find(node->attr.name,
                    node->scope);
 }
-void CodeGenerator::
-    generateCodeForBranch(std::string branch_name, ConditionCodes condition)
+
+void CodeGenerator::generateCodeForBranch(std::string branch_name,
+                                          ConditionCodes condition,
+                                          TreeNode *operationNode)
 {
+
     if (shouldShowVisitingMessages)
-        std::cout << "+++++++++++++ Branch start +++++++++++++"
-                  << "\n";
-    print(
-        moveLowToHigh(
-            AcumulatorRegister,
-            SwapRegister));
+    {
+        std::cout << "+++++++++++++ Branch start +++++++++++++\n";
+    }
+
+    print(moveLowToHigh(AcumulatorRegister, SwapRegister));
+
     setDebugName("begin Branch");
 
     Instruction *leftByte = loadImediateToRegister(TemporaryRegister, 0);
@@ -209,18 +212,28 @@ void CodeGenerator::
         TemporaryRegister,
         BaseAddressRegister,
         TemporaryRegister));
+
     BranchLabel *branchLabel = new BranchLabel(branch_name, leftByte, rightByte);
 
-    print(
-        moveHighToLow(AcumulatorRegister, SwapRegister));
+    print(moveHighToLow(AcumulatorRegister, SwapRegister));
+
+    if (operationNode)
+    {
+        print(pushRegister(TemporaryRegister));
+        generateCode(operationNode); // generate child 0 and child 1 and then CMP
+        generateCodeForPop(TemporaryRegister);
+    }
 
     print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
-    
+
     setDebugName("end Branch");
+
     labelOriginMap[branch_name].push_back(branchLabel);
+
     if (shouldShowVisitingMessages)
-        std::cout << "+++++++++++++ Branch end +++++++++++++"
-                  << "\n";
+    {
+        std::cout << "+++++++++++++ Branch end +++++++++++++\n";
+    }
 }
 
 void CodeGenerator::generateCodeForPop(Registers reg)
@@ -298,34 +311,34 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
-        printLabelNop(while_label);
+        printLabelNop(while_label); //Before the while branch
 
-        generateCode(node->child[0]);
-        generateCodeForBranch(
+        generateCodeForBranch( // If cond, then go to do_label
             do_label,
-            translateCondition(node->child[0]->attr.op));
+            translateCondition(node->child[0]->attr.op),
+            node->child[0]);
 
-        generateCodeForBranch(
+        generateCodeForBranch( // Else, go to while_end_label
             while_end_label,
             AL);
 
-        printLabelNop(do_label);
+        printLabelNop(do_label); // Goes here if cond is true
 
         generateCode(node->child[1]);
-        generateCodeForBranch(while_label, AL);
+        generateCodeForBranch(while_label, AL); // Go back to first branch
 
-        printLabelNop(while_end_label);
+        printLabelNop(while_end_label); // Goes here if cond is false
     }
     break;
 
     case IfK:
     {
-        generateCode(node->child[0]);
         std::string if_true_label_name = "if_true_" + std::to_string(node->attr.val);
         std::string if_end_label_name = "if_end_" + std::to_string(node->attr.val);
+
         generateCodeForBranch(if_true_label_name,
-                              translateCondition(
-                                  node->child[0]->attr.op));
+                              translateCondition(node->child[0]->attr.op),
+                              node->child[0]);
 
         // Generate code for ELSE code
 
@@ -382,13 +395,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     "ADD",
                     FramePointer,
                     0));
-            print(
-                new TypeEInstruction(
-                    69,
-                    "OUTSS",
-                    0,
-                    FramePointer));
-
             if (node->child[1] != NULL)
             {
                 generateCode(node->child[1]);
@@ -442,12 +448,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case AssignK:
     {
-        if(shouldShowVisitingMessages)
-        std::cout << "This is Assign\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "This is Assign\n";
 
         TreeNode *varToBeAssignedInto = node->child[0];
-        if(shouldShowVisitingMessages)
-        std::cout << "Back to assign from value\n";
+        if (shouldShowVisitingMessages)
+            std::cout << "Back to assign from value\n";
         switch (varToBeAssignedInto->kind.exp)
         {
         case IdK:
@@ -512,7 +518,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
 
         if (shouldShowVisitingMessages)
-        std::cout << "Assign end\n";
+            std::cout << "Assign end\n";
     }
     break;
 
@@ -692,13 +698,13 @@ void CodeGenerator::createHeader()
     print(nop());
     print(
         new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize));
-    print( subImeditateFromRegister(1, BaseAddressRegister) );
+    print(subImeditateFromRegister(1, BaseAddressRegister));
     // print(
     //         new TypeEInstruction(
     //             69,
     //             "OUTSS",
     //             0,
-    //             BaseAddressRegister));    
+    //             BaseAddressRegister));
     setDebugName("begin Header");
     generateRunTimeSystem();
 
@@ -830,7 +836,7 @@ void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
     BucketList record = getRecordFromSymbolTable(node);
     print(
-        loadImediateToRegister(reg, record->memloc * 4));
+        loadImediateToRegister(reg, record->memloc));
     // if (node->scope != "global")
     // {
     //     print(
@@ -852,7 +858,7 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
     DataSection ds;
     int variableCountInFunction = ds.getSize(node->attr.name);
-    
+
     //Return redirects to here
     std::string label = "end_" + node->attr.name;
     printLabelNop(label);
@@ -862,15 +868,9 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
     {
         generateCodeForPop(TemporaryRegister);
     }
+    
     generateCodeForPop(FramePointer);
-    
-    print(
-            new TypeEInstruction(
-                69,
-                "OUTSS",
-                0,
-                ReturnAddressRegister));
-    
+
     print(
         jumpToRegister(ReturnAddressRegister));
 }
@@ -901,14 +901,14 @@ void CodeGenerator::generateGlobalAR()
     {
         print(pushAcumulator());
     }
-    
+
     print(
         new TypeDInstruction(
             57,
             "ADD",
             GlobalPointer,
             0));
-    
+
     setDebugName("end GlobalAR");
 }
 
@@ -920,23 +920,22 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
     int argumentCount = node->attr.val;
     print(
         pushRegister(FramePointer));
-    setDebugName("begin Activation " + FunctionName );
+    setDebugName("begin Activation " + FunctionName);
 
     int localVariableCount = variableCountInFunction - argumentCount;
-    
+
     //Build activation record
 
     //Declaring local variables, if any
-    if( localVariableCount > 0 )
+    if (localVariableCount > 0)
     {
         print(
             new TypeDInstruction(
                 8,
                 "MOV",
                 AcumulatorRegister,
-                0 )
-        );
-        
+                0));
+
         // Inserting the local vars into the AR
         for (int i = 0; i < localVariableCount; ++i)
         {
@@ -955,21 +954,19 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
     //All variables pushed
     // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
-    int branchCodeSize = 8; //Might be changed
-    print(
-        new TypeDInstruction(
-            56,
-            "ADD",
-            ReturnAddressRegister,
-            branchCodeSize + 2));
-    print(
-                new TypeEInstruction(
-                    69,
-                    "OUTSS",
-                    0,
-                    ReturnAddressRegister));
+    int branchCodeStart = code.size();
+    Instruction *jumpAndLinkAddress =
+        new TypeDInstruction(56,
+                             "ADD",
+                             ReturnAddressRegister,
+                             0);
+    print(jumpAndLinkAddress);
+       
     generateCodeForBranch(FunctionName, AL);
-    setDebugName("end Activation " + FunctionName );
+    
+    jumpAndLinkAddress->immediate = (code.size() - branchCodeStart);
+
+    setDebugName("end Activation " + FunctionName);
 }
 
 void CodeGenerator::generateRunTimeSystem()
@@ -979,11 +976,11 @@ void CodeGenerator::generateRunTimeSystem()
     destroyGlobalAR();
     print(
         //What the program will do after main
-    new TypeDInstruction(
-        75,
-        "HLT",
-        0,
-        0));
+        new TypeDInstruction(
+            75,
+            "HLT",
+            0,
+            0));
 }
 
 void CodeGenerator::destroyGlobalAR()
@@ -1015,34 +1012,36 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
                             "\n"
                             "CONTENT BEGIN\n";
     outputStream << mifHeader;
-    
+
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
-        if( ! inst->debugname.empty() ){
+        if (!inst->debugname.empty())
+        {
             printf("%s\n", inst->debugname.c_str());
         }
-        printf("% 3d: %-22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str() );
-        
+        printf("% 3d: %-22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
+
         outputStream << "    " << inst->relativeAddress << " : ";
         outputStream << "0000000000000000" << bin << "; -- " << inst->to_string();
-        if( ! inst->debugname.empty() )
+        if (!inst->debugname.empty())
         {
             outputStream << " (" << inst->debugname << ")";
         }
         outputStream << "\n";
-        
+
         // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
         // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
     }
-    
-    for(int i = code.size(); i < 16384; ++i )
+
+    for (int i = code.size(); i < 16384; ++i)
     {
         outputStream << "    " << i << " : ";
         outputStream << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX;\n";
     }
-    outputStream << "END;\n" << std::endl;
+    outputStream << "END;\n"
+                 << std::endl;
     outputStream.close();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());
 }
