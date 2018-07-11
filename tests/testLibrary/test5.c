@@ -24,10 +24,10 @@ void main(void)
 {
     int i;
     i = 0;
-    while( i < 5 )
+    output(i);
+    if( i < 5 )
     {
-        i = i + 1;
-        output(i); // FE1O
+        output(51802); // FE1O
     }
     // i = 10;
     // k = 12;
