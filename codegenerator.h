@@ -82,6 +82,7 @@ Instruction *subImeditateFromRegister(int value, Registers destination);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
+Instruction * outputRegister(Registers reg);
 
 void hr(std::string);
 

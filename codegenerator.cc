@@ -311,7 +311,14 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
-        printLabelNop(while_label); //Before the while branch
+        print(
+            new TypeDInstruction(
+                56,
+                "ADD",
+                ReturnAddressRegister,
+                0));
+        setDebugName(while_label);
+        print(pushRegister(ReturnAddressRegister));
 
         generateCodeForBranch( // If cond, then go to do_label
             do_label,
@@ -325,9 +332,21 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         printLabelNop(do_label); // Goes here if cond is true
 
         generateCode(node->child[1]);
-        generateCodeForBranch(while_label, AL); // Go back to first branch
 
-        printLabelNop(while_end_label); // Goes here if cond is false
+        print(popRegister(ReturnAddressRegister));
+        setDebugName("Return to " + while_label);
+        print(nop());
+        print(
+            new TypeFInstruction(
+                38,
+                "BX",
+                AL,
+                ReturnAddressRegister));
+        // generateCodeForBranch(while_label, AL); // Go back to first branch
+
+        printLabelNop(while_end_label);
+        print(popRegister(ReturnAddressRegister));
+        print(nop());
     }
     break;
 
@@ -423,11 +442,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         else if (FunctionName == "fun_output")
         {
             print(
-                new TypeEInstruction(
-                    69,
-                    "OUTSS",
-                    0,
-                    AcumulatorRegister));
+                outputRegister(AcumulatorRegister));
             setDebugName("OUTPUT");
         }
         else if (FunctionName == "fun_outputLED")
@@ -683,8 +698,8 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
             new TypeEInstruction(
                 22,
                 "CMP",
-                AcumulatorRegister,
-                TemporaryRegister));
+                TemporaryRegister,
+                AcumulatorRegister));
 
         break;
     }
@@ -735,8 +750,17 @@ Instruction *jumpToRegister(Registers reg)
 
     );
 }
+Instruction *outputRegister(Registers reg)
+{
+    return new TypeEInstruction(
+        69,
+        "OUTSS",
+        0,
+        reg);
+}
 
-Instruction *popRegister(Registers reg)
+Instruction *
+popRegister(Registers reg)
 {
     return new TypeEInstruction(
         68,
@@ -868,7 +892,7 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
     {
         generateCodeForPop(TemporaryRegister);
     }
-    
+
     generateCodeForPop(FramePointer);
 
     print(
@@ -961,9 +985,9 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
                              ReturnAddressRegister,
                              0);
     print(jumpAndLinkAddress);
-       
+
     generateCodeForBranch(FunctionName, AL);
-    
+
     jumpAndLinkAddress->immediate = (code.size() - branchCodeStart);
 
     setDebugName("end Activation " + FunctionName);
