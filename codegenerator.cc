@@ -397,8 +397,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string FunctionName = std::string(node->attr.name);
         if (
             (FunctionName != "fun_input") &&
-            (FunctionName != "fun_output") &&
-            (FunctionName != "fun_outputLED"))
+            (FunctionName != "fun_output")
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
@@ -444,15 +443,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             print(
                 outputRegister(AcumulatorRegister));
             setDebugName("OUTPUT");
-        }
-        else if (FunctionName == "fun_outputLED")
-        {
-            print(
-                new TypeEInstruction(
-                    70,
-                    "OUTLED",
-                    0,
-                    AcumulatorRegister));
         }
         else
         {

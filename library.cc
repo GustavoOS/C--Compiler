@@ -12,8 +12,6 @@ void LibraryIncluder::buildLibrary()
     libSize++;
     libraryString += "void output(int number) {}\n";
     libSize++;
-    libraryString += "void outputLED(int number) {}\n";
-    libSize++;
 }
 
 FILE *LibraryIncluder::getFinalFile()
