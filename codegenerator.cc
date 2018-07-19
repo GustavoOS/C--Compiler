@@ -397,7 +397,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string FunctionName = std::string(node->attr.name);
         if (
             (FunctionName != "fun_input") &&
-            (FunctionName != "fun_output")
+            (FunctionName != "fun_output"))
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
