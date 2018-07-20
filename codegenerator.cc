@@ -433,7 +433,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             print(
                 new TypeEInstruction(
                     71,
-                    "INSW",
+                    "INPUT",
                     0,
                     AcumulatorRegister));
             setDebugName("INPUT");
@@ -744,7 +744,7 @@ Instruction *outputRegister(Registers reg)
 {
     return new TypeEInstruction(
         69,
-        "OUTSS",
+        "OUTPUT",
         0,
         reg);
 }
