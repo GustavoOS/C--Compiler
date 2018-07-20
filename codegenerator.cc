@@ -432,6 +432,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             print(
                 new TypeEInstruction(
+                    70,
+                    "PAUSE",
+                    0,
+                    0));
+            print(
+                new TypeEInstruction(
                     71,
                     "INPUT",
                     0,
@@ -440,6 +446,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_output")
         {
+            print(
+                new TypeEInstruction(
+                    70,
+                    "PAUSE",
+                    0,
+                    0));
             print(
                 outputRegister(AcumulatorRegister));
             setDebugName("OUTPUT");
