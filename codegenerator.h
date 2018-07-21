@@ -49,7 +49,7 @@ class Instruction
 {
 public:
   int id;
-  std::string name, label;
+  std::string name, label, debugname;
   int regm, regn, regd, condition, immediate, offset;
   virtual std::string to_string() = 0;
   virtual std::string to_binary() {
@@ -78,9 +78,11 @@ Instruction *pushRegister(Registers reg);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 Instruction *moveLowToLowRegister(Registers origin, Registers destination);
+Instruction *subImeditateFromRegister(int value, Registers destination);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
+Instruction * outputRegister(Registers reg);
 
 void hr(std::string);
 
@@ -90,13 +92,13 @@ public:
   CodeGenerator(bool displayable);
   void generate(TreeNode *node);
   void linker();
-  void generateBinaryCode();
+  void generateBinaryCode(std::string outputFile);
 
 private:
   std::string generatedCode;
   std::vector<Instruction *> code;
   std::map<std::string, Instruction *> labelDestMap;
-  std::map<std::string, BranchLabel *> labelOriginMap;
+  std::map<std::string, std::vector< BranchLabel *> > labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
   TreeNode * mainActivation;
@@ -110,12 +112,15 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
-  void generateCodeForBranch(std::string branch_name, ConditionCodes condition);
+  void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode * child = NULL);
+  void generateCodeForPop(Registers reg);
   void registerLabelInstruction(std::string label, Instruction *Instruction);
 
   void fetchVarOffset(TreeNode *node, Registers reg);
   void loadVariable(TreeNode *node, Registers reg);
   void printLabelNop(std::string);
+
+  void setDebugName( std::string name );
 
   void DestroyARAndExitFunction(TreeNode *);
   void generateGlobalAR();
@@ -170,7 +175,7 @@ public:
       int identity,
       std::string instructionName,
       int instructionImmediate,
-      int RegisterM,
+      int RegisterN,
       int RegisterD);
 
   std::string to_string();

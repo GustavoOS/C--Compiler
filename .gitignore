@@ -7,3 +7,4 @@ bin/*
 scanner.c
 /tests/temporary.o
 temporary.o
+output.txt

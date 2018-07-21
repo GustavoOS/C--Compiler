@@ -51,11 +51,18 @@ int main(int argc, char *argv[])
 {
   TreeNode *syntaxTree;
   std::string pgm; /* source code file name */
-  if (argc != 2)
+  std::string outputFile = "output.txt";
+  if (argc != 2 && argc != 3)
   {
-    fprintf(stderr, "usage: %s <filename>\n", argv[0]);
+    fprintf(stderr, "usage: %s <filename> <output>\n", argv[0]);
     exit(1);
   }
+
+  if(argc == 3)
+  {
+    outputFile = argv[2];
+  }
+
   pgm = std::string(argv[1]);
   if (pgm.find('.') == std::string::npos)
     pgm = pgm + ".c";
@@ -110,7 +117,7 @@ int main(int argc, char *argv[])
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);
     cg.linker();
-    cg.generateBinaryCode();
+    cg.generateBinaryCode(outputFile);
   }
 #if !NO_CODE
   if (!Error)
