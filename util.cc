@@ -114,7 +114,7 @@ void printToken(TokenType token, const char *tokenString)
  */
 TreeNode *newStmtNode(StmtKind kind)
 {
-  TreeNode *t = new TreeNode;
+  TreeNode *t = new TreeNode();
   int i;
   if (t == NULL)
     fprintf(listing, "Out of memory error at line %d\n", lineno);
@@ -135,7 +135,7 @@ TreeNode *newStmtNode(StmtKind kind)
  */
 TreeNode *newExpNode(ExpKind kind)
 {
-  TreeNode *t = new TreeNode;
+  TreeNode *t = new TreeNode();
   int i;
   if (t == NULL)
     fprintf(listing, "Out of memory error at line %d\n", lineno);

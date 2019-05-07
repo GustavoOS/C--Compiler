@@ -553,7 +553,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         std::cout << "This is an expression\n";
     if (shouldShowVisitingMessages)
         printNode(node);
-    switch (node->kind.stmt)
+    switch (node->kind.exp)
     {
     case OpK:
     {
