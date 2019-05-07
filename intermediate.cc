@@ -223,14 +223,15 @@ void IntermediateCodeGenerator::generateWhile(TreeNode *node)
 {
     std::string _whileStartLabel = counter.getNextLabel(), _whileExitLabel = counter.getNextLabel();
 
-    // Condition
-    generate(node->child[0]);
-
-    // Evaluation
+    // Evaluation label
     insertQuadruple(
         newQuadruple()
             ->withLabel(_whileStartLabel));
 
+    // Condition check
+    generate(node->child[0]);
+
+    // Branch
     insertQuadruple(
         newQuadruple()
             ->withOperation("if_false")
