@@ -2,11 +2,8 @@
 #include <iostream>
 #include <fstream>
 
-MifGenerator::MifGenerator(std::string outputFile)
+MifGenerator::MifGenerator()
 {
-
-    file.open(outputFile.c_str(), std::ofstream::out);
-
     header = "-- begin_signature\n"
              "-- Memory\n"
              "-- end_signature\n"
@@ -17,7 +14,10 @@ MifGenerator::MifGenerator(std::string outputFile)
              "DATA_RADIX=BIN;\n"
              "\n"
              "CONTENT BEGIN\n";
+}
 
+void MifGenerator::open(std::string outputFile){
+    file.open(outputFile.c_str(), std::ofstream::out);
     file << header;
 }
 

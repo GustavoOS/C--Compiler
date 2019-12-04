@@ -6,7 +6,8 @@
 class MifGenerator
 {
 public:
-    MifGenerator(std::string);
+    MifGenerator();
+    void open(std::string);
     void printMultipleEmptyPosition(int start, int repeats);
     void printInstruction(int, std::string, std::string);
     void printDebugMsg(std::string);

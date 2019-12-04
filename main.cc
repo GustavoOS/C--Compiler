@@ -48,7 +48,7 @@ int TraceCode = TRUE;
 int Error = FALSE;
 
 // Mark True for OS mode development
-bool isOperatingSystem = false;
+bool isOperatingSystem = true;
 int PROGRAM_OFFSET = isOperatingSystem ? 2048 : 0;
 
 int main(int argc, char *argv[])

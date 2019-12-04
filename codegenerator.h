@@ -5,6 +5,7 @@
 #include <iostream>
 #include "globals.h"
 #include <map>
+#include "mifgenerator.h"
 
 enum Registers : int
 {
@@ -116,6 +117,7 @@ private:
   void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode * child = NULL);
   void generateCodeForPop(Registers reg);
   void registerLabelInstruction(std::string label, Instruction *Instruction);
+  void generateCodeForConst(int);
 
   void fetchVarOffset(TreeNode *node, Registers reg);
   void loadVariable(TreeNode *node, Registers reg);
@@ -128,6 +130,9 @@ private:
   void generateCodeForFunctionActivation(TreeNode *node);
   void generateRunTimeSystem();
   void destroyGlobalAR();
+
+  void generateCodeToJumpToOS();
+  MifGenerator mif;
 };
 
 class BranchLabel

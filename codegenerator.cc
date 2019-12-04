@@ -572,45 +572,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     break;
     case ConstK:
     {
-
-        std::string fullNumber, byteNumber;
-        fullNumber = std::bitset<32>(node->attr.val).to_string();
-
-        for (int i = 0; i < 4; i++)
-        {
-            byteNumber = fullNumber.substr(8 * i, 8);
-            std::bitset<8> partialNumber(byteNumber);
-            int byteAsInt = (int)partialNumber.to_ulong();
-
-            if (i == 0)
-            {
-                print(loadImediateToRegister(AcumulatorRegister, byteAsInt));
-                setDebugName("begin ConstK");
-            }
-            else
-            {
-                print(
-                    new TypeAInstruction(
-                        1,
-                        "LSL",
-                        8,
-                        AcumulatorRegister,
-                        AcumulatorRegister));
-                if (byteAsInt != 0)
-                {
-                    print(
-                        loadImediateToRegister(TemporaryRegister, byteAsInt));
-                    print(
-                        new TypeBInstruction(
-                            4,
-                            "ADD",
-                            TemporaryRegister,
-                            AcumulatorRegister,
-                            AcumulatorRegister));
-                }
-            }
-        }
-        setDebugName("end ConstK");
+        generateCodeForConst(node->attr.val);
     }
     break;
     case IdK:
@@ -1021,9 +983,10 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    MifGenerator mif = MifGenerator(outputFile);
+    mif.open(outputFile);
 
-    mif.printMultipleEmptyPosition(0, programOffset);
+    if (programOffset)
+        generateCodeToJumpToOS();
 
     for (Instruction *inst : code)
     {
@@ -1048,10 +1011,87 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
         mif.jumpLine();
     }
 
-    mif.printMultipleEmptyPosition(code.size(), 16384);
+    mif.printMultipleEmptyPosition(code.size() + programOffset, 16384);
 
     mif.printFooter();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());
+}
+
+void CodeGenerator::generateCodeToJumpToOS()
+{
+    std::vector<Instruction *> originalCode = code, newCode;
+    std::string originalInst = generatedCode, ngc;
+    code = newCode;
+    generatedCode = ngc;
+    generateCodeForConst(2048);
+
+    print(new TypeFInstruction(38, "BX", AL, AcumulatorRegister));
+
+
+
+    Instruction *inst;
+
+    for (int i = 0; i < code.size(); i++)
+    {
+        inst = code[i];
+        std::string bin = inst->to_binary();
+        assert(bin.size() == 16);
+
+        this->mif.printInstruction(i,
+                             bin,
+                             inst->to_string());
+
+        this->mif.jumpLine();
+    }
+
+    mif.printMultipleEmptyPosition(code.size(), programOffset);
+    code = originalCode;
+    generatedCode = originalInst;
+}
+
+void CodeGenerator::generateCodeForConst(int value)
+{
+    {
+
+        std::string fullNumber, byteNumber;
+        fullNumber = std::bitset<32>(value).to_string();
+
+        for (int i = 0; i < 4; i++)
+        {
+            byteNumber = fullNumber.substr(8 * i, 8);
+            std::bitset<8> partialNumber(byteNumber);
+            int byteAsInt = (int)partialNumber.to_ulong();
+
+            if (i == 0)
+            {
+                print(loadImediateToRegister(AcumulatorRegister, byteAsInt));
+                setDebugName("begin ConstK");
+            }
+            else
+            {
+                print(
+                    new TypeAInstruction(
+                        1,
+                        "LSL",
+                        8,
+                        AcumulatorRegister,
+                        AcumulatorRegister));
+                if (byteAsInt != 0)
+                {
+                    print(
+                        loadImediateToRegister(TemporaryRegister, byteAsInt));
+                    print(
+                        new TypeBInstruction(
+                            4,
+                            "ADD",
+                            TemporaryRegister,
+                            AcumulatorRegister,
+                            AcumulatorRegister));
+                }
+            }
+        }
+        setDebugName("end ConstK");
+    }
 }
 
 std::string printRegister(int reg)
