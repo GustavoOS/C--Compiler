@@ -31,7 +31,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable)
+CodeGenerator::CodeGenerator(bool displayable, int programOffset)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -41,6 +41,7 @@ CodeGenerator::CodeGenerator(bool displayable)
     mainActivation->attr.val = 0;
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
+    this->programOffset = programOffset;
 }
 
 void CodeGenerator::print(Instruction *instruction)

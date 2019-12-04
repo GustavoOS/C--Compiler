@@ -89,7 +89,7 @@ void hr(std::string);
 class CodeGenerator
 {
 public:
-  CodeGenerator(bool displayable);
+  CodeGenerator(bool displayable, int programOffset);
   void generate(TreeNode *node);
   void linker();
   void generateBinaryCode(std::string outputFile);
@@ -102,6 +102,7 @@ private:
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
   TreeNode * mainActivation;
+  int programOffset;
 
   //Private methods
   void print(Instruction *instruction);

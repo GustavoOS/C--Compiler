@@ -1,5 +1,5 @@
 cminus: obj/lex.yy.o obj/parser.o obj/util.o obj/memory.o obj/analyze.o obj/symtab.o obj/codegenerator.o obj/syntaticErrors.o obj/instructions.o obj/library.o
-	g++ -Wall -g -std=c++11 -o bin/cminus obj/*  main.c -ly -lfl
+	g++ -Wall -g -std=c++11 -o bin/cminus obj/*  main.cc -ly -lfl
 
 obj/lex.yy.o: scanner.l
 	flex -o scanner.c scanner.l
