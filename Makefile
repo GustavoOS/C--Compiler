@@ -1,4 +1,4 @@
-cminus: obj/lex.yy.o obj/parser.o obj/util.o obj/memory.o obj/analyze.o obj/symtab.o obj/codegenerator.o obj/syntaticErrors.o obj/instructions.o obj/library.o
+cminus: obj/lex.yy.o obj/parser.o obj/util.o obj/memory.o obj/analyze.o obj/symtab.o obj/codegenerator.o obj/syntaticErrors.o obj/instructions.o obj/library.o obj/mifgenerator.o
 	g++ -Wall -g -std=c++11 -o bin/cminus obj/*  main.cc -ly -lfl
 
 obj/lex.yy.o: scanner.l
@@ -32,6 +32,9 @@ obj/symtab.o: symtab.cc
 
 obj/library.o: library.cc
 	g++ -g -c -Wall -std=c++11 library.cc -o obj/library.o
+
+obj/mifgenerator.o: mifgenerator.cc
+	g++ -g -c -Wall -std=c++11 mifgenerator.cc -o obj/mifgenerator.o
 
 view:
 	dot -Tps calc.dot -o graph.ps; evince graph.ps

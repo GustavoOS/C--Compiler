@@ -1023,6 +1023,8 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 
     MifGenerator mif = MifGenerator(outputFile);
 
+    mif.printMultipleEmptyPosition(0, programOffset);
+
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
@@ -1031,18 +1033,22 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
         if (!inst->debugname.empty())
             printf("%s\n", inst->debugname.c_str());
 
-        printf("% 3d: %-22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
+        printf("% 3d: %-22s => %s\n",
+               inst->relativeAddress,
+               inst->to_string().c_str(),
+               bin.c_str());
 
-        mif.printInstruction(inst->relativeAddress, bin, inst->to_string());
+        mif.printInstruction(inst->relativeAddress + programOffset,
+                             bin,
+                             inst->to_string());
 
         if (!inst->debugname.empty())
-            mif.printLine(" (" + inst->debugname + ")");
+            mif.printDebugMsg(inst->debugname);
 
         mif.jumpLine();
     }
 
-    for (int i = code.size(); i < 16384; ++i)
-        mif.printEmptyMemoryPosition(i);
+    mif.printMultipleEmptyPosition(code.size(), 16384);
 
     mif.printFooter();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());

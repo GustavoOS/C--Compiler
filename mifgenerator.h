@@ -7,16 +7,17 @@ class MifGenerator
 {
 public:
     MifGenerator(std::string);
-    void printEmptyMemoryPosition(int);
+    void printMultipleEmptyPosition(int start, int repeats);
     void printInstruction(int, std::string, std::string);
-    void printLine(std::string);
-    void printHeader();
+    void printDebugMsg(std::string);
     void jumpLine();
     void printFooter();
 private:
     std::string header;
     std::ofstream file;
     void close();
+    void printLine(std::string);
+    void printEmptyMemoryPosition(int);
 };
 
 #endif

@@ -17,10 +17,7 @@ MifGenerator::MifGenerator(std::string outputFile)
              "DATA_RADIX=BIN;\n"
              "\n"
              "CONTENT BEGIN\n";
-}
 
-void MifGenerator::printHeader()
-{
     file << header;
 }
 
@@ -57,4 +54,16 @@ void MifGenerator::printInstruction(int position, std::string binary, std::strin
 {
     printLine("    " + std::to_string(position) +
                   " : 0000000000000000" + binary + "; -- " + assembly);
+}
+
+void MifGenerator::printMultipleEmptyPosition(int start, int repeats)
+{
+    for (int i = start; i < repeats; i++)
+        printEmptyMemoryPosition(i);
+    
+}
+
+void MifGenerator::printDebugMsg(std::string msg)
+{
+    printLine(" (" + msg + ")");
 }
