@@ -7,6 +7,7 @@
 #include <bitset>
 #include <assert.h>
 #include <fstream>
+#include "mifgenerator.h"
 
 ConditionCodes translateCondition(TokenType operation)
 {
@@ -91,7 +92,7 @@ void CodeGenerator::linker()
         for (BranchLabel *label_dest : origin.second)
         {
             // std::cout << "label" << label << "\n";
-            int destinationAddress = labelDestMap[label]->relativeAddress;
+            int destinationAddress = labelDestMap[label]->relativeAddress + programOffset;
             std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
             std::string byteNumber = fullNumber.substr(0, 8);
             std::bitset<8> partialNumber(byteNumber);
@@ -110,13 +111,6 @@ void CodeGenerator::linker()
             std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
         }
     }
-
-    // printf("AFTER LINKER:");
-
-    // for (Instruction *inst : code)
-    // {
-    //     std::cout << inst->relativeAddress << " : " << inst->to_string() << "\n";
-    // }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -1027,49 +1021,30 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    std::ofstream outputStream(outputFile.c_str(), std::ofstream::out);
-    std::string mifHeader = "-- begin_signature\n"
-                            "-- Memory\n"
-                            "-- end_signature\n"
-                            "WIDTH=32;\n"
-                            "DEPTH=16384;\n"
-                            "\n"
-                            "ADDRESS_RADIX=UNS;\n"
-                            "DATA_RADIX=BIN;\n"
-                            "\n"
-                            "CONTENT BEGIN\n";
-    outputStream << mifHeader;
+    MifGenerator mif = MifGenerator(outputFile);
 
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
+
         if (!inst->debugname.empty())
-        {
             printf("%s\n", inst->debugname.c_str());
-        }
+
         printf("% 3d: %-22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
 
-        outputStream << "    " << inst->relativeAddress << " : ";
-        outputStream << "0000000000000000" << bin << "; -- " << inst->to_string();
-        if (!inst->debugname.empty())
-        {
-            outputStream << " (" << inst->debugname << ")";
-        }
-        outputStream << "\n";
+        mif.printInstruction(inst->relativeAddress, bin, inst->to_string());
 
-        // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
-        // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
+        if (!inst->debugname.empty())
+            mif.printLine(" (" + inst->debugname + ")");
+
+        mif.jumpLine();
     }
 
     for (int i = code.size(); i < 16384; ++i)
-    {
-        outputStream << "    " << i << " : ";
-        outputStream << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX;\n";
-    }
-    outputStream << "END;\n"
-                 << std::endl;
-    outputStream.close();
+        mif.printEmptyMemoryPosition(i);
+
+    mif.printFooter();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());
 }
 
