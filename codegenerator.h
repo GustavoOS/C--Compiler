@@ -39,7 +39,7 @@ enum ConditionCodes
   GT,     //Signed greater than
   LE,     //Signed lower than
   AL,     //Always
-  NEVER,  //Never
+  AB,     //Absolute, always
   CS = 2, //Unsigned Greater than or equal
   CC = 3  //Unsigned Lower THan
 };
@@ -243,5 +243,17 @@ public:
   std::string to_string();
   std::string to_binary();
 };
+
+class Bytes
+{
+private:
+  int bytes[4];
+  int convertNthByteToInt(int, int);
+public:
+  Bytes(int);
+  int getNthByte(int); //Zero based
+};
+
+
 
 #endif

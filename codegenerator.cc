@@ -89,23 +89,17 @@ void CodeGenerator::linker()
     for (auto origin : labelOriginMap)
     {
         std::string label = origin.first;
+        std::cout << "LINKER label: " << label << "\n";
         for (BranchLabel *label_dest : origin.second)
         {
-            // std::cout << "label" << label << "\n";
-            int destinationAddress = labelDestMap[label]->relativeAddress + programOffset;
-            std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
-            std::string byteNumber = fullNumber.substr(0, 8);
-            std::bitset<8> partialNumber(byteNumber);
-            int byteAsInt = (int)partialNumber.to_ulong();
-            label_dest->leftByte->immediate = byteAsInt;
+            int destinationAddress = labelDestMap[label]->relativeAddress;
+            Bytes number = Bytes(destinationAddress);
+            label_dest->leftByte->immediate = number.getNthByte(2);
+            label_dest->rightByte->immediate = number.getNthByte(3);
 
-            std::string byteNumber2 = fullNumber.substr(8, 8);
-            std::bitset<8> partialNumber2(byteNumber2);
-            int byteAsInt2 = (int)partialNumber2.to_ulong();
-
-            label_dest->rightByte->immediate = byteAsInt2;
+            // Prints
+            std::cout << "LINKER PRINTS\n";
             std::cout << label << " -> " << label_dest->to_string() << "\n";
-
             std::cout << "destinationAddress: " << destinationAddress << "\n";
             std::cout << "left : " << label_dest->leftByte->to_string() << "\n";
             std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
@@ -169,9 +163,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 {
 
     if (shouldShowVisitingMessages)
-    {
         std::cout << "+++++++++++++ Branch start +++++++++++++\n";
-    }
 
     print(moveLowToHigh(AcumulatorRegister, SwapRegister));
 
@@ -1025,21 +1017,19 @@ void CodeGenerator::generateCodeToJumpToOS()
     generatedCode = ngc;
     generateCodeForConst(2048);
 
-    print(new TypeFInstruction(38, "BX", AL, AcumulatorRegister));
-
-
+    print(new TypeFInstruction(38, "BX", AB, AcumulatorRegister));
 
     Instruction *inst;
 
-    for (int i = 0; i < code.size(); i++)
+    for (int i = 0; i < (int)code.size(); i++)
     {
         inst = code[i];
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
 
         this->mif.printInstruction(i,
-                             bin,
-                             inst->to_string());
+                                   bin,
+                                   inst->to_string());
 
         this->mif.jumpLine();
     }
@@ -1053,18 +1043,15 @@ void CodeGenerator::generateCodeForConst(int value)
 {
     {
 
-        std::string fullNumber, byteNumber;
-        fullNumber = std::bitset<32>(value).to_string();
+        Bytes number = Bytes(value);
 
         for (int i = 0; i < 4; i++)
         {
-            byteNumber = fullNumber.substr(8 * i, 8);
-            std::bitset<8> partialNumber(byteNumber);
-            int byteAsInt = (int)partialNumber.to_ulong();
+            int byte = number.getNthByte(i);
 
             if (i == 0)
             {
-                print(loadImediateToRegister(AcumulatorRegister, byteAsInt));
+                print(loadImediateToRegister(AcumulatorRegister, byte));
                 setDebugName("begin ConstK");
             }
             else
@@ -1076,10 +1063,10 @@ void CodeGenerator::generateCodeForConst(int value)
                         8,
                         AcumulatorRegister,
                         AcumulatorRegister));
-                if (byteAsInt != 0)
+                if (byte != 0)
                 {
                     print(
-                        loadImediateToRegister(TemporaryRegister, byteAsInt));
+                        loadImediateToRegister(TemporaryRegister, byte));
                     print(
                         new TypeBInstruction(
                             4,
@@ -1116,4 +1103,26 @@ std::string printRegister(int reg)
         return "$SR";
     }
     return "!UNKNOWN!";
+}
+
+Bytes::Bytes(int number)
+{
+    for (int i = 0; i < 4; i++)
+        bytes[i] = convertNthByteToInt(number, i);
+}
+
+int Bytes::getNthByte(int nthByte)
+{
+    return bytes[nthByte];
+}
+
+int Bytes::convertNthByteToInt(int number, int nthByte)
+{
+    std::string fullNumber = std::bitset<32>(number).to_string();
+    std::string byteNumber = fullNumber.substr(8 * nthByte, 8);
+    std::bitset<8> partialNumber(byteNumber);
+    int n = (int)partialNumber.to_ulong();
+    // std::cout << "This is Bytes, returning " << n << "from the number "
+            //   << number << ". That should be the " << nthByte << " position byte\n";
+    return n;
 }
