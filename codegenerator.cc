@@ -75,17 +75,10 @@ void CodeGenerator::generate(TreeNode *node)
 
 void CodeGenerator::linker()
 {
-    for (auto item : labelDestMap)
-    {
-        std::string label = item.first;
-        Instruction *label_dest = item.second;
-        std::cout << label << " -> " << label_dest->name << "\n";
-    }
-    int i = 0;
-    for (Instruction *inst : code)
-    {
-        inst->relativeAddress = i++;
-    }
+    
+    printEveryLabelLink();
+
+    insertIndexInsideEveryInstruction();
 
     for (auto origin : labelOriginMap)
     {
@@ -104,6 +97,25 @@ void CodeGenerator::linker()
             std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
             std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
         }
+    }
+}
+
+void CodeGenerator::insertIndexInsideEveryInstruction()
+{
+    int i = 0;
+    for (Instruction *inst : code)
+    {
+        inst->relativeAddress = i++;
+    }
+}
+
+void CodeGenerator::printEveryLabelLink()
+{
+    for (auto item : labelDestMap)
+    {
+        std::string label = item.first;
+        Instruction *label_dest = item.second;
+        std::cout << label << " -> " << label_dest->name << "\n";
     }
 }
 
@@ -169,11 +181,9 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     setDebugName("begin Branch");
 
-    Instruction *firstByte = loadImediateToRegister(TemporaryRegister, 0);
+    BranchLabel * branchLabel = new BranchLabel(branch_name, condition);
 
-    Instruction *secondByte = loadImediateToRegister(AcumulatorRegister, 0);
-
-    print(firstByte);
+    print(branchLabel->firstByte);
 
     print(
         new TypeAInstruction(
@@ -183,7 +193,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
             TemporaryRegister,
             TemporaryRegister));
 
-    print(secondByte);
+    print(branchLabel->secondByte);
 
     print(
         new TypeBInstruction(
@@ -213,7 +223,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
         generateCodeForPop(TemporaryRegister);
     }
 
-    print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
+    print(branchLabel->branch);
 
     setDebugName("end Branch");
 
@@ -221,7 +231,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch end +++++++++++++\n";
-    }
+}
 
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
@@ -442,7 +452,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else
             generateCodeForFunctionActivation(node);
-        }
+    }
     break;
 
     case AssignK:

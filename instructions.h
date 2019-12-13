@@ -182,8 +182,9 @@ class BranchLabel
 public:
     Instruction *firstByte;
     Instruction *secondByte;
+    Instruction * branch;
 
-    BranchLabel(std::string gotolabe);
+    BranchLabel(std::string gotolabe, ConditionCodes condition);
 
     std::string to_string();
 };

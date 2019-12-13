@@ -121,9 +121,12 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(std::string gotolabel)
+BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
 {
     tolabel = gotolabel;
+    firstByte = loadImediateToRegister(TemporaryRegister, 0);
+    secondByte = loadImediateToRegister(AcumulatorRegister, 0);
+    branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
 }
 
 std::string BranchLabel::to_string()
