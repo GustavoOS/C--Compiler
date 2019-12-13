@@ -33,6 +33,7 @@ private:
   bool shouldShowVisitingMessages;
   TreeNode * mainActivation;
   int programOffset;
+  MifGenerator mif;
 
   //Private methods
   void print(Instruction *instruction);
@@ -61,7 +62,6 @@ private:
   void destroyGlobalAR();
 
   void generateCodeToJumpToOS();
-  MifGenerator mif;
 };
 
 
