@@ -75,7 +75,6 @@ void CodeGenerator::generate(TreeNode *node)
 
 void CodeGenerator::linker()
 {
-    
     printEveryLabelLink();
 
     insertIndexInsideEveryInstruction();
