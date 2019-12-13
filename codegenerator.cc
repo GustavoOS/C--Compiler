@@ -4,9 +4,11 @@
 #include "symtab.h"
 #include "memory.h"
 #include <iostream>
-#include <bitset>
 #include <assert.h>
 #include <fstream>
+#include "mifgenerator.h"
+#include "bytes.h"
+#include "instructions.h"
 
 ConditionCodes translateCondition(TokenType operation)
 {
@@ -31,7 +33,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable)
+CodeGenerator::CodeGenerator(bool displayable, int programOffset)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -41,6 +43,7 @@ CodeGenerator::CodeGenerator(bool displayable)
     mainActivation->attr.val = 0;
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
+    this->programOffset = programOffset;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -89,33 +92,19 @@ void CodeGenerator::linker()
         std::string label = origin.first;
         for (BranchLabel *label_dest : origin.second)
         {
-            // std::cout << "label" << label << "\n";
             int destinationAddress = labelDestMap[label]->relativeAddress;
-            std::string fullNumber = std::bitset<16>(destinationAddress).to_string();
-            std::string byteNumber = fullNumber.substr(0, 8);
-            std::bitset<8> partialNumber(byteNumber);
-            int byteAsInt = (int)partialNumber.to_ulong();
-            label_dest->leftByte->immediate = byteAsInt;
+            Bytes number = Bytes(destinationAddress);
+            label_dest->firstByte->immediate = number.getNthByte(2);
+            label_dest->secondByte->immediate = number.getNthByte(3);
 
-            std::string byteNumber2 = fullNumber.substr(8, 8);
-            std::bitset<8> partialNumber2(byteNumber2);
-            int byteAsInt2 = (int)partialNumber2.to_ulong();
-
-            label_dest->rightByte->immediate = byteAsInt2;
+            // Prints
+            std::cout << "LINKER PRINTS\n";
             std::cout << label << " -> " << label_dest->to_string() << "\n";
-
             std::cout << "destinationAddress: " << destinationAddress << "\n";
-            std::cout << "left : " << label_dest->leftByte->to_string() << "\n";
-            std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
+            std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
+            std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
         }
     }
-
-    // printf("AFTER LINKER:");
-
-    // for (Instruction *inst : code)
-    // {
-    //     std::cout << inst->relativeAddress << " : " << inst->to_string() << "\n";
-    // }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -174,19 +163,17 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 {
 
     if (shouldShowVisitingMessages)
-    {
         std::cout << "+++++++++++++ Branch start +++++++++++++\n";
-    }
 
     print(moveLowToHigh(AcumulatorRegister, SwapRegister));
 
     setDebugName("begin Branch");
 
-    Instruction *leftByte = loadImediateToRegister(TemporaryRegister, 0);
+    Instruction *firstByte = loadImediateToRegister(TemporaryRegister, 0);
 
-    Instruction *rightByte = loadImediateToRegister(AcumulatorRegister, 0);
+    Instruction *secondByte = loadImediateToRegister(AcumulatorRegister, 0);
 
-    print(leftByte);
+    print(firstByte);
 
     print(
         new TypeAInstruction(
@@ -196,7 +183,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
             TemporaryRegister,
             TemporaryRegister));
 
-    print(rightByte);
+    print(secondByte);
 
     print(
         new TypeBInstruction(
@@ -213,7 +200,9 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
         BaseAddressRegister,
         TemporaryRegister));
 
-    BranchLabel *branchLabel = new BranchLabel(branch_name, leftByte, rightByte);
+    BranchLabel *branchLabel = new BranchLabel(branch_name);
+    branchLabel->firstByte = firstByte;
+    branchLabel->secondByte = secondByte;
 
     print(moveHighToLow(AcumulatorRegister, SwapRegister));
 
@@ -231,10 +220,8 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
     labelOriginMap[branch_name].push_back(branchLabel);
 
     if (shouldShowVisitingMessages)
-    {
         std::cout << "+++++++++++++ Branch end +++++++++++++\n";
     }
-}
 
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
@@ -380,14 +367,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     {
 
         if (node->child[0] != NULL)
-        {
             generateCode(node->child[0]);
-        }
         else
-        {
             print(
                 loadImediateToRegister(AcumulatorRegister, 0));
-        }
+
         generateCodeForBranch("end_" + node->scope, AL);
     }
     break;
@@ -457,10 +441,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             setDebugName("OUTPUT");
         }
         else
-        {
             generateCodeForFunctionActivation(node);
         }
-    }
     break;
 
     case AssignK:
@@ -577,45 +559,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     break;
     case ConstK:
     {
-
-        std::string fullNumber, byteNumber;
-        fullNumber = std::bitset<32>(node->attr.val).to_string();
-
-        for (int i = 0; i < 4; i++)
-        {
-            byteNumber = fullNumber.substr(8 * i, 8);
-            std::bitset<8> partialNumber(byteNumber);
-            int byteAsInt = (int)partialNumber.to_ulong();
-
-            if (i == 0)
-            {
-                print(loadImediateToRegister(AcumulatorRegister, byteAsInt));
-                setDebugName("begin ConstK");
-            }
-            else
-            {
-                print(
-                    new TypeAInstruction(
-                        1,
-                        "LSL",
-                        8,
-                        AcumulatorRegister,
-                        AcumulatorRegister));
-                if (byteAsInt != 0)
-                {
-                    print(
-                        loadImediateToRegister(TemporaryRegister, byteAsInt));
-                    print(
-                        new TypeBInstruction(
-                            4,
-                            "ADD",
-                            TemporaryRegister,
-                            AcumulatorRegister,
-                            AcumulatorRegister));
-                }
-            }
-        }
-        setDebugName("end ConstK");
+        generateCodeForConst(node->attr.val);
     }
     break;
     case IdK:
@@ -734,113 +678,6 @@ void CodeGenerator::createFooter()
 {
     if (shouldShowVisitingMessages)
         std::cout << "This is a footer\n";
-}
-
-//Instruction Class
-std::string Instruction::to_string()
-{
-    return "Generic Instruction";
-}
-
-Instruction *jumpToRegister(Registers reg)
-{
-    return new TypeFInstruction(
-        38,
-        "BX",
-        AL,
-        reg
-
-    );
-}
-Instruction *outputRegister(Registers reg)
-{
-    return new TypeEInstruction(
-        69,
-        "OUTPUT",
-        0,
-        reg);
-}
-
-Instruction *
-popRegister(Registers reg)
-{
-    return new TypeEInstruction(
-        68,
-        "POP",
-        0,
-        reg);
-}
-
-Instruction *pushRegister(Registers reg)
-{
-    return new TypeEInstruction(
-        67,
-        "PUSH",
-        0,
-        reg);
-}
-
-Instruction *loadImediateToRegister(Registers regis, int number)
-{
-    return new TypeDInstruction(
-        8,
-        "MOV",
-        regis,
-        number);
-}
-
-Instruction *pushAcumulator()
-{
-    return pushRegister(AcumulatorRegister);
-}
-
-Instruction *nop()
-{
-    return new TypeDInstruction(74, "NOP", 0, 0);
-}
-
-Instruction *moveLowToLowRegister(Registers origin, Registers destination)
-{
-    return new TypeCInstruction(
-        6,
-        "ADD",
-        0,
-        origin,
-        destination);
-}
-
-Instruction *subImeditateFromRegister(int value, Registers destination)
-{
-    // return new TypeDInstruction(
-    //     11,
-    //     "SUB",
-    //     destination,
-    //     value
-    // );
-    return new TypeCInstruction(
-        7,
-        "SUB",
-        value,
-        destination,
-        destination);
-}
-
-Instruction *moveLowToHigh(Registers low, Registers high)
-{
-    return new TypeEInstruction(
-        36,
-        "MOV",
-        low,
-        high);
-}
-
-Instruction *moveHighToLow(Registers low, Registers high)
-{
-    return new TypeEInstruction(
-        35,
-        "MOV",
-        high,
-        low);
 }
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
@@ -1026,72 +863,108 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    std::ofstream outputStream(outputFile.c_str(), std::ofstream::out);
-    std::string mifHeader = "-- begin_signature\n"
-                            "-- Memory\n"
-                            "-- end_signature\n"
-                            "WIDTH=32;\n"
-                            "DEPTH=16384;\n"
-                            "\n"
-                            "ADDRESS_RADIX=UNS;\n"
-                            "DATA_RADIX=BIN;\n"
-                            "\n"
-                            "CONTENT BEGIN\n";
-    outputStream << mifHeader;
+    mif.open(outputFile);
+
+    if (programOffset)
+        generateCodeToJumpToOS();
 
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
         assert(bin.size() == 16);
+
         if (!inst->debugname.empty())
-        {
             printf("%s\n", inst->debugname.c_str());
-        }
-        printf("% 3d: %-22s => %s\n", inst->relativeAddress, inst->to_string().c_str(), bin.c_str());
 
-        outputStream << "    " << inst->relativeAddress << " : ";
-        outputStream << "0000000000000000" << bin << "; -- " << inst->to_string();
+        printf("% 3d: %-22s => %s\n",
+               inst->relativeAddress,
+               inst->to_string().c_str(),
+               bin.c_str());
+
+        mif.printInstruction(inst->relativeAddress + programOffset,
+                             bin,
+                             inst->to_string());
+
         if (!inst->debugname.empty())
-        {
-            outputStream << " (" << inst->debugname << ")";
-        }
-        outputStream << "\n";
+            mif.printDebugMsg(inst->debugname);
 
-        // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(0, 8) << ";\n";
-        // outputStream << "RAM[" << ramCounter++ << "] <= 8'b" << bin.substr(8, 16) << ";\n";
+        mif.jumpLine();
     }
 
-    for (int i = code.size(); i < 16384; ++i)
-    {
-        outputStream << "    " << i << " : ";
-        outputStream << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX;\n";
-    }
-    outputStream << "END;\n"
-                 << std::endl;
-    outputStream.close();
+    mif.printMultipleEmptyPosition(code.size() + programOffset, 16384);
+
+    mif.printFooter();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());
 }
 
-std::string printRegister(int reg)
+void CodeGenerator::generateCodeToJumpToOS()
 {
-    switch (reg)
+    std::vector<Instruction *> originalCode = code, newCode;
+    std::string originalInst = generatedCode, ngc;
+    code = newCode;
+    generatedCode = ngc;
+    generateCodeForConst(2048);
+
+    print(new TypeFInstruction(38, "BX", AB, AcumulatorRegister));
+
+    Instruction *inst;
+
+    for (int i = 0; i < (int)code.size(); i++)
     {
-    case HeapArrayRegister:
-        return "$H0";
-    case AcumulatorRegister:
-        return "$A0";
-    case TemporaryRegister:
-        return "$T1";
-    case FramePointer:
-        return "$FP";
-    case GlobalPointer:
-        return "$GP";
-    case BaseAddressRegister:
-        return "$BA";
-    case ReturnAddressRegister:
-        return "$RA";
-    case SwapRegister:
-        return "$SR";
+        inst = code[i];
+        std::string bin = inst->to_binary();
+        assert(bin.size() == 16);
+
+        this->mif.printInstruction(i,
+                                   bin,
+                                   inst->to_string());
+
+        this->mif.jumpLine();
     }
-    return "!UNKNOWN!";
+
+    mif.printMultipleEmptyPosition(code.size(), programOffset);
+    code = originalCode;
+    generatedCode = originalInst;
+}
+
+void CodeGenerator::generateCodeForConst(int value)
+{
+    {
+
+        Bytes number = Bytes(value);
+
+        for (int i = 0; i < 4; i++)
+        {
+            int byte = number.getNthByte(i);
+
+            if (i == 0)
+            {
+                print(loadImediateToRegister(AcumulatorRegister, byte));
+                setDebugName("begin ConstK");
+            }
+            else
+            {
+                print(
+                    new TypeAInstruction(
+                        1,
+                        "LSL",
+                        8,
+                        AcumulatorRegister,
+                        AcumulatorRegister));
+                if (byte != 0)
+                {
+                    print(
+                        loadImediateToRegister(TemporaryRegister, byte));
+                    print(
+                        new TypeBInstruction(
+                            4,
+                            "ADD",
+                            TemporaryRegister,
+                            AcumulatorRegister,
+                            AcumulatorRegister));
+                }
+            }
+        }
+        setDebugName("end ConstK");
+    }
 }
