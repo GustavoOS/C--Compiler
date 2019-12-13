@@ -86,7 +86,7 @@ void CodeGenerator::linker()
         {
             int destinationAddress =
                 labelDestMap[label]->relativeAddress -
-                label_dest->branch->relativeAddress - 1;
+                label_dest->branch->relativeAddress;
             Bytes number = Bytes(destinationAddress);
             label_dest->firstByte->immediate = number.getNthByte(2);
             label_dest->secondByte->immediate = number.getNthByte(3);
