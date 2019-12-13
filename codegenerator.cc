@@ -184,7 +184,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     setDebugName("begin Branch");
 
-    BranchLabel * branchLabel = new BranchLabel(branch_name, condition);
+    BranchLabel *branchLabel = new BranchLabel(branch_name, condition);
 
     print(branchLabel->firstByte);
 
