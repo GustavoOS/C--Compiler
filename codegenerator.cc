@@ -341,7 +341,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             new TypeFInstruction(
                 38,
                 "BX",
-                AL,
+                AB,
                 ReturnAddressRegister));
         // generateCodeForBranch(while_label, AL); // Go back to first branch
 
