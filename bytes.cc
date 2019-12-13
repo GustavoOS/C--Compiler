@@ -23,3 +23,34 @@ int Bytes::convertNthByteToInt(int number, int nthByte)
     //   << number << ". That should be the " << nthByte << " position byte\n";
     return n;
 }
+
+std::string getVal5Bits(int val)
+{
+    std::bitset<5> bs(val);
+    return bs.to_string();
+}
+
+std::string getVal3Bits(int val)
+{
+    std::bitset<3> bs(val);
+    return bs.to_string();
+}
+
+std::string getVal4Bits(int val)
+{
+    std::bitset<4> bs(val);
+    return bs.to_string();
+}
+
+std::string getVal8Bits(int val)
+{
+    std::bitset<8> bs(val);
+    return bs.to_string();
+}
+
+std::string getVal8BitsSignal(int val)
+{
+    std::bitset<8> bs(val);
+    // TODO : Add support to signal
+    return bs.to_string();
+}
