@@ -244,15 +244,7 @@ public:
   std::string to_binary();
 };
 
-class Bytes
-{
-private:
-  int bytes[4];
-  int convertNthByteToInt(int, int);
-public:
-  Bytes(int);
-  int getNthByte(int); //Zero based
-};
+
 
 
 
