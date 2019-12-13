@@ -107,9 +107,7 @@ void CodeGenerator::insertIndexInsideEveryInstruction()
 {
     int i = 0;
     for (Instruction *inst : code)
-    {
         inst->relativeAddress = i++;
-    }
 }
 
 void CodeGenerator::printEveryLabelLink()
