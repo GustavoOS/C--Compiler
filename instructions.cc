@@ -1,5 +1,113 @@
-#include "codegenerator.h"
+#include "instructions.h"
 #include <bitset>
+#include <vector>
+#include <map>
+
+//Instruction Class
+std::string Instruction::to_string()
+{
+    return "Generic Instruction";
+}
+
+Instruction *jumpToRegister(Registers reg)
+{
+    return new TypeFInstruction(
+        38,
+        "BX",
+        AL,
+        reg
+    );
+}
+Instruction *outputRegister(Registers reg)
+{
+    return new TypeEInstruction(
+        69,
+        "OUTPUT",
+        0,
+        reg);
+}
+
+Instruction *
+popRegister(Registers reg)
+{
+    return new TypeEInstruction(
+        68,
+        "POP",
+        0,
+        reg);
+}
+
+Instruction *pushRegister(Registers reg)
+{
+    return new TypeEInstruction(
+        67,
+        "PUSH",
+        0,
+        reg);
+}
+
+Instruction *loadImediateToRegister(Registers regis, int number)
+{
+    return new TypeDInstruction(
+        8,
+        "MOV",
+        regis,
+        number);
+}
+
+Instruction *pushAcumulator()
+{
+    return pushRegister(AcumulatorRegister);
+}
+
+Instruction *nop()
+{
+    return new TypeDInstruction(74, "NOP", 0, 0);
+}
+
+Instruction *moveLowToLowRegister(Registers origin, Registers destination)
+{
+    return new TypeCInstruction(
+        6,
+        "ADD",
+        0,
+        origin,
+        destination);
+}
+
+Instruction *subImeditateFromRegister(int value, Registers destination)
+{
+    // return new TypeDInstruction(
+    //     11,
+    //     "SUB",
+    //     destination,
+    //     value
+    // );
+    return new TypeCInstruction(
+        7,
+        "SUB",
+        value,
+        destination,
+        destination);
+}
+
+Instruction *moveLowToHigh(Registers low, Registers high)
+{
+    return new TypeEInstruction(
+        36,
+        "MOV",
+        low,
+        high);
+}
+
+Instruction *moveHighToLow(Registers low, Registers high)
+{
+    return new TypeEInstruction(
+        35,
+        "MOV",
+        high,
+        low);
+}
 
 std::string getVal5Bits(int val)
 {
@@ -480,4 +588,28 @@ std::string Instruction::getFunct2(int id)
 std::string Instruction::getFunct1(int id)
 {
     return funct1[id];
+}
+
+std::string printRegister(int reg)
+{
+    switch (reg)
+    {
+    case HeapArrayRegister:
+        return "$H0";
+    case AcumulatorRegister:
+        return "$A0";
+    case TemporaryRegister:
+        return "$T1";
+    case FramePointer:
+        return "$FP";
+    case GlobalPointer:
+        return "$GP";
+    case BaseAddressRegister:
+        return "$BA";
+    case ReturnAddressRegister:
+        return "$RA";
+    case SwapRegister:
+        return "$SR";
+    }
+    return "!UNKNOWN!";
 }
