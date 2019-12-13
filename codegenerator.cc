@@ -209,6 +209,13 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
         BaseAddressRegister,
         TemporaryRegister));
 
+    print(
+        new TypeEInstruction(
+            59,
+            "SXTH",
+            TemporaryRegister,
+            TemporaryRegister));
+
     BranchLabel *branchLabel = new BranchLabel(branch_name);
     branchLabel->firstByte = firstByte;
     branchLabel->secondByte = secondByte;
