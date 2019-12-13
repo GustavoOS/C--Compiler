@@ -180,10 +180,11 @@ class BranchLabel
     std::string tolabel;
 
 public:
-    Instruction *leftByte;
-    Instruction *rightByte;
+    Instruction *firstByte;
+    Instruction *secondByte;
 
-    BranchLabel(std::string gotolabel, Instruction *lByte, Instruction *rByte);
+    BranchLabel(std::string gotolabe);
+
     std::string to_string();
 };
 

@@ -109,8 +109,6 @@ Instruction *moveHighToLow(Registers low, Registers high)
         low);
 }
 
-
-
 void Instruction::setlabel(std::string newLabel)
 {
     isLabel = true;
@@ -123,11 +121,9 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(std::string gotolabel, Instruction *lByte, Instruction *rByte)
+BranchLabel::BranchLabel(std::string gotolabel)
 {
     tolabel = gotolabel;
-    leftByte = lByte;
-    rightByte = rByte;
 }
 
 std::string BranchLabel::to_string()

@@ -94,15 +94,15 @@ void CodeGenerator::linker()
         {
             int destinationAddress = labelDestMap[label]->relativeAddress;
             Bytes number = Bytes(destinationAddress);
-            label_dest->leftByte->immediate = number.getNthByte(2);
-            label_dest->rightByte->immediate = number.getNthByte(3);
+            label_dest->firstByte->immediate = number.getNthByte(2);
+            label_dest->secondByte->immediate = number.getNthByte(3);
 
             // Prints
             std::cout << "LINKER PRINTS\n";
             std::cout << label << " -> " << label_dest->to_string() << "\n";
             std::cout << "destinationAddress: " << destinationAddress << "\n";
-            std::cout << "left : " << label_dest->leftByte->to_string() << "\n";
-            std::cout << "right: " << label_dest->rightByte->to_string() << "\n";
+            std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
+            std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
         }
     }
 }
@@ -169,11 +169,11 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     setDebugName("begin Branch");
 
-    Instruction *leftByte = loadImediateToRegister(TemporaryRegister, 0);
+    Instruction *firstByte = loadImediateToRegister(TemporaryRegister, 0);
 
-    Instruction *rightByte = loadImediateToRegister(AcumulatorRegister, 0);
+    Instruction *secondByte = loadImediateToRegister(AcumulatorRegister, 0);
 
-    print(leftByte);
+    print(firstByte);
 
     print(
         new TypeAInstruction(
@@ -183,7 +183,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
             TemporaryRegister,
             TemporaryRegister));
 
-    print(rightByte);
+    print(secondByte);
 
     print(
         new TypeBInstruction(
@@ -200,7 +200,9 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
         BaseAddressRegister,
         TemporaryRegister));
 
-    BranchLabel *branchLabel = new BranchLabel(branch_name, leftByte, rightByte);
+    BranchLabel *branchLabel = new BranchLabel(branch_name);
+    branchLabel->firstByte = firstByte;
+    branchLabel->secondByte = secondByte;
 
     print(moveHighToLow(AcumulatorRegister, SwapRegister));
 
