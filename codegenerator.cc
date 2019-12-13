@@ -220,10 +220,8 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
     labelOriginMap[branch_name].push_back(branchLabel);
 
     if (shouldShowVisitingMessages)
-    {
         std::cout << "+++++++++++++ Branch end +++++++++++++\n";
     }
-}
 
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
@@ -369,14 +367,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     {
 
         if (node->child[0] != NULL)
-        {
             generateCode(node->child[0]);
-        }
         else
-        {
             print(
                 loadImediateToRegister(AcumulatorRegister, 0));
-        }
+
         generateCodeForBranch("end_" + node->scope, AL);
     }
     break;
@@ -446,10 +441,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             setDebugName("OUTPUT");
         }
         else
-        {
             generateCodeForFunctionActivation(node);
         }
-    }
     break;
 
     case AssignK:
