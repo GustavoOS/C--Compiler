@@ -84,7 +84,9 @@ void CodeGenerator::linker()
         std::string label = origin.first;
         for (BranchLabel *label_dest : origin.second)
         {
-            int destinationAddress = labelDestMap[label]->relativeAddress;
+            int destinationAddress =
+                labelDestMap[label]->relativeAddress -
+                label_dest->branch->relativeAddress - 1;
             Bytes number = Bytes(destinationAddress);
             label_dest->firstByte->immediate = number.getNthByte(2);
             label_dest->secondByte->immediate = number.getNthByte(3);
@@ -95,6 +97,8 @@ void CodeGenerator::linker()
             std::cout << "destinationAddress: " << destinationAddress << "\n";
             std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
             std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
+            std::cout << "branch position: " << label_dest->branch->relativeAddress << "\n";
+            std::cout << "absolute position: " << labelDestMap[label]->relativeAddress << "\n";
         }
     }
 }
