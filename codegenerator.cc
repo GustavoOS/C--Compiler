@@ -216,10 +216,6 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
             TemporaryRegister,
             TemporaryRegister));
 
-    BranchLabel *branchLabel = new BranchLabel(branch_name);
-    branchLabel->firstByte = firstByte;
-    branchLabel->secondByte = secondByte;
-
     print(moveHighToLow(AcumulatorRegister, SwapRegister));
 
     if (operationNode)
