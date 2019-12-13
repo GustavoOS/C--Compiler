@@ -15,8 +15,7 @@ Instruction *jumpToRegister(Registers reg)
         38,
         "BX",
         AL,
-        reg
-    );
+        reg);
 }
 Instruction *outputRegister(Registers reg)
 {
@@ -290,7 +289,6 @@ std::string TypeEInstruction::to_binary()
     return getOpCode(id) + getFunct2(id) + getFunct1(id) + getVal3Bits(regm) + getVal3Bits(regd);
 }
 
-
 TypeFInstruction::TypeFInstruction(
     int identity,
     std::string instructionName,
@@ -326,8 +324,6 @@ TypeGInstruction::TypeGInstruction(
     condition = conditionCode;
     offset = offsetSize;
 }
-
-
 
 std::string TypeGInstruction::to_string()
 {
@@ -470,8 +466,7 @@ std::map<int, int> opMap = {
     {55, 1},
     {56, 0},
     {57, 1},
-    {75, 1}
-};
+    {75, 1}};
 
 std::map<int, std::string> funct2 = {
     {12, "0000"},

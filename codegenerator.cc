@@ -685,8 +685,6 @@ void CodeGenerator::createFooter()
         std::cout << "This is a footer\n";
 }
 
-
-
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
 {
     fetchVarOffset(node, reg);
@@ -975,4 +973,3 @@ void CodeGenerator::generateCodeForConst(int value)
         setDebugName("end ConstK");
     }
 }
-

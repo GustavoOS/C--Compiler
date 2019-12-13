@@ -8,10 +8,6 @@
 #include "mifgenerator.h"
 #include "instructions.h"
 
-
-
-
-
 ConditionCodes translateCondition(int operation);
 
 void hr(std::string);
@@ -28,10 +24,10 @@ private:
   std::string generatedCode;
   std::vector<Instruction *> code;
   std::map<std::string, Instruction *> labelDestMap;
-  std::map<std::string, std::vector< BranchLabel *> > labelOriginMap;
+  std::map<std::string, std::vector<BranchLabel *>> labelOriginMap;
   bool shouldPrintGeneratedCodeOnScreen;
   bool shouldShowVisitingMessages;
-  TreeNode * mainActivation;
+  TreeNode *mainActivation;
   int programOffset;
   MifGenerator mif;
 
@@ -44,7 +40,7 @@ private:
   void generateCodeForStmtNode(TreeNode *node);
   void generateCodeForExprNode(TreeNode *node);
   void generateOperationCode(TreeNode *);
-  void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode * child = NULL);
+  void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode *child = NULL);
   void generateCodeForPop(Registers reg);
   void registerLabelInstruction(std::string label, Instruction *Instruction);
   void generateCodeForConst(int);
@@ -53,7 +49,7 @@ private:
   void loadVariable(TreeNode *node, Registers reg);
   void printLabelNop(std::string);
 
-  void setDebugName( std::string name );
+  void setDebugName(std::string name);
 
   void DestroyARAndExitFunction(TreeNode *);
   void generateGlobalAR();
@@ -63,11 +59,5 @@ private:
 
   void generateCodeToJumpToOS();
 };
-
-
-
-
-
-
 
 #endif
