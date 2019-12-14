@@ -56,10 +56,14 @@ private:
     void generateCodeForFunctionActivation(TreeNode *node);
     void generateRunTimeSystem();
     void destroyGlobalAR();
+    void buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode);
+    void jumpAndLink(std::string);
 
     void insertIndexInsideEveryInstruction();
     void printEveryLabelLink();
     void generateCodeToJumpToOS();
+
+    void printRegister(Registers reg);
 };
 
 #endif

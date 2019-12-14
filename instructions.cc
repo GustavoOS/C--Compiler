@@ -15,7 +15,7 @@ Instruction *jumpToRegister(Registers reg)
     return new TypeFInstruction(
         38,
         "BX",
-        AL,
+        AB,
         reg);
 }
 Instruction *outputRegister(Registers reg)
@@ -27,8 +27,7 @@ Instruction *outputRegister(Registers reg)
         reg);
 }
 
-Instruction *
-popRegister(Registers reg)
+Instruction *popRegister(Registers reg)
 {
     return new TypeEInstruction(
         68,
@@ -107,6 +106,14 @@ Instruction *moveHighToLow(Registers low, Registers high)
         "MOV",
         high,
         low);
+}
+
+Instruction *sumWithPC(Registers reg, int number)
+{
+    return new TypeDInstruction(56,
+                                "ADD",
+                                reg,
+                                number);
 }
 
 void Instruction::setlabel(std::string newLabel)

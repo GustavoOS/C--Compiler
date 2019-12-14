@@ -312,12 +312,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
-        print(
-            new TypeDInstruction(
-                56,
-                "ADD",
-                ReturnAddressRegister,
-                0));
+        print(sumWithPC(ReturnAddressRegister, 0));
+
         setDebugName(while_label);
         print(pushRegister(ReturnAddressRegister));
 
@@ -444,14 +440,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_output")
         {
-            print(
-                new TypeEInstruction(
-                    70,
-                    "PAUSE",
-                    0,
-                    0));
-            print(
-                outputRegister(AcumulatorRegister));
+            printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
         }
         else
@@ -671,8 +660,7 @@ void CodeGenerator::createHeader()
 {
     int headerSize = 0;
     print(nop());
-    print(
-        new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize));
+    print(sumWithPC(BaseAddressRegister, headerSize));
     print(subImeditateFromRegister(1, BaseAddressRegister));
     // print(
     //         new TypeEInstruction(
@@ -799,11 +787,16 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
         pushRegister(FramePointer));
     setDebugName("begin Activation " + FunctionName);
 
-    int localVariableCount = variableCountInFunction - argumentCount;
+    buildAR(variableCountInFunction - argumentCount, argumentCount, node->child[0]);
 
-    //Build activation record
+    jumpAndLink(FunctionName);
 
-    //Declaring local variables, if any
+    setDebugName("end Activation " + FunctionName);
+}
+
+void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
+{
+
     if (localVariableCount > 0)
     {
         print(
@@ -815,35 +808,27 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
         // Inserting the local vars into the AR
         for (int i = 0; i < localVariableCount; ++i)
-        {
             print(pushAcumulator());
-        }
     }
 
     // Inserting the arguments into the AR
-    TreeNode *argumentNode = node->child[0];
     for (int i = 0; i < argumentCount; i++)
     {
         generateCodeForAnyNode(argumentNode);
         print(pushAcumulator());
         argumentNode = argumentNode->sibling;
     }
+}
 
-    //All variables pushed
-    // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
+void CodeGenerator::jumpAndLink(std::string FunctionName)
+{
     int branchCodeStart = code.size();
-    Instruction *jumpAndLinkAddress =
-        new TypeDInstruction(56,
-                             "ADD",
-                             ReturnAddressRegister,
-                             0);
+    Instruction *jumpAndLinkAddress = sumWithPC(ReturnAddressRegister, 0);
     print(jumpAndLinkAddress);
 
     generateCodeForBranch(FunctionName, AL);
 
-    jumpAndLinkAddress->immediate = (code.size() - branchCodeStart);
-
-    setDebugName("end Activation " + FunctionName);
+    jumpAndLinkAddress->immediate = code.size() - branchCodeStart;
 }
 
 void CodeGenerator::generateRunTimeSystem()
@@ -981,4 +966,16 @@ void CodeGenerator::generateCodeForConst(int value)
         }
         setDebugName("end ConstK");
     }
+}
+
+void CodeGenerator::printRegister(Registers reg)
+{
+    print(
+        new TypeEInstruction(
+            70,
+            "PAUSE",
+            0,
+            0));
+    print(
+        outputRegister(reg));
 }
