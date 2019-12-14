@@ -240,7 +240,6 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
     print(popRegister(reg));
-    print(nop());
 }
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
@@ -391,7 +390,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string FunctionName = std::string(node->attr.name);
         if ( // Don't declare  library functions
             (FunctionName != "fun_input") &&
-            (FunctionName != "fun_output"))
+            (FunctionName != "fun_output") &&
+            (FunctionName != "fun_readFromMemory") &&
+            (FunctionName != "fun_writeIntoMemory"))
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
@@ -421,9 +422,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunActiveK:
     {
         std::string FunctionName = std::string(node->attr.name);
+        TreeNode *arg = node->child[0];
         if (FunctionName == "fun_input")
         {
-            generateCode(node->child[0]);
+            generateCode(arg);
             print(
                 new TypeEInstruction(
                     70,
@@ -440,9 +442,37 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_output")
         {
-            generateCode(node->child[0]);
+            generateCode(arg);
             printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
+        }
+        else if (FunctionName == "fun_readFromMemory")
+        {
+            generateCode(arg);
+            print(
+                new TypeAInstruction(49,
+                                     "LDR",
+                                     0,
+                                     AcumulatorRegister,
+                                     AcumulatorRegister));
+            setDebugName("READ MEMORY");
+        }
+        else if (FunctionName == "fun_writeIntoMemory")
+        {
+            generateCodeForAnyNode(arg);
+            print(pushAcumulator()); //Push data arg
+            arg = arg->sibling;
+            generateCodeForAnyNode(arg);           //Address in Acumulator
+            generateCodeForPop(TemporaryRegister); //Data in Temporary Register
+            print(
+                new TypeAInstruction(
+                    48,
+                    "STR",
+                    0,
+                    AcumulatorRegister, //Address
+                    TemporaryRegister   //Data
+                    ));
+            setDebugName("WRITE MEMORY");
         }
         else
             generateCodeForFunctionActivation(node);
@@ -759,7 +789,7 @@ void CodeGenerator::generateGlobalAR()
     int globalCount = ds.getSize("global");
     print(loadImediateToRegister(AcumulatorRegister, 0));
     setDebugName("begin GlobalAR");
-    for ( int i = 0; i < globalCount + 1;i++)
+    for (int i = 0; i < globalCount + 1; i++)
         print(pushAcumulator());
 
     print(
@@ -791,7 +821,6 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
 void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
 {
-
     if (localVariableCount > 0)
     {
         print(
