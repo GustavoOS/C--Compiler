@@ -71,6 +71,7 @@ Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 Instruction *moveLowToLowRegister(Registers origin, Registers destination);
 Instruction *subImeditateFromRegister(int value, Registers destination);
+Instruction *sumWithPC(Registers reg, int number);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
@@ -182,8 +183,9 @@ class BranchLabel
 public:
     Instruction *firstByte;
     Instruction *secondByte;
+    Instruction *branch;
 
-    BranchLabel(std::string gotolabe);
+    BranchLabel(std::string gotolabe, ConditionCodes condition);
 
     std::string to_string();
 };

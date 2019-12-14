@@ -75,24 +75,18 @@ void CodeGenerator::generate(TreeNode *node)
 
 void CodeGenerator::linker()
 {
-    for (auto item : labelDestMap)
-    {
-        std::string label = item.first;
-        Instruction *label_dest = item.second;
-        std::cout << label << " -> " << label_dest->name << "\n";
-    }
-    int i = 0;
-    for (Instruction *inst : code)
-    {
-        inst->relativeAddress = i++;
-    }
+    printEveryLabelLink();
+
+    insertIndexInsideEveryInstruction();
 
     for (auto origin : labelOriginMap)
     {
         std::string label = origin.first;
         for (BranchLabel *label_dest : origin.second)
         {
-            int destinationAddress = labelDestMap[label]->relativeAddress;
+            int destinationAddress =
+                labelDestMap[label]->relativeAddress -
+                label_dest->branch->relativeAddress;
             Bytes number = Bytes(destinationAddress);
             label_dest->firstByte->immediate = number.getNthByte(2);
             label_dest->secondByte->immediate = number.getNthByte(3);
@@ -103,7 +97,26 @@ void CodeGenerator::linker()
             std::cout << "destinationAddress: " << destinationAddress << "\n";
             std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
             std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
+            std::cout << "branch position: " << label_dest->branch->relativeAddress << "\n";
+            std::cout << "absolute position: " << labelDestMap[label]->relativeAddress << "\n";
         }
+    }
+}
+
+void CodeGenerator::insertIndexInsideEveryInstruction()
+{
+    int i = 0;
+    for (Instruction *inst : code)
+        inst->relativeAddress = i++;
+}
+
+void CodeGenerator::printEveryLabelLink()
+{
+    for (auto item : labelDestMap)
+    {
+        std::string label = item.first;
+        Instruction *label_dest = item.second;
+        std::cout << label << " -> " << label_dest->name << "\n";
     }
 }
 
@@ -169,11 +182,9 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     setDebugName("begin Branch");
 
-    Instruction *firstByte = loadImediateToRegister(TemporaryRegister, 0);
+    BranchLabel *branchLabel = new BranchLabel(branch_name, condition);
 
-    Instruction *secondByte = loadImediateToRegister(AcumulatorRegister, 0);
-
-    print(firstByte);
+    print(branchLabel->firstByte);
 
     print(
         new TypeAInstruction(
@@ -183,7 +194,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
             TemporaryRegister,
             TemporaryRegister));
 
-    print(secondByte);
+    print(branchLabel->secondByte);
 
     print(
         new TypeBInstruction(
@@ -200,9 +211,12 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
         BaseAddressRegister,
         TemporaryRegister));
 
-    BranchLabel *branchLabel = new BranchLabel(branch_name);
-    branchLabel->firstByte = firstByte;
-    branchLabel->secondByte = secondByte;
+    print(
+        new TypeEInstruction(
+            59,
+            "SXTH",
+            TemporaryRegister,
+            TemporaryRegister));
 
     print(moveHighToLow(AcumulatorRegister, SwapRegister));
 
@@ -213,7 +227,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
         generateCodeForPop(TemporaryRegister);
     }
 
-    print(new TypeFInstruction(38, "BX", condition, TemporaryRegister));
+    print(branchLabel->branch);
 
     setDebugName("end Branch");
 
@@ -221,7 +235,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch end +++++++++++++\n";
-    }
+}
 
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
@@ -298,12 +312,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
-        print(
-            new TypeDInstruction(
-                56,
-                "ADD",
-                ReturnAddressRegister,
-                0));
+        print(sumWithPC(ReturnAddressRegister, 0));
+
         setDebugName(while_label);
         print(pushRegister(ReturnAddressRegister));
 
@@ -327,7 +337,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             new TypeFInstruction(
                 38,
                 "BX",
-                AL,
+                AB,
                 ReturnAddressRegister));
         // generateCodeForBranch(while_label, AL); // Go back to first branch
 
@@ -430,19 +440,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_output")
         {
-            print(
-                new TypeEInstruction(
-                    70,
-                    "PAUSE",
-                    0,
-                    0));
-            print(
-                outputRegister(AcumulatorRegister));
+            printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
         }
         else
             generateCodeForFunctionActivation(node);
-        }
+    }
     break;
 
     case AssignK:
@@ -657,8 +660,7 @@ void CodeGenerator::createHeader()
 {
     int headerSize = 0;
     print(nop());
-    print(
-        new TypeDInstruction(56, "ADD", BaseAddressRegister, headerSize));
+    print(sumWithPC(BaseAddressRegister, headerSize));
     print(subImeditateFromRegister(1, BaseAddressRegister));
     // print(
     //         new TypeEInstruction(
@@ -785,11 +787,16 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
         pushRegister(FramePointer));
     setDebugName("begin Activation " + FunctionName);
 
-    int localVariableCount = variableCountInFunction - argumentCount;
+    buildAR(variableCountInFunction - argumentCount, argumentCount, node->child[0]);
 
-    //Build activation record
+    jumpAndLink(FunctionName);
 
-    //Declaring local variables, if any
+    setDebugName("end Activation " + FunctionName);
+}
+
+void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
+{
+
     if (localVariableCount > 0)
     {
         print(
@@ -801,35 +808,27 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
         // Inserting the local vars into the AR
         for (int i = 0; i < localVariableCount; ++i)
-        {
             print(pushAcumulator());
-        }
     }
 
     // Inserting the arguments into the AR
-    TreeNode *argumentNode = node->child[0];
     for (int i = 0; i < argumentCount; i++)
     {
         generateCodeForAnyNode(argumentNode);
         print(pushAcumulator());
         argumentNode = argumentNode->sibling;
     }
+}
 
-    //All variables pushed
-    // Following code replaces the JUMP AND LINK INSTRUCTION (jal label)
+void CodeGenerator::jumpAndLink(std::string FunctionName)
+{
     int branchCodeStart = code.size();
-    Instruction *jumpAndLinkAddress =
-        new TypeDInstruction(56,
-                             "ADD",
-                             ReturnAddressRegister,
-                             0);
+    Instruction *jumpAndLinkAddress = sumWithPC(ReturnAddressRegister, 0);
     print(jumpAndLinkAddress);
 
     generateCodeForBranch(FunctionName, AL);
 
-    jumpAndLinkAddress->immediate = (code.size() - branchCodeStart);
-
-    setDebugName("end Activation " + FunctionName);
+    jumpAndLinkAddress->immediate = code.size() - branchCodeStart;
 }
 
 void CodeGenerator::generateRunTimeSystem()
@@ -967,4 +966,16 @@ void CodeGenerator::generateCodeForConst(int value)
         }
         setDebugName("end ConstK");
     }
+}
+
+void CodeGenerator::printRegister(Registers reg)
+{
+    print(
+        new TypeEInstruction(
+            70,
+            "PAUSE",
+            0,
+            0));
+    print(
+        outputRegister(reg));
 }

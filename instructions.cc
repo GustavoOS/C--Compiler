@@ -15,7 +15,7 @@ Instruction *jumpToRegister(Registers reg)
     return new TypeFInstruction(
         38,
         "BX",
-        AL,
+        AB,
         reg);
 }
 Instruction *outputRegister(Registers reg)
@@ -27,8 +27,7 @@ Instruction *outputRegister(Registers reg)
         reg);
 }
 
-Instruction *
-popRegister(Registers reg)
+Instruction *popRegister(Registers reg)
 {
     return new TypeEInstruction(
         68,
@@ -109,6 +108,14 @@ Instruction *moveHighToLow(Registers low, Registers high)
         low);
 }
 
+Instruction *sumWithPC(Registers reg, int number)
+{
+    return new TypeDInstruction(56,
+                                "ADD",
+                                reg,
+                                number);
+}
+
 void Instruction::setlabel(std::string newLabel)
 {
     isLabel = true;
@@ -121,9 +128,12 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(std::string gotolabel)
+BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
 {
     tolabel = gotolabel;
+    firstByte = loadImediateToRegister(TemporaryRegister, 0);
+    secondByte = loadImediateToRegister(AcumulatorRegister, 0);
+    branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
 }
 
 std::string BranchLabel::to_string()
