@@ -64,6 +64,7 @@ private:
     void generateCodeToJumpToOS();
 
     void printRegister(Registers reg);
+    void pushArguments(int argumentCount, TreeNode *argumentNode);
 };
 
 #endif

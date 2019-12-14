@@ -389,7 +389,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunDeclK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        if (
+        if ( // Don't declare  library functions
             (FunctionName != "fun_input") &&
             (FunctionName != "fun_output"))
         {
@@ -421,9 +421,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunActiveK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        generateCode(node->child[0]);
         if (FunctionName == "fun_input")
         {
+            generateCode(node->child[0]);
             print(
                 new TypeEInstruction(
                     70,
@@ -440,6 +440,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_output")
         {
+            generateCode(node->child[0]);
             printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
         }
@@ -756,16 +757,10 @@ void CodeGenerator::generateGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(
-        loadImediateToRegister(AcumulatorRegister, 0));
+    print(loadImediateToRegister(AcumulatorRegister, 0));
     setDebugName("begin GlobalAR");
-    for (
-        int i = 0;
-        i < globalCount + 1;
-        i++)
-    {
+    for ( int i = 0; i < globalCount + 1;i++)
         print(pushAcumulator());
-    }
 
     print(
         new TypeDInstruction(
@@ -811,7 +806,11 @@ void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode 
             print(pushAcumulator());
     }
 
-    // Inserting the arguments into the AR
+    pushArguments(argumentCount, argumentNode);
+}
+
+void CodeGenerator::pushArguments(int argumentCount, TreeNode *argumentNode)
+{
     for (int i = 0; i < argumentCount; i++)
     {
         generateCodeForAnyNode(argumentNode);
