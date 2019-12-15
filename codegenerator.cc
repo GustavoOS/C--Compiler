@@ -326,8 +326,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         print(popRegister(ReturnAddressRegister));
         setDebugName("Return to " + while_label);
         print(nop());
+
         print(jumpToRegister(ReturnAddressRegister));
-        // generateCodeForBranch(while_label, AL); // Go back to first branch
 
         printLabelNop(while_end_label);
         print(popRegister(ReturnAddressRegister));
