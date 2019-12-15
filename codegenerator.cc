@@ -196,13 +196,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     print(branchLabel->secondByte);
 
-    print(
-        new TypeBInstruction(
-            4,
-            "ADD",
-            TemporaryRegister,
-            AcumulatorRegister,
-            TemporaryRegister));
+    print(sumRegisters(TemporaryRegister, AcumulatorRegister));
 
     print(
         new TypeEInstruction(
@@ -279,15 +273,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 2,
                 TemporaryRegister,
                 TemporaryRegister));
-        print(
-            new TypeBInstruction(
-                4,
-                "ADD",
-                TemporaryRegister,
-                HeapArrayRegister,
-                HeapArrayRegister
-
-                ));
+        print(sumRegisters(HeapArrayRegister, TemporaryRegister));
         setDebugName("end VetDeclK " + node->attr.val);
         break;
 
@@ -390,12 +376,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
             print(labelInstruction);
             setDebugName("begin FunDeclK " + FunctionName);
-            print(
-                new TypeDInstruction(
-                    57,
-                    "ADD",
-                    FramePointer,
-                    0));
+            print(copySP(FramePointer));
             if (functionBody)
                 generateCode(functionBody);
 
@@ -505,17 +486,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 moveLowToHigh(AcumulatorRegister, SwapRegister));
             generateCodeForPop(AcumulatorRegister);
             generateCodeForPop(TemporaryRegister);
-            print(
-                new TypeBInstruction(
-                    4,
-                    "ADD",
-                    AcumulatorRegister,
-                    TemporaryRegister,
-                    TemporaryRegister));
-            print(
-                moveHighToLow(
-                    AcumulatorRegister,
-                    SwapRegister));
+            print(sumRegisters(TemporaryRegister, AcumulatorRegister));
+            print(moveHighToLow(AcumulatorRegister, SwapRegister));
             print(
                 new TypeAInstruction(
                     48,
@@ -622,13 +594,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
     switch (node->attr.op)
     {
     case PLUS:
-        print(
-            new TypeBInstruction(
-                4,
-                "ADD",
-                TemporaryRegister,
-                AcumulatorRegister,
-                AcumulatorRegister));
+        print(sumRegisters(AcumulatorRegister, TemporaryRegister));
         break;
 
     case MINUS:
@@ -708,17 +674,7 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
     BucketList record = getRecordFromSymbolTable(node);
-    print(
-        loadImediateToRegister(reg, record->memloc));
-    // if (node->scope != "global")
-    // {
-    //     print(
-    //         new TypeEInstruction(
-    //             21,
-    //             "NEG",
-    //             reg,
-    //             reg));
-    // }
+    print(loadImediateToRegister(reg, record->memloc));
 }
 
 void hr(std::string middle)
@@ -766,12 +722,7 @@ void CodeGenerator::generateGlobalAR()
     for (int i = 0; i < globalCount + 1; i++)
         print(pushAcumulator());
 
-    print(
-        new TypeDInstruction(
-            57,
-            "ADD",
-            GlobalPointer,
-            0));
+    print(copySP(GlobalPointer));
 
     setDebugName("end GlobalAR");
 }
@@ -795,12 +746,7 @@ void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode 
 {
     if (localVariableCount > 0)
     {
-        print(
-            new TypeDInstruction(
-                8,
-                "MOV",
-                AcumulatorRegister,
-                0));
+        print(loadImediateToRegister(AcumulatorRegister, 0));
 
         // Inserting the local vars into the AR
         for (int i = 0; i < localVariableCount; ++i)
@@ -891,7 +837,7 @@ void CodeGenerator::generateCodeToJumpToOS()
     std::string originalInst = generatedCode, ngc;
     code = newCode;
     generatedCode = ngc;
-    generateCodeForConst(2048);
+    generateCodeForConst(programOffset);
 
     print(jumpToRegister(AcumulatorRegister));
 
@@ -941,15 +887,8 @@ void CodeGenerator::generateCodeForConst(int value)
                         AcumulatorRegister));
                 if (byte != 0)
                 {
-                    print(
-                        loadImediateToRegister(TemporaryRegister, byte));
-                    print(
-                        new TypeBInstruction(
-                            4,
-                            "ADD",
-                            TemporaryRegister,
-                            AcumulatorRegister,
-                            AcumulatorRegister));
+                    print(loadImediateToRegister(TemporaryRegister, byte));
+                    print(sumRegisters(AcumulatorRegister, TemporaryRegister));
                 }
             }
         }

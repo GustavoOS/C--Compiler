@@ -72,6 +72,8 @@ Instruction *jumpToRegister(Registers reg);
 Instruction *moveLowToLowRegister(Registers origin, Registers destination);
 Instruction *subImeditateFromRegister(int value, Registers destination);
 Instruction *sumWithPC(Registers reg, int number);
+Instruction *sumRegisters(Registers ra, Registers rb); // A = A + B
+Instruction *copySP(Register reg);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);

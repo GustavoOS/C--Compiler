@@ -76,12 +76,6 @@ Instruction *moveLowToLowRegister(Registers origin, Registers destination)
 
 Instruction *subImeditateFromRegister(int value, Registers destination)
 {
-    // return new TypeDInstruction(
-    //     11,
-    //     "SUB",
-    //     destination,
-    //     value
-    // );
     return new TypeCInstruction(
         7,
         "SUB",
@@ -114,6 +108,23 @@ Instruction *sumWithPC(Registers reg, int number)
                                 "ADD",
                                 reg,
                                 number);
+}
+
+Instruction *sumRegisters(Registers ra, Registers rb)
+{
+    return new TypeBInstruction(4,
+                                "ADD",
+                                ra,
+                                rb,
+                                ra);
+}
+
+Instruction *copySP(Registers reg)
+{
+    return new TypeDInstruction(57,
+                                "ADD",
+                                reg,
+                                0);
 }
 
 Instruction *halt()
