@@ -116,6 +116,15 @@ Instruction *sumWithPC(Registers reg, int number)
                                 number);
 }
 
+Instruction *halt()
+{
+    return new TypeDInstruction(
+        75,
+        "HLT",
+        0,
+        0);
+}
+
 void Instruction::setlabel(std::string newLabel)
 {
     isLabel = true;
@@ -164,7 +173,8 @@ std::string TypeAInstruction::to_string()
 
 std::string TypeAInstruction::to_binary()
 {
-    return getOpCode(id) + getOpBit(id) + getVal5Bits(immediate) + getVal3Bits(regm) + getVal3Bits(regd);
+    return getOpCode(id) + getOpBit(id) + getVal5Bits(immediate) +
+           getVal3Bits(regm) + getVal3Bits(regd);
 }
 
 TypeBInstruction::TypeBInstruction(
@@ -190,7 +200,8 @@ std::string TypeBInstruction::to_string()
 
 std::string TypeBInstruction::to_binary()
 {
-    return getOpCode(id) + getOpBit(id) + getFunct1(id) + getVal3Bits(regm) + getVal3Bits(regn) + getVal3Bits(regd);
+    return getOpCode(id) + getOpBit(id) + getFunct1(id) +
+           getVal3Bits(regm) + getVal3Bits(regn) + getVal3Bits(regd);
 }
 
 TypeCInstruction::TypeCInstruction(
@@ -216,7 +227,8 @@ std::string TypeCInstruction::to_string()
 
 std::string TypeCInstruction::to_binary()
 {
-    return getOpCode(id) + getOpBit(id) + getFunct1(id) + getVal3Bits(immediate) + getVal3Bits(regn) + getVal3Bits(regd);
+    return getOpCode(id) + getOpBit(id) + getFunct1(id) +
+           getVal3Bits(immediate) + getVal3Bits(regn) + getVal3Bits(regd);
 }
 
 std::string TypeDInstruction::to_string()

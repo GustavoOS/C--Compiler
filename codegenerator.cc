@@ -836,26 +836,15 @@ void CodeGenerator::generateRunTimeSystem()
     generateGlobalAR();
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
-    print(
-        //What the program will do after main
-        new TypeDInstruction(
-            75,
-            "HLT",
-            0,
-            0));
+    print(halt());
 }
 
 void CodeGenerator::destroyGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    for (
-        int i = 0;
-        i < globalCount + 1;
-        i++)
-    {
+    for (int i = 0; i < globalCount + 1; i++)
         generateCodeForPop(TemporaryRegister);
-    }
 }
 
 void CodeGenerator::generateBinaryCode(std::string outputFile)

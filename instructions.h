@@ -76,6 +76,7 @@ Instruction *sumWithPC(Registers reg, int number);
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
 Instruction *outputRegister(Registers reg);
+Instruction *halt();
 
 class BranchLabel;
 class TypeDInstruction;
