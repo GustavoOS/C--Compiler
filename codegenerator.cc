@@ -33,7 +33,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable, int programOffset)
+CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -44,6 +44,8 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset)
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
     this->programOffset = programOffset;
+    memorySize= isBios ? 512 : 16384;
+    this->isBios = isBios;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -196,13 +198,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     print(branchLabel->secondByte);
 
-    print(
-        new TypeBInstruction(
-            4,
-            "ADD",
-            TemporaryRegister,
-            AcumulatorRegister,
-            TemporaryRegister));
+    print(sumRegisters(TemporaryRegister, AcumulatorRegister));
 
     print(
         new TypeEInstruction(
@@ -233,7 +229,6 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
     print(popRegister(reg));
-    print(nop());
 }
 
 void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
@@ -280,15 +275,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 2,
                 TemporaryRegister,
                 TemporaryRegister));
-        print(
-            new TypeBInstruction(
-                4,
-                "ADD",
-                TemporaryRegister,
-                HeapArrayRegister,
-                HeapArrayRegister
-
-                ));
+        print(sumRegisters(HeapArrayRegister, TemporaryRegister));
         setDebugName("end VetDeclK " + node->attr.val);
         break;
 
@@ -304,16 +291,17 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string while_label = "while_" + std::to_string(node->attr.val);
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
+        
+        TreeNode * condition = node->child[0];
+        TreeNode * body = node->child[1];
 
-        print(sumWithPC(ReturnAddressRegister, 0));
-
+        printLabelNop(while_label);
         setDebugName(while_label);
-        print(pushRegister(ReturnAddressRegister));
 
         generateCodeForBranch( // If cond, then go to do_label
             do_label,
-            translateCondition(node->child[0]->attr.op),
-            node->child[0]);
+            translateCondition(condition->attr.op),
+            condition);
 
         generateCodeForBranch( // Else, go to while_end_label
             while_end_label,
@@ -321,17 +309,13 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
         printLabelNop(do_label); // Goes here if cond is true
 
-        generateCode(node->child[1]);
+        generateCode(body);
 
-        print(popRegister(ReturnAddressRegister));
+        generateCodeForBranch(while_label, AL);
         setDebugName("Return to " + while_label);
-        print(nop());
-
-        print(jumpToRegister(ReturnAddressRegister));
-
+        
         printLabelNop(while_end_label);
-        print(popRegister(ReturnAddressRegister));
-        print(nop());
+        setDebugName(while_label + " end");
     }
     break;
 
@@ -375,9 +359,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunDeclK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        if (
+        if ( // Don't declare  library functions
             (FunctionName != "fun_input") &&
-            (FunctionName != "fun_output"))
+            (FunctionName != "fun_output") &&
+            (FunctionName != "fun_readFromMemory") &&
+            (FunctionName != "fun_writeIntoMemory"))
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
@@ -389,12 +375,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
             print(labelInstruction);
             setDebugName("begin FunDeclK " + FunctionName);
-            print(
-                new TypeDInstruction(
-                    57,
-                    "ADD",
-                    FramePointer,
-                    0));
+            print(copySP(FramePointer));
             if (functionBody)
                 generateCode(functionBody);
 
@@ -407,9 +388,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     case FunActiveK:
     {
         std::string FunctionName = std::string(node->attr.name);
-        generateCode(node->child[0]);
+        TreeNode *arg = node->child[0];
         if (FunctionName == "fun_input")
         {
+            generateCode(arg);
             print(
                 new TypeEInstruction(
                     70,
@@ -426,8 +408,37 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_output")
         {
+            generateCode(arg);
             printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
+        }
+        else if (FunctionName == "fun_readFromMemory")
+        {
+            generateCode(arg);
+            print(
+                new TypeAInstruction(49,
+                                     "LDR",
+                                     0,
+                                     AcumulatorRegister,
+                                     AcumulatorRegister));
+            setDebugName("READ MEMORY");
+        }
+        else if (FunctionName == "fun_writeIntoMemory")
+        {
+            generateCodeForAnyNode(arg);
+            print(pushAcumulator()); //Push data arg
+            arg = arg->sibling;
+            generateCodeForAnyNode(arg);           //Address in Acumulator
+            generateCodeForPop(TemporaryRegister); //Data in Temporary Register
+            print(
+                new TypeAInstruction(
+                    48,
+                    "STR",
+                    0,
+                    AcumulatorRegister, //Address
+                    TemporaryRegister   //Data
+                    ));
+            setDebugName("WRITE MEMORY");
         }
         else
             generateCodeForFunctionActivation(node);
@@ -474,17 +485,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 moveLowToHigh(AcumulatorRegister, SwapRegister));
             generateCodeForPop(AcumulatorRegister);
             generateCodeForPop(TemporaryRegister);
-            print(
-                new TypeBInstruction(
-                    4,
-                    "ADD",
-                    AcumulatorRegister,
-                    TemporaryRegister,
-                    TemporaryRegister));
-            print(
-                moveHighToLow(
-                    AcumulatorRegister,
-                    SwapRegister));
+            print(sumRegisters(TemporaryRegister, AcumulatorRegister));
+            print(moveHighToLow(AcumulatorRegister, SwapRegister));
             print(
                 new TypeAInstruction(
                     48,
@@ -591,13 +593,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
     switch (node->attr.op)
     {
     case PLUS:
-        print(
-            new TypeBInstruction(
-                4,
-                "ADD",
-                TemporaryRegister,
-                AcumulatorRegister,
-                AcumulatorRegister));
+        print(sumRegisters(AcumulatorRegister, TemporaryRegister));
         break;
 
     case MINUS:
@@ -677,17 +673,7 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
     BucketList record = getRecordFromSymbolTable(node);
-    print(
-        loadImediateToRegister(reg, record->memloc));
-    // if (node->scope != "global")
-    // {
-    //     print(
-    //         new TypeEInstruction(
-    //             21,
-    //             "NEG",
-    //             reg,
-    //             reg));
-    // }
+    print(loadImediateToRegister(reg, record->memloc));
 }
 
 void hr(std::string middle)
@@ -730,23 +716,12 @@ void CodeGenerator::generateGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(
-        loadImediateToRegister(AcumulatorRegister, 0));
+    print(loadImediateToRegister(AcumulatorRegister, 0));
     setDebugName("begin GlobalAR");
-    for (
-        int i = 0;
-        i < globalCount + 1;
-        i++)
-    {
+    for (int i = 0; i < globalCount + 1; i++)
         print(pushAcumulator());
-    }
 
-    print(
-        new TypeDInstruction(
-            57,
-            "ADD",
-            GlobalPointer,
-            0));
+    print(copySP(GlobalPointer));
 
     setDebugName("end GlobalAR");
 }
@@ -768,22 +743,20 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
 void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
 {
-
     if (localVariableCount > 0)
     {
-        print(
-            new TypeDInstruction(
-                8,
-                "MOV",
-                AcumulatorRegister,
-                0));
+        print(loadImediateToRegister(AcumulatorRegister, 0));
 
         // Inserting the local vars into the AR
         for (int i = 0; i < localVariableCount; ++i)
             print(pushAcumulator());
     }
 
-    // Inserting the arguments into the AR
+    pushArguments(argumentCount, argumentNode);
+}
+
+void CodeGenerator::pushArguments(int argumentCount, TreeNode *argumentNode)
+{
     for (int i = 0; i < argumentCount; i++)
     {
         generateCodeForAnyNode(argumentNode);
@@ -808,33 +781,22 @@ void CodeGenerator::generateRunTimeSystem()
     generateGlobalAR();
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
-    print(
-        //What the program will do after main
-        new TypeDInstruction(
-            75,
-            "HLT",
-            0,
-            0));
+    print(halt());
 }
 
 void CodeGenerator::destroyGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    for (
-        int i = 0;
-        i < globalCount + 1;
-        i++)
-    {
+    for (int i = 0; i < globalCount + 1; i++)
         generateCodeForPop(TemporaryRegister);
-    }
 }
 
 void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    mif.open(outputFile);
+    mif.open(outputFile, isBios);
 
     if (programOffset)
         generateCodeToJumpToOS();
@@ -862,7 +824,7 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
         mif.jumpLine();
     }
 
-    mif.printMultipleEmptyPosition(code.size() + programOffset, 16384);
+    mif.printMultipleEmptyPosition(code.size() + programOffset, memorySize);
 
     mif.printFooter();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());
@@ -874,7 +836,7 @@ void CodeGenerator::generateCodeToJumpToOS()
     std::string originalInst = generatedCode, ngc;
     code = newCode;
     generatedCode = ngc;
-    generateCodeForConst(2048);
+    generateCodeForConst(programOffset);
 
     print(jumpToRegister(AcumulatorRegister));
 
@@ -924,15 +886,8 @@ void CodeGenerator::generateCodeForConst(int value)
                         AcumulatorRegister));
                 if (byte != 0)
                 {
-                    print(
-                        loadImediateToRegister(TemporaryRegister, byte));
-                    print(
-                        new TypeBInstruction(
-                            4,
-                            "ADD",
-                            TemporaryRegister,
-                            AcumulatorRegister,
-                            AcumulatorRegister));
+                    print(loadImediateToRegister(TemporaryRegister, byte));
+                    print(sumRegisters(AcumulatorRegister, TemporaryRegister));
                 }
             }
         }

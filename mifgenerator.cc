@@ -6,17 +6,21 @@ MifGenerator::MifGenerator()
 {
     header = "-- begin_signature\n"
              "-- Memory\n"
-             "-- end_signature\n"
-             "WIDTH=32;\n"
-             "DEPTH=16384;\n"
-             "\n"
-             "ADDRESS_RADIX=UNS;\n"
-             "DATA_RADIX=BIN;\n"
-             "\n"
-             "CONTENT BEGIN\n";
+             "-- end_signature\n";
 }
 
-void MifGenerator::open(std::string outputFile){
+void MifGenerator::open(std::string outputFile, bool isBios)
+{
+    this->isBios = isBios;
+    std::string width = isBios ? "16;\n" : "32;\n";
+    std::string depth = isBios ? "512;\n" : "16384;\n";
+    header += "WIDTH=" + width +
+              "DEPTH=" + depth +
+              "\n"
+              "ADDRESS_RADIX=UNS;\n"
+              "DATA_RADIX=BIN;\n"
+              "\n"
+              "CONTENT BEGIN\n";
     file.open(outputFile.c_str(), std::ofstream::out);
     file << header;
 }
@@ -46,21 +50,25 @@ void MifGenerator::close()
 
 void MifGenerator::printEmptyMemoryPosition(int position)
 {
+    std::string firstHW = isBios ? "" : "XXXXXXXXXXXXXXXX";
     printLine("    " + std::to_string(position) +
-              " : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX;\n");
+              " : " +
+              firstHW +
+              "XXXXXXXXXXXXXXXX;\n");
 }
 
 void MifGenerator::printInstruction(int position, std::string binary, std::string assembly)
 {
+    std::string firstHW = isBios ? "" : "0000000000000000";
     printLine("    " + std::to_string(position) +
-                  " : 0000000000000000" + binary + "; -- " + assembly);
+              " : " + firstHW +
+              binary + "; -- " + assembly);
 }
 
 void MifGenerator::printMultipleEmptyPosition(int start, int repeats)
 {
     for (int i = start; i < repeats; i++)
         printEmptyMemoryPosition(i);
-    
 }
 
 void MifGenerator::printDebugMsg(std::string msg)

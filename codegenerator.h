@@ -15,7 +15,7 @@ void hr(std::string);
 class CodeGenerator
 {
 public:
-    CodeGenerator(bool displayable, int programOffset);
+    CodeGenerator(bool displayable, int programOffset, bool isBios);
     void generate(TreeNode *node);
     void linker();
     void generateBinaryCode(std::string outputFile);
@@ -30,6 +30,8 @@ private:
     TreeNode *mainActivation;
     int programOffset;
     MifGenerator mif;
+    bool isBios;
+    int memorySize;
 
     //Private methods
     void print(Instruction *instruction);
@@ -64,6 +66,7 @@ private:
     void generateCodeToJumpToOS();
 
     void printRegister(Registers reg);
+    void pushArguments(int argumentCount, TreeNode *argumentNode);
 };
 
 #endif

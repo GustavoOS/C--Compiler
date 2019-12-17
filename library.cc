@@ -12,6 +12,10 @@ void LibraryIncluder::buildLibrary()
     libSize++;
     libraryString += "void output(int number) {}\n";
     libSize++;
+    libraryString += "int readFromMemory(int address){}\n";
+    libSize++;
+    libraryString += "void writeIntoMemory(int address, int data){}\n";
+    libSize++;
 }
 
 FILE *LibraryIncluder::getFinalFile()
