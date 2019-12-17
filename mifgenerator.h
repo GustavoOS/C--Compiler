@@ -7,7 +7,7 @@ class MifGenerator
 {
 public:
     MifGenerator();
-    void open(std::string);
+    void open(std::string, bool);
     void printMultipleEmptyPosition(int start, int repeats);
     void printInstruction(int, std::string, std::string);
     void printDebugMsg(std::string);
@@ -19,6 +19,7 @@ private:
     void close();
     void printLine(std::string);
     void printEmptyMemoryPosition(int);
+    bool isBios;
 };
 
 #endif

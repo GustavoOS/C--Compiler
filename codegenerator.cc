@@ -33,7 +33,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable, int programOffset)
+CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -44,6 +44,8 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset)
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
     this->programOffset = programOffset;
+    memorySize= isBios ? 512 : 16384;
+    this->isBios = isBios;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -797,7 +799,7 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    mif.open(outputFile);
+    mif.open(outputFile, isBios);
 
     if (programOffset)
         generateCodeToJumpToOS();
@@ -825,7 +827,7 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
         mif.jumpLine();
     }
 
-    mif.printMultipleEmptyPosition(code.size() + programOffset, 16384);
+    mif.printMultipleEmptyPosition(code.size() + programOffset, memorySize);
 
     mif.printFooter();
     printf("\n\n Output saved on %s \n\n", outputFile.c_str());
