@@ -291,16 +291,17 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string while_label = "while_" + std::to_string(node->attr.val);
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
+        
+        TreeNode * condition = node->child[0];
+        TreeNode * body = node->child[1];
 
-        print(sumWithPC(ReturnAddressRegister, 0));
-
+        printLabelNop(while_label);
         setDebugName(while_label);
-        print(pushRegister(ReturnAddressRegister));
 
         generateCodeForBranch( // If cond, then go to do_label
             do_label,
-            translateCondition(node->child[0]->attr.op),
-            node->child[0]);
+            translateCondition(condition->attr.op),
+            condition);
 
         generateCodeForBranch( // Else, go to while_end_label
             while_end_label,
@@ -308,17 +309,13 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
         printLabelNop(do_label); // Goes here if cond is true
 
-        generateCode(node->child[1]);
+        generateCode(body);
 
-        print(popRegister(ReturnAddressRegister));
+        generateCodeForBranch(while_label, AL);
         setDebugName("Return to " + while_label);
-        print(nop());
-
-        print(jumpToRegister(ReturnAddressRegister));
-
+        
         printLabelNop(while_end_label);
-        print(popRegister(ReturnAddressRegister));
-        print(nop());
+        setDebugName(while_label + " end");
     }
     break;
 
