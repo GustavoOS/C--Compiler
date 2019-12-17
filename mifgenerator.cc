@@ -6,19 +6,21 @@ MifGenerator::MifGenerator()
 {
     header = "-- begin_signature\n"
              "-- Memory\n"
-             "-- end_signature\n"
-             "WIDTH=32;\n"
-             "DEPTH=16384;\n"
-             "\n"
-             "ADDRESS_RADIX=UNS;\n"
-             "DATA_RADIX=BIN;\n"
-             "\n"
-             "CONTENT BEGIN\n";
+             "-- end_signature\n";
 }
 
 void MifGenerator::open(std::string outputFile, bool isBios)
 {
     this->isBios = isBios;
+    std::string width = isBios ? "16;\n" : "32;\n";
+    std::string depth = isBios ? "512;\n" : "16384;\n";
+    header += "WIDTH=" + width +
+              "DEPTH=" + depth +
+              "\n"
+              "ADDRESS_RADIX=UNS;\n"
+              "DATA_RADIX=BIN;\n"
+              "\n"
+              "CONTENT BEGIN\n";
     file.open(outputFile.c_str(), std::ofstream::out);
     file << header;
 }
