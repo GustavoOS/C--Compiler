@@ -9,13 +9,12 @@ LibraryIncluder::LibraryIncluder(std::string sourceFile)
 void LibraryIncluder::buildLibrary()
 {
     libraryString += "int input(void) {}\n";
-    libSize++;
     libraryString += "void output(int number) {}\n";
-    libSize++;
     libraryString += "int readFromMemory(int address){}\n";
-    libSize++;
     libraryString += "void writeIntoMemory(int address, int data){}\n";
-    libSize++;
+    libraryString += "int extractFirstHW(int number){}\n";
+    libraryString += "int extractSecondHW(int number){}\n";
+    libSize+=6;
 }
 
 FILE *LibraryIncluder::getFinalFile()

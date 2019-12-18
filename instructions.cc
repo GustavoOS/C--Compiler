@@ -93,6 +93,16 @@ Instruction *moveLowToHigh(Registers low, Registers high)
         high);
 }
 
+Instruction *extendZero(Registers reg)
+{
+    return new TypeEInstruction(61, "UXTH", reg, reg);
+}
+
+Instruction * rightShiftImmediate(Registers reg, int immediate)
+{
+    return new TypeAInstruction(2, "LSR", immediate, reg, reg);
+}
+
 Instruction *moveHighToLow(Registers low, Registers high)
 {
     return new TypeEInstruction(

@@ -44,7 +44,7 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios)
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
     this->programOffset = programOffset;
-    memorySize= isBios ? 512 : 16384;
+    memorySize = isBios ? 512 : 16384;
     this->isBios = isBios;
 }
 
@@ -291,9 +291,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         std::string while_label = "while_" + std::to_string(node->attr.val);
         std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
-        
-        TreeNode * condition = node->child[0];
-        TreeNode * body = node->child[1];
+
+        TreeNode *condition = node->child[0];
+        TreeNode *body = node->child[1];
 
         printLabelNop(while_label);
         setDebugName(while_label);
@@ -313,7 +313,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
         generateCodeForBranch(while_label, AL);
         setDebugName("Return to " + while_label);
-        
+
         printLabelNop(while_end_label);
         setDebugName(while_label + " end");
     }
@@ -363,7 +363,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "fun_input") &&
             (FunctionName != "fun_output") &&
             (FunctionName != "fun_readFromMemory") &&
-            (FunctionName != "fun_writeIntoMemory"))
+            (FunctionName != "fun_writeIntoMemory") &&
+            (FunctionName != "fun_extractFirstHW") &&
+            (FunctionName != "fun_extractSecondHW"))
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
@@ -439,6 +441,16 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     TemporaryRegister   //Data
                     ));
             setDebugName("WRITE MEMORY");
+        }
+        else if (FunctionName == "fun_extractFirstHW")
+        {
+            generateCode(arg);
+            print(extendZero(AcumulatorRegister));
+        }
+        else if (FunctionName == "fun_extractSecondHW")
+        {
+            generateCode(arg);
+            print(rightShiftImmediate(AcumulatorRegister, 16));
         }
         else
             generateCodeForFunctionActivation(node);
