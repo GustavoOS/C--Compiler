@@ -830,14 +830,15 @@ void CodeGenerator::mountFileStructure()
     std::cout << "Compressed File\n";
     int headerSize = 2;
     int fileName = 10;
+    int slotStart = 2058;
     Bytes name = Bytes(fileName);
-    mif.printInstruction(0,
+    mif.printInstruction(slotStart + 0,
                          name.to_string(),
                          "name = " +
                              std::to_string(fileName) + "\n");
     int s = (code.size() / 2);
     Bytes size = Bytes(s);
-    mif.printInstruction(1,
+    mif.printInstruction(slotStart + 1,
                          size.to_string(),
                          "size = " +
                              std::to_string(s) + "\n");
@@ -853,7 +854,7 @@ void CodeGenerator::mountFileStructure()
         if (hasNext)
             debugText += " | " + code[i + 1]->to_string();
 
-        mif.printInstruction(headerSize + ((int)i / 2),
+        mif.printInstruction(slotStart + headerSize + ((int)i / 2),
                              leftInstr + rightInstr,
                              debugText);
 
