@@ -7,9 +7,9 @@ Bytes::Bytes(int number)
     fullNumber = std::bitset<32>(number).to_string();
 }
 
-std::string Bytes::getHWString()
+std::string Bytes::to_string()
 {
-    return fullNumber.substr(16, 16);
+    return fullNumber;
 }
 
 int Bytes::getNthByte(int nthByte)

@@ -15,7 +15,7 @@ void hr(std::string);
 class CodeGenerator
 {
 public:
-    CodeGenerator(bool displayable, int programOffset, bool isBios);
+    CodeGenerator(bool displayable, int programOffset, bool isBios, bool isCompressed);
     void generate(TreeNode *node);
     void linker();
     void generateBinaryCode(std::string outputFile);
@@ -30,7 +30,7 @@ private:
     TreeNode *mainActivation;
     int programOffset;
     MifGenerator mif;
-    bool isBios;
+    bool isBios, isCompressedProgram;
     int memorySize;
 
     //Private methods
@@ -46,6 +46,9 @@ private:
     void generateCodeForPop(Registers reg);
     void registerLabelInstruction(std::string label, Instruction *Instruction);
     void generateCodeForConst(int);
+
+    void mountFileStructure();
+    void mountUncompressedProgram();
 
     void fetchVarOffset(TreeNode *node, Registers reg);
     void loadVariable(TreeNode *node, Registers reg);

@@ -50,6 +50,7 @@ int Error = FALSE;
 // Mark True for OS mode development
 bool isOperatingSystem = false;
 bool isBios = false;
+bool isCompressedProgram = true;
 
 int PROGRAM_OFFSET = isOperatingSystem ? 2048 : 0;
 
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
   }
   if (!Error)
   {
-    CodeGenerator cg = CodeGenerator(TraceCode, PROGRAM_OFFSET, isBios);
+    CodeGenerator cg = CodeGenerator(TraceCode, PROGRAM_OFFSET, isBios, isCompressedProgram);
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);

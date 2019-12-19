@@ -33,7 +33,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios)
+CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios, bool isCompressed)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -46,6 +46,7 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios)
     this->programOffset = programOffset;
     memorySize = isBios ? 512 : 16384;
     this->isBios = isBios;
+    isCompressedProgram = isCompressed;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -808,11 +809,65 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 {
     printf("\n\n +++++ Code generator! +++++ \n\n");
 
-    mif.open(outputFile, isBios);
+    mif.open(outputFile, isBios, isCompressedProgram);
 
     if (programOffset)
         generateCodeToJumpToOS();
 
+    if (isCompressedProgram)
+        mountFileStructure();
+    else
+        mountUncompressedProgram();
+
+    mif.printMultipleEmptyPosition(memorySize);
+
+    mif.printFooter();
+    printf("\n\n Output saved on %s \n\n", outputFile.c_str());
+}
+
+void CodeGenerator::mountFileStructure()
+{
+    std::cout << "Compressed File\n";
+    int headerSize = 2;
+    int fileName = 10;
+    Bytes name = Bytes(fileName);
+    mif.printInstruction(0,
+                         name.to_string(),
+                         "name = " +
+                             std::to_string(fileName) + "\n");
+    int s = (code.size() / 2);
+    Bytes size = Bytes(s);
+    mif.printInstruction(1,
+                         size.to_string(),
+                         "size = " +
+                             std::to_string(s) + "\n");
+
+    for (int i = 0; i < (int)code.size(); i += 2)
+    {
+        bool hasNext = (i + 1) < (int)code.size();
+        std::string leftInstr = code[i]->to_binary();
+        std::string rightInstr = hasNext
+                                     ? code[i + 1]->to_binary()
+                                     : "0000000000000000";
+        std::string debugText = code[i]->to_string();
+        if (hasNext)
+            debugText += " | " + code[i + 1]->to_string();
+
+        mif.printInstruction(headerSize + ((int)i / 2),
+                             leftInstr + rightInstr,
+                             debugText);
+
+        if (!code[i]->debugname.empty())
+            mif.printDebugMsg(code[i]->debugname);
+        if (hasNext && (!code[i + 1]->debugname.empty()))
+            mif.printDebugMsg(code[i + 1]->debugname);
+
+        mif.jumpLine();
+    }
+}
+
+void CodeGenerator::mountUncompressedProgram()
+{
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
@@ -835,11 +890,6 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 
         mif.jumpLine();
     }
-
-    mif.printMultipleEmptyPosition(code.size() + programOffset, memorySize);
-
-    mif.printFooter();
-    printf("\n\n Output saved on %s \n\n", outputFile.c_str());
 }
 
 void CodeGenerator::generateCodeToJumpToOS()
@@ -867,7 +917,7 @@ void CodeGenerator::generateCodeToJumpToOS()
         this->mif.jumpLine();
     }
 
-    mif.printMultipleEmptyPosition(code.size(), programOffset);
+    mif.printMultipleEmptyPosition(programOffset);
     code = originalCode;
     generatedCode = originalInst;
 }

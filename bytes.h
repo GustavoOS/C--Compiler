@@ -11,7 +11,7 @@ private:
 public:
     Bytes(int);
     int getNthByte(int); //Zero based
-    std::string getHWString();
+    std::string to_string();
 };
 
 std::string getVal5Bits(int val);

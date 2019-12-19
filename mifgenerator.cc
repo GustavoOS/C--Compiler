@@ -7,13 +7,16 @@ MifGenerator::MifGenerator()
     header = "-- begin_signature\n"
              "-- Memory\n"
              "-- end_signature\n";
+    greatestLine = -1;
 }
 
-void MifGenerator::open(std::string outputFile, bool isBios)
+void MifGenerator::open(std::string outputFile, bool isBios, bool isCompressed)
 {
-    this->isBios = isBios;
+    this->isCompressed = isBios || isCompressed;
     std::string width = isBios ? "16;\n" : "32;\n";
     std::string depth = isBios ? "512;\n" : "16384;\n";
+    dontcare = isBios ? "XXXXXXXXXXXXXXXX"
+                      : "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     header += "WIDTH=" + width +
               "DEPTH=" + depth +
               "\n"
@@ -50,23 +53,24 @@ void MifGenerator::close()
 
 void MifGenerator::printEmptyMemoryPosition(int position)
 {
-    std::string firstHW = isBios ? "" : "XXXXXXXXXXXXXXXX";
+    updateGreatestLine(position);
     printLine("    " + std::to_string(position) +
               " : " +
-              firstHW +
-              "XXXXXXXXXXXXXXXX;\n");
+              dontcare + ";\n");
 }
 
 void MifGenerator::printInstruction(int position, std::string binary, std::string assembly)
 {
-    std::string firstHW = isBios ? "" : "0000000000000000";
+    updateGreatestLine(position);
+    std::string firstHW = isCompressed ? "" : "0000000000000000";
     printLine("    " + std::to_string(position) +
               " : " + firstHW +
               binary + "; -- " + assembly);
 }
 
-void MifGenerator::printMultipleEmptyPosition(int start, int repeats)
+void MifGenerator::printMultipleEmptyPosition(int repeats)
 {
+    int start = greatestLine + 1;
     for (int i = start; i < repeats; i++)
         printEmptyMemoryPosition(i);
 }
@@ -74,4 +78,10 @@ void MifGenerator::printMultipleEmptyPosition(int start, int repeats)
 void MifGenerator::printDebugMsg(std::string msg)
 {
     printLine(" (" + msg + ")");
+}
+
+void MifGenerator::updateGreatestLine(int line)
+{
+    if (line > greatestLine)
+        greatestLine = line;
 }
