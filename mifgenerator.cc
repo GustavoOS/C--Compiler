@@ -1,6 +1,7 @@
 #include "mifgenerator.h"
 #include <iostream>
 #include <fstream>
+#include "bytes.h"
 
 MifGenerator::MifGenerator()
 {
@@ -84,4 +85,13 @@ void MifGenerator::updateGreatestLine(int line)
 {
     if (line > greatestLine)
         greatestLine = line;
+}
+
+void MifGenerator::printSize(int codeSize, int place)
+{
+    Bytes size = Bytes(codeSize);
+    printInstruction(place,
+                     size.to_string(),
+                     "size = " +
+                         std::to_string(codeSize) + "\n");
 }

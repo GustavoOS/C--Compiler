@@ -11,6 +11,7 @@ public:
     void printMultipleEmptyPosition(int repeats);
     void printInstruction(int, std::string, std::string);
     void printDebugMsg(std::string);
+    void printSize(int codeSize, int place);
     void jumpLine();
     void printFooter();
 private:

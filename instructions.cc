@@ -18,6 +18,7 @@ Instruction *jumpToRegister(Registers reg)
         AB,
         reg);
 }
+
 Instruction *outputRegister(Registers reg)
 {
     return new TypeEInstruction(

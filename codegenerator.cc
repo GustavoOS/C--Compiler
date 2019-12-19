@@ -33,7 +33,12 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios, bool isCompressed)
+CodeGenerator::CodeGenerator(
+    bool displayable,
+    int programOffset,
+    bool isBios,
+    bool isCompressed,
+    bool isOS)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -47,6 +52,7 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset, bool isBios, b
     memorySize = isBios ? 512 : 16384;
     this->isBios = isBios;
     isCompressedProgram = isCompressed;
+    this->isOS = isOS;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -794,6 +800,9 @@ void CodeGenerator::generateRunTimeSystem()
     generateGlobalAR();
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
+    if (isOS)
+        goToApplication();
+    
     print(halt());
 }
 
@@ -803,6 +812,12 @@ void CodeGenerator::destroyGlobalAR()
     int globalCount = ds.getSize("global");
     for (int i = 0; i < globalCount + 1; i++)
         generateCodeForPop(TemporaryRegister);
+}
+
+void CodeGenerator::goToApplication()
+{
+    print(loadImediateToRegister(AcumulatorRegister, 0));
+    print(jumpToRegister(AcumulatorRegister));
 }
 
 void CodeGenerator::generateBinaryCode(std::string outputFile)
@@ -836,12 +851,8 @@ void CodeGenerator::mountFileStructure()
                          name.to_string(),
                          "name = " +
                              std::to_string(fileName) + "\n");
-    int s = (code.size() / 2);
-    Bytes size = Bytes(s);
-    mif.printInstruction(slotStart + 1,
-                         size.to_string(),
-                         "size = " +
-                             std::to_string(s) + "\n");
+
+    mif.printSize(code.size(), slotStart + 1);
 
     for (int i = 0; i < (int)code.size(); i += 2)
     {
@@ -869,6 +880,11 @@ void CodeGenerator::mountFileStructure()
 
 void CodeGenerator::mountUncompressedProgram()
 {
+    if (isOS)
+    {
+        mif.printSize(code.size(), programOffset);
+        programOffset++;
+    }
     for (Instruction *inst : code)
     {
         std::string bin = inst->to_binary();
