@@ -18,7 +18,14 @@ Instruction *jumpToRegister(Registers reg)
         AB,
         reg);
 }
-
+Instruction *branchImmediate(ConditionCodes cond, int small)
+{
+    return new TypeGInstruction(
+        73,
+        "B",
+        cond,
+        small);
+}
 Instruction *outputRegister(Registers reg)
 {
     return new TypeEInstruction(
@@ -99,7 +106,7 @@ Instruction *extendZero(Registers reg)
     return new TypeEInstruction(61, "UXTH", reg, reg);
 }
 
-Instruction * rightShiftImmediate(Registers reg, int immediate)
+Instruction *rightShiftImmediate(Registers reg, int immediate)
 {
     return new TypeAInstruction(2, "LSR", immediate, reg, reg);
 }

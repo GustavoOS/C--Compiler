@@ -76,6 +76,7 @@ Instruction *sumRegisters(Registers ra, Registers rb); // A = A + B
 Instruction *copySP(Registers reg);
 Instruction *extendZero(Registers reg);
 Instruction *rightShiftImmediate(Registers, int);
+Instruction *branchImmediate(ConditionCodes, int);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);

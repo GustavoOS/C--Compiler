@@ -232,6 +232,44 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch end +++++++++++++\n";
 }
+void CodeGenerator::generateCodeForIf(TreeNode *node)
+{
+    std::string if_end = "if_end_" +
+                          std::to_string(node->attr.val);
+    TreeNode *condition = node->child[0];
+    TreeNode *body = node->child[1];
+    Instruction *branch =
+        branchImmediate(translateCondition(condition->attr.op), 9);
+    generateCode(condition);
+    print(branch);
+    int size = code.size();
+    generateCodeForBranch(if_end, AL);
+    branch->offset = code.size() - size + 1;
+    generateCode(body);
+    printLabelNop(if_end);
+    setDebugName("end Elseless IF");
+}
+
+void CodeGenerator::generateCodeForIfElse(TreeNode *node)
+{
+    std::string if_true_label_ = "if_true_" + std::to_string(node->attr.val);
+    std::string if_end_label = "if_end_" + std::to_string(node->attr.val);
+    TreeNode *condition = node->child[0];
+    TreeNode *body = node->child[1], *elseBody = node->child[2];
+    generateCodeForBranch(if_true_label_,
+                          translateCondition(condition->attr.op),
+                          condition);
+
+    generateCode(elseBody);
+
+    generateCodeForBranch(if_end_label, AL);
+
+    printLabelNop(if_true_label_);
+
+    generateCode(body);
+
+    printLabelNop(if_end_label);
+}
 
 void CodeGenerator::generateCodeForPop(Registers reg)
 {
@@ -328,25 +366,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case IfK:
     {
-        std::string if_true_label_name = "if_true_" + std::to_string(node->attr.val);
-        std::string if_end_label_name = "if_end_" + std::to_string(node->attr.val);
-        TreeNode *condition = node->child[0];
-        TreeNode *body = node->child[1], *elseBody = node->child[2];
-
-        generateCodeForBranch(if_true_label_name,
-                              translateCondition(condition->attr.op),
-                              condition);
-
-        if (elseBody)
-            generateCode(elseBody);
-
-        generateCodeForBranch(if_end_label_name, AL);
-
-        printLabelNop(if_true_label_name);
-
-        generateCode(body);
-
-        printLabelNop(if_end_label_name);
+        if (node->child[2])
+            generateCodeForIfElse(node);
+        else
+            generateCodeForIf(node);
     }
     break;
 

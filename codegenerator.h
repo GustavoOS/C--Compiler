@@ -43,6 +43,8 @@ private:
     void generateCodeForExprNode(TreeNode *node);
     void generateOperationCode(TreeNode *);
     void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode *child = NULL);
+    void generateCodeForIf(TreeNode * node);
+    void generateCodeForIfElse(TreeNode * node);
     void generateCodeForPop(Registers reg);
     void registerLabelInstruction(std::string label, Instruction *Instruction);
     void generateCodeForConst(int);
