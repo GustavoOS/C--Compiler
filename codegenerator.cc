@@ -452,12 +452,12 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         else if (FunctionName == "fun_extractFirstHW")
         {
             generateCode(arg);
-            print(extendZero(AcumulatorRegister));
+            print(rightShiftImmediate(AcumulatorRegister, 16));
         }
         else if (FunctionName == "fun_extractSecondHW")
         {
             generateCode(arg);
-            print(rightShiftImmediate(AcumulatorRegister, 16));
+            print(extendZero(AcumulatorRegister));
         }
         else
             generateCodeForFunctionActivation(node);
@@ -802,7 +802,7 @@ void CodeGenerator::generateRunTimeSystem()
     destroyGlobalAR();
     if (isOS)
         goToApplication();
-    
+
     print(halt());
 }
 
