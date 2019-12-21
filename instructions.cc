@@ -618,10 +618,12 @@ std::string printRegister(int reg)
         return "$FP";
     case GlobalPointer:
         return "$GP";
-    case BaseAddressRegister:
-        return "$BA";
+    case SystemCallRegister:
+        return "$SC";
     case ReturnAddressRegister:
         return "$RA";
+    case SnapshotPointer:
+        return "$XP";
     case SwapRegister:
         return "$SR";
     }

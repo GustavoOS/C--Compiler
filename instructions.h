@@ -10,9 +10,10 @@ enum Registers : int
     TemporaryRegister,
     FramePointer,
     GlobalPointer,
-    BaseAddressRegister,
+    SnapshotPointer,
     ReturnAddressRegister,
-    SwapRegister = 8
+    SystemCallRegister,
+    SwapRegister
 };
 
 enum ConditionCodes
