@@ -423,12 +423,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         if (FunctionName == "fun_input")
         {
             generateCode(arg);
-            print(
-                new TypeEInstruction(
-                    70,
-                    "PAUSE",
-                    0,
-                    0));
+            print(pause());
             print(
                 new TypeEInstruction(
                     71,
@@ -998,12 +993,6 @@ void CodeGenerator::generateCodeForConst(int value)
 
 void CodeGenerator::printRegister(Registers reg)
 {
-    print(
-        new TypeEInstruction(
-            70,
-            "PAUSE",
-            0,
-            0));
-    print(
-        outputRegister(reg));
+    print(pause());
+    print(outputRegister(reg));
 }

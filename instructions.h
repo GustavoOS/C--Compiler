@@ -83,6 +83,7 @@ Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
 Instruction *outputRegister(Registers reg);
 Instruction *halt();
+Instruction *pause();
 
 class BranchLabel;
 class TypeDInstruction;

@@ -154,6 +154,15 @@ Instruction *halt()
         0);
 }
 
+Instruction *pause()
+{
+    return new TypeEInstruction(
+        70,
+        "PAUSE",
+        0,
+        0);
+}
+
 void Instruction::setlabel(std::string newLabel)
 {
     isLabel = true;
