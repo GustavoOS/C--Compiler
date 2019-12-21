@@ -15,7 +15,8 @@ void hr(std::string);
 class CodeGenerator
 {
 public:
-    CodeGenerator(bool displayable, int programOffset, bool isBios, bool isCompressed, bool isOS);
+    CodeGenerator(bool displayable, int programOffset);
+    void setMode(bool isBios, bool isCompressed, bool isOS);
     void generate(TreeNode *node);
     void linker();
     void generateBinaryCode(std::string outputFile);

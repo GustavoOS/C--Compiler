@@ -118,10 +118,8 @@ int main(int argc, char *argv[])
   if (!Error)
   {
     CodeGenerator cg = CodeGenerator(TraceCode,
-                                     PROGRAM_OFFSET,
-                                     isBios,
-                                     isCompressedProgram,
-                                     isOperatingSystem);
+                                     PROGRAM_OFFSET);
+    cg.setMode(isBios, isCompressedProgram, isOperatingSystem);
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);

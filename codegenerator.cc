@@ -33,12 +33,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(
-    bool displayable,
-    int programOffset,
-    bool isBios,
-    bool isCompressed,
-    bool isOS)
+CodeGenerator::CodeGenerator(bool displayable, int programOffset)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -49,10 +44,14 @@ CodeGenerator::CodeGenerator(
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
     this->programOffset = programOffset;
+}
+
+void CodeGenerator::setMode(bool bios, bool compressed, bool os)
+{
+    isBios = bios;
+    isCompressedProgram = compressed;
+    isOS = os;
     memorySize = isBios ? 512 : 16384;
-    this->isBios = isBios;
-    isCompressedProgram = isCompressed;
-    this->isOS = isOS;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -235,7 +234,7 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 void CodeGenerator::generateCodeForIf(TreeNode *node)
 {
     std::string if_end = "if_end_" +
-                          std::to_string(node->attr.val);
+                         std::to_string(node->attr.val);
     TreeNode *condition = node->child[0];
     TreeNode *body = node->child[1];
     Instruction *branch =
