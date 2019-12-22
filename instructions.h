@@ -10,9 +10,10 @@ enum Registers : int
     TemporaryRegister,
     FramePointer,
     GlobalPointer,
-    BaseAddressRegister,
+    SnapshotPointer,
     ReturnAddressRegister,
-    SwapRegister = 8
+    SystemCallRegister,
+    SwapRegister
 };
 
 enum ConditionCodes
@@ -74,11 +75,15 @@ Instruction *subImeditateFromRegister(int value, Registers destination);
 Instruction *sumWithPC(Registers reg, int number);
 Instruction *sumRegisters(Registers ra, Registers rb); // A = A + B
 Instruction *copySP(Registers reg);
+Instruction *extendZero(Registers reg);
+Instruction *rightShiftImmediate(Registers, int);
+Instruction *branchImmediate(ConditionCodes, int);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
 Instruction *outputRegister(Registers reg);
 Instruction *halt();
+Instruction *pause();
 
 class BranchLabel;
 class TypeDInstruction;

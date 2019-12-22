@@ -18,6 +18,14 @@ Instruction *jumpToRegister(Registers reg)
         AB,
         reg);
 }
+Instruction *branchImmediate(ConditionCodes cond, int small)
+{
+    return new TypeGInstruction(
+        73,
+        "B",
+        cond,
+        small);
+}
 Instruction *outputRegister(Registers reg)
 {
     return new TypeEInstruction(
@@ -93,6 +101,16 @@ Instruction *moveLowToHigh(Registers low, Registers high)
         high);
 }
 
+Instruction *extendZero(Registers reg)
+{
+    return new TypeEInstruction(61, "UXTH", reg, reg);
+}
+
+Instruction *rightShiftImmediate(Registers reg, int immediate)
+{
+    return new TypeAInstruction(2, "LSR", immediate, reg, reg);
+}
+
 Instruction *moveHighToLow(Registers low, Registers high)
 {
     return new TypeEInstruction(
@@ -132,6 +150,15 @@ Instruction *halt()
     return new TypeDInstruction(
         75,
         "HLT",
+        0,
+        0);
+}
+
+Instruction *pause()
+{
+    return new TypeEInstruction(
+        70,
+        "PAUSE",
         0,
         0);
 }
@@ -600,10 +627,12 @@ std::string printRegister(int reg)
         return "$FP";
     case GlobalPointer:
         return "$GP";
-    case BaseAddressRegister:
-        return "$BA";
+    case SystemCallRegister:
+        return "$SC";
     case ReturnAddressRegister:
         return "$RA";
+    case SnapshotPointer:
+        return "$XP";
     case SwapRegister:
         return "$SR";
     }

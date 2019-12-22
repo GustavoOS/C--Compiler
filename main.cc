@@ -50,8 +50,9 @@ int Error = FALSE;
 // Mark True for OS mode development
 bool isOperatingSystem = false;
 bool isBios = false;
+bool isCompressedProgram = true;
 
-int PROGRAM_OFFSET = isOperatingSystem ? 2048 : 0;
+int PROGRAM_OFFSET = 0;
 
 int main(int argc, char *argv[])
 {
@@ -64,10 +65,8 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  if(argc == 3)
-  {
+  if (argc == 3)
     outputFile = argv[2];
-  }
 
   pgm = std::string(argv[1]);
   if (pgm.find('.') == std::string::npos)
@@ -118,7 +117,9 @@ int main(int argc, char *argv[])
   }
   if (!Error)
   {
-    CodeGenerator cg = CodeGenerator(TraceCode, PROGRAM_OFFSET, isBios);
+    CodeGenerator cg = CodeGenerator(TraceCode,
+                                     PROGRAM_OFFSET);
+    cg.setMode(isBios, isCompressedProgram, isOperatingSystem);
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);
