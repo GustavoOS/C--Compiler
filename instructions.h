@@ -13,7 +13,10 @@ enum Registers : int
     SnapshotPointer,
     ReturnAddressRegister,
     SystemCallRegister,
-    SwapRegister
+    SwapRegister,
+    LinkRegister = 13,
+    StackPointer,
+    ProgramCounter
 };
 
 enum ConditionCodes
