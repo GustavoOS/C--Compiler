@@ -14,7 +14,8 @@ enum Registers : int
     ReturnAddressRegister,
     SystemCallRegister,
     SwapRegister,
-    LinkRegister = 13,
+    SavedStateRegister = 12,
+    LinkRegister,
     StackPointer,
     ProgramCounter
 };
@@ -81,6 +82,8 @@ Instruction *copySP(Registers reg);
 Instruction *extendZero(Registers reg);
 Instruction *rightShiftImmediate(Registers, int);
 Instruction *branchImmediate(ConditionCodes, int);
+Instruction *leftShiftImmediate(Registers, int);
+Instruction *addImmediate(Registers, int);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);

@@ -12,6 +12,7 @@ public:
     Bytes(int);
     int getNthByte(int); //Zero based
     std::string to_string();
+    int findFirstByteIndex();
 };
 
 std::string getVal5Bits(int val);

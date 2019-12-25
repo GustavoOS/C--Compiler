@@ -111,6 +111,16 @@ Instruction *rightShiftImmediate(Registers reg, int immediate)
     return new TypeAInstruction(2, "LSR", immediate, reg, reg);
 }
 
+Instruction *leftShiftImmediate(Registers reg, int number)
+{
+    return new TypeAInstruction(1, "LSL", number, reg, reg);
+}
+
+Instruction *addImmediate(Registers reg, int number)
+{
+    return new TypeDInstruction(10, "ADD", reg, number);
+}
+
 Instruction *moveHighToLow(Registers low, Registers high)
 {
     return new TypeEInstruction(
@@ -635,6 +645,8 @@ std::string printRegister(int reg)
         return "$XP";
     case SwapRegister:
         return "$SR";
+    case SavedStateRegister:
+        return "$STR";
     }
     return "!UNKNOWN!";
 }

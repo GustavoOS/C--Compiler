@@ -958,37 +958,28 @@ void CodeGenerator::generateCodeToJumpToOS()
 
 void CodeGenerator::generateCodeForConst(int value)
 {
+    Bytes number = Bytes(value);
+    int nulls = 0;
+    int current = number.findFirstByteIndex();
+    print(loadImediateToRegister(AcumulatorRegister, number.getNthByte(current)));
+    setDebugName("begin ConstK");
+    for (int i = current + 1; i < 4; i++)
     {
-
-        Bytes number = Bytes(value);
-
-        for (int i = 0; i < 4; i++)
+        int b = number.getNthByte(i);
+        if (b == 0)
+            nulls++;
+        else
         {
-            int byte = number.getNthByte(i);
-
-            if (i == 0)
-            {
-                print(loadImediateToRegister(AcumulatorRegister, byte));
-                setDebugName("begin ConstK");
-            }
-            else
-            {
-                print(
-                    new TypeAInstruction(
-                        1,
-                        "LSL",
-                        8,
-                        AcumulatorRegister,
-                        AcumulatorRegister));
-                if (byte != 0)
-                {
-                    print(loadImediateToRegister(TemporaryRegister, byte));
-                    print(sumRegisters(AcumulatorRegister, TemporaryRegister));
-                }
-            }
+            print(leftShiftImmediate(AcumulatorRegister,
+                                     8 * (nulls + 1)));
+            print(addImmediate(AcumulatorRegister, b));
+            nulls = 0;
         }
-        setDebugName("end ConstK");
     }
+    if (nulls > 0)
+        print(leftShiftImmediate(AcumulatorRegister, 8*nulls));
+
+    setDebugName("end ConstK");
 }
 
 void CodeGenerator::printRegister(Registers reg)
