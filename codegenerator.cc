@@ -186,34 +186,14 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch start +++++++++++++\n";
 
-    print(moveLowToHigh(AcumulatorRegister, SwapRegister));
-
-    setDebugName("begin Branch");
 
     BranchLabel *branchLabel = new BranchLabel(branch_name, condition);
 
     print(branchLabel->firstByte);
-
-    print(
-        new TypeAInstruction(
-            1,
-            "LSL",
-            8,
-            TemporaryRegister,
-            TemporaryRegister));
-
+    setDebugName("begin Branch");
+    print(leftShiftImmediate(TemporaryRegister, 8));
     print(branchLabel->secondByte);
-
-    print(sumRegisters(TemporaryRegister, AcumulatorRegister));
-
-    print(
-        new TypeEInstruction(
-            59,
-            "SXTH",
-            TemporaryRegister,
-            TemporaryRegister));
-
-    print(moveHighToLow(AcumulatorRegister, SwapRegister));
+    print(signExtendHW(TemporaryRegister));
 
     if (operationNode)
     {

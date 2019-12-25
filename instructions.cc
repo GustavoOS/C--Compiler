@@ -121,6 +121,11 @@ Instruction *addImmediate(Registers reg, int number)
     return new TypeDInstruction(10, "ADD", reg, number);
 }
 
+Instruction *signExtendHW(Registers reg)
+{
+    return new TypeEInstruction(59, "SXTH", reg, reg);
+}
+
 Instruction *moveHighToLow(Registers low, Registers high)
 {
     return new TypeEInstruction(
@@ -189,7 +194,7 @@ BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
 {
     tolabel = gotolabel;
     firstByte = loadImediateToRegister(TemporaryRegister, 0);
-    secondByte = loadImediateToRegister(AcumulatorRegister, 0);
+    secondByte = addImmediate(TemporaryRegister, 0);
     branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
 }
 

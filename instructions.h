@@ -84,6 +84,7 @@ Instruction *rightShiftImmediate(Registers, int);
 Instruction *branchImmediate(ConditionCodes, int);
 Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
+Instruction *signExtendHW(Registers);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
