@@ -14,6 +14,7 @@ enum Registers : int
     ReturnAddressRegister,
     SystemCallRegister,
     SwapRegister,
+    StoredSpecReg,
     LinkRegister = 13,
     StackPointer,
     ProgramCounter
@@ -84,6 +85,7 @@ Instruction *branchImmediate(ConditionCodes, int);
 Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
+Instruction *interrupt();
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
