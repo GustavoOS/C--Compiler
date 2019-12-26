@@ -14,8 +14,7 @@ enum Registers : int
     ReturnAddressRegister,
     SystemCallRegister,
     SwapRegister,
-    SavedStateRegister = 12,
-    LinkRegister,
+    LinkRegister = 13,
     StackPointer,
     ProgramCounter
 };

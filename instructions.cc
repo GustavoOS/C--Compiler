@@ -457,6 +457,7 @@ std::vector<std::string> opcode =
         "1101", // 73
         "1110", // 74
         "1110", // 75
+        "1011"  // 76
 };
 
 std::map<int, int> opMap = {
@@ -553,6 +554,7 @@ std::map<int, std::string> funct2 = {
     {69, "1110"},
     {70, "1110"},
     {71, "1110"},
+    {76, "0000"}
 };
 
 std::map<int, std::string> funct1 = {
@@ -594,6 +596,7 @@ std::map<int, std::string> funct1 = {
     {45, "01"},
     {46, "10"},
     {47, "11"},
+    {58, "00"},
     {59, "00"},
     {60, "01"},
     {61, "10"},
@@ -606,7 +609,8 @@ std::map<int, std::string> funct1 = {
     {68, "00"},
     {69, "00"},
     {70, "01"},
-    {71, "10"}};
+    {71, "10"},
+    {76, "01"}};
 
 std::string Instruction::getOpCode(int id)
 {
@@ -650,8 +654,6 @@ std::string printRegister(int reg)
         return "$XP";
     case SwapRegister:
         return "$SR";
-    case SavedStateRegister:
-        return "$STR";
     }
     return "!UNKNOWN!";
 }
