@@ -660,6 +660,8 @@ std::string printRegister(int reg)
         return "$SR";
     case StoredSpecReg:
         return "$SXR";
+    case LinkRegister:
+        return "$LR";
     }
     return "!UNKNOWN!";
 }
