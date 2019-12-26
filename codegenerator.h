@@ -38,6 +38,8 @@ private:
     void print(Instruction *instruction);
     void generateCode(TreeNode *node);
     void createHeader();
+    void createOSHeader();
+    void createBIOSHeader();
     void createFooter();
     void generateCodeForAnyNode(TreeNode *);
     void generateCodeForStmtNode(TreeNode *node);
@@ -54,6 +56,7 @@ private:
     void mountUncompressedProgram();
 
     void fetchVarOffset(TreeNode *node, Registers reg);
+    int fetchVarOffsetByName(std::string variable, std::string scope);
     void loadVariable(TreeNode *node, Registers reg);
     void printLabelNop(std::string);
 
@@ -67,6 +70,7 @@ private:
     void buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode);
     void jumpAndLink(std::string);
     void goToApplication();
+    void setOSVariables();
 
     void insertIndexInsideEveryInstruction();
     void printEveryLabelLink();

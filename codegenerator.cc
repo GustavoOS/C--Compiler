@@ -78,7 +78,6 @@ void CodeGenerator::generate(TreeNode *node)
 {
     createHeader();
     generateCode(node);
-    createFooter();
 }
 
 void CodeGenerator::linker()
@@ -185,7 +184,6 @@ void CodeGenerator::generateCodeForBranch(std::string branch_name,
 
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch start +++++++++++++\n";
-
 
     BranchLabel *branchLabel = new BranchLabel(branch_name, condition);
 
@@ -403,6 +401,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         if (FunctionName == "fun_input")
         {
             generateCode(arg);
+            if (!isOS && !isBios)
+            {
+                print(loadImediateToRegister(SystemCallRegister, 1));
+                print(interrupt());
+            }
             print(pause());
             print(
                 new TypeEInstruction(
@@ -415,6 +418,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         else if (FunctionName == "fun_output")
         {
             generateCode(arg);
+            if (!isOS && !isBios)
+            {
+                print(loadImediateToRegister(SystemCallRegister, 1));
+                print(interrupt());
+            }
             printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
         }
@@ -658,6 +666,11 @@ void CodeGenerator::createHeader()
 {
     print(nop());
     setDebugName("begin Header");
+    if (isOS)
+        createOSHeader();
+    if (isBios)
+        createBIOSHeader();
+
     generateRunTimeSystem();
 
     if (shouldShowVisitingMessages)
@@ -665,10 +678,54 @@ void CodeGenerator::createHeader()
     setDebugName("end Header");
 }
 
+void CodeGenerator::createOSHeader()
+{
+    print(new TypeEInstruction(58, "CPXR", 0, StoredSpecReg));
+    setDebugName("Create OS header");
+    print(pushAcumulator());
+    print(pushRegister(TemporaryRegister));
+    print(pushRegister(FramePointer));
+    print(pushRegister(GlobalPointer));
+    print(pushRegister(ReturnAddressRegister));
+    print(moveHighToLow(TemporaryRegister, SwapRegister));
+    print(pushRegister(TemporaryRegister));
+    print(pushRegister(SnapshotPointer));                  // SP
+    print(moveHighToLow(TemporaryRegister, LinkRegister)); // PC
+    print(pushRegister(TemporaryRegister));
+    print(moveHighToLow(TemporaryRegister, StoredSpecReg));
+    print(pushRegister(TemporaryRegister)); //SpecReg
+    print(pushRegister(SystemCallRegister));
+    print(copySP(TemporaryRegister));
+    setDebugName("OS HEADER END");
+}
+
+void CodeGenerator::createBIOSHeader()
+{
+    print(loadImediateToRegister(HeapArrayRegister, 1));
+    print(new TypeAInstruction(1, "LSL", 13, HeapArrayRegister, HeapArrayRegister));
+}
+
 void CodeGenerator::createFooter()
 {
     if (shouldShowVisitingMessages)
         std::cout << "This is a footer\n";
+    if (!isOS)
+        return;
+    generateCodeForPop(SystemCallRegister);
+    generateCodeForPop(TemporaryRegister);
+    moveLowToHigh(TemporaryRegister, StoredSpecReg);
+    generateCodeForPop(TemporaryRegister);
+    moveLowToHigh(TemporaryRegister, LinkRegister);
+    generateCodeForPop(SnapshotPointer);
+    generateCodeForPop(TemporaryRegister);
+    print(moveLowToHigh(TemporaryRegister, SwapRegister));
+    generateCodeForPop(ReturnAddressRegister);
+    generateCodeForPop(GlobalPointer);
+    generateCodeForPop(FramePointer);
+    generateCodeForPop(TemporaryRegister);
+    generateCodeForPop(AcumulatorRegister);
+    print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
+    goToApplication();
 }
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
@@ -690,6 +747,15 @@ void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
     BucketList record = getRecordFromSymbolTable(node);
     print(loadImediateToRegister(reg, record->memloc));
+}
+
+int CodeGenerator::fetchVarOffsetByName(std::string variable, std::string scope)
+{
+    TreeNode *node = newExpNode(IdK);
+    node->attr.name = variable;
+    node->scope = scope;
+    BucketList record = getRecordFromSymbolTable(node);
+    return record ? record->memloc : -1;
 }
 
 void hr(std::string middle)
@@ -739,7 +805,26 @@ void CodeGenerator::generateGlobalAR()
 
     print(copySP(GlobalPointer));
 
+    if (isOS)
+        setOSVariables();
     setDebugName("end GlobalAR");
+}
+
+void CodeGenerator::setOSVariables()
+{
+    int state = fetchVarOffsetByName("registers", "global");
+    std::cout << "STATE: " << std::to_string(state) << " \n";
+    if (state > 0)
+    {
+        print(
+            new TypeAInstruction(
+                48,
+                "STR",
+                state,
+                GlobalPointer,
+                TemporaryRegister));
+        setDebugName("SET OS VARIABLE");
+    }
 }
 
 void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
@@ -797,8 +882,7 @@ void CodeGenerator::generateRunTimeSystem()
     generateGlobalAR();
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
-    if (isOS)
-        goToApplication();
+    createFooter();
 
     print(halt());
 }
@@ -813,8 +897,7 @@ void CodeGenerator::destroyGlobalAR()
 
 void CodeGenerator::goToApplication()
 {
-    print(loadImediateToRegister(AcumulatorRegister, 0));
-    print(jumpToRegister(AcumulatorRegister));
+    print(interrupt());
 }
 
 void CodeGenerator::generateBinaryCode(std::string outputFile)
@@ -957,7 +1040,7 @@ void CodeGenerator::generateCodeForConst(int value)
         }
     }
     if (nulls > 0)
-        print(leftShiftImmediate(AcumulatorRegister, 8*nulls));
+        print(leftShiftImmediate(AcumulatorRegister, 8 * nulls));
 
     setDebugName("end ConstK");
 }

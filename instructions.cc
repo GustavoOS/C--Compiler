@@ -160,6 +160,11 @@ Instruction *copySP(Registers reg)
                                 0);
 }
 
+Instruction *interrupt()
+{
+    return new TypeAInstruction(72, "SWI", 0, 0, 0);
+}
+
 Instruction *halt()
 {
     return new TypeDInstruction(
@@ -554,8 +559,7 @@ std::map<int, std::string> funct2 = {
     {69, "1110"},
     {70, "1110"},
     {71, "1110"},
-    {76, "0000"}
-};
+    {76, "0000"}};
 
 std::map<int, std::string> funct1 = {
     {4, "00"},
@@ -654,6 +658,8 @@ std::string printRegister(int reg)
         return "$XP";
     case SwapRegister:
         return "$SR";
+    case StoredSpecReg:
+        return "$SXR";
     }
     return "!UNKNOWN!";
 }
