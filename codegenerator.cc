@@ -556,9 +556,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     {
 
         generateCode(node->child[0]);
-
-        print(
-            pushAcumulator());
+        print(pushAcumulator());
 
         generateCode(node->child[1]);
 
