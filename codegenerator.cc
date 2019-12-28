@@ -698,8 +698,7 @@ void CodeGenerator::createOSHeader()
 
 void CodeGenerator::createBIOSHeader()
 {
-    print(loadImediateToRegister(HeapArrayRegister, 1));
-    print(new TypeAInstruction(1, "LSL", 13, HeapArrayRegister, HeapArrayRegister));
+    generateCodeForConst(8192, HeapArrayRegister);
 }
 
 void CodeGenerator::createFooter()
@@ -897,8 +896,9 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-
-    print(halt());
+    if (!isBios && !isOS)
+        print(loadImediateToRegister(SystemCallRegister, 2));
+    print(interrupt());
 }
 
 void CodeGenerator::destroyGlobalAR()
@@ -937,16 +937,10 @@ void CodeGenerator::generateBinaryCode(std::string outputFile)
 void CodeGenerator::mountFileStructure()
 {
     std::cout << "Compressed File\n";
-    int headerSize = 2;
-    int fileName = 10;
+    int headerSize = 1;
     int slotStart = 2058;
-    Bytes name = Bytes(fileName);
-    mif.printInstruction(slotStart + 0,
-                         name.to_string(),
-                         "name = " +
-                             std::to_string(fileName) + "\n");
 
-    mif.printSize(code.size(), slotStart + 1);
+    mif.printSize(code.size(), slotStart);
 
     for (int i = 0; i < (int)code.size(); i += 2)
     {
