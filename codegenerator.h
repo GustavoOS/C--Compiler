@@ -50,12 +50,13 @@ private:
     void generateCodeForIfElse(TreeNode * node);
     void generateCodeForPop(Registers reg);
     void registerLabelInstruction(std::string label, Instruction *Instruction);
-    void generateCodeForConst(int);
+    void generateCodeForConst(int, Registers);
 
     void mountFileStructure();
     void mountUncompressedProgram();
 
     void fetchVarOffset(TreeNode *node, Registers reg);
+    int fetchVarOffsetAsInteger(TreeNode * node);
     int fetchVarOffsetByName(std::string variable, std::string scope);
     void loadVariable(TreeNode *node, Registers reg);
     void printLabelNop(std::string);

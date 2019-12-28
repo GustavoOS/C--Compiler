@@ -572,7 +572,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     break;
     case ConstK:
     {
-        generateCodeForConst(node->attr.val);
+        generateCodeForConst(node->attr.val, AcumulatorRegister);
     }
     break;
     case IdK:
@@ -592,7 +592,6 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister,
                 AcumulatorRegister));
-        print(nop());
     }
     break;
 
@@ -728,17 +727,29 @@ void CodeGenerator::createFooter()
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
 {
-    fetchVarOffset(node, reg);
-    print(
-        new TypeBInstruction(
-            44,
-            "LDR",
-            reg,
-            node->scope == "global"
-                ? GlobalPointer
-                : FramePointer,
-            reg));
-    print(nop());
+    int offset = fetchVarOffsetAsInteger(node);
+    Registers scopeRegister = node->scope == "global"
+                                  ? GlobalPointer
+                                  : FramePointer;
+    if (offset < 31)
+        print(
+            new TypeAInstruction(
+                49,
+                "LDR",
+                offset,
+                scopeRegister,
+                reg));
+    else
+    {
+        generateCodeForConst(offset, reg);
+        print(
+            new TypeBInstruction(
+                44,
+                "LDR",
+                reg,
+                scopeRegister,
+                reg));
+    }
 }
 
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
@@ -747,13 +758,18 @@ void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
     print(loadImediateToRegister(reg, record->memloc));
 }
 
+int CodeGenerator::fetchVarOffsetAsInteger(TreeNode *node)
+{
+    BucketList record = getRecordFromSymbolTable(node);
+    return record ? record->memloc : -1;
+}
+
 int CodeGenerator::fetchVarOffsetByName(std::string variable, std::string scope)
 {
     TreeNode *node = newExpNode(IdK);
     node->attr.name = variable;
     node->scope = scope;
-    BucketList record = getRecordFromSymbolTable(node);
-    return record ? record->memloc : -1;
+    return fetchVarOffsetAsInteger(node);
 }
 
 void hr(std::string middle)
@@ -993,7 +1009,7 @@ void CodeGenerator::generateCodeToJumpToOS()
     std::string originalInst = generatedCode, ngc;
     code = newCode;
     generatedCode = ngc;
-    generateCodeForConst(programOffset);
+    generateCodeForConst(programOffset, AcumulatorRegister);
 
     print(jumpToRegister(AcumulatorRegister));
 
@@ -1017,12 +1033,12 @@ void CodeGenerator::generateCodeToJumpToOS()
     generatedCode = originalInst;
 }
 
-void CodeGenerator::generateCodeForConst(int value)
+void CodeGenerator::generateCodeForConst(int value, Registers reg)
 {
     Bytes number = Bytes(value);
     int nulls = 0;
     int current = number.findFirstByteIndex();
-    print(loadImediateToRegister(AcumulatorRegister, number.getNthByte(current)));
+    print(loadImediateToRegister(reg, number.getNthByte(current)));
     setDebugName("begin ConstK");
     for (int i = current + 1; i < 4; i++)
     {
@@ -1031,14 +1047,14 @@ void CodeGenerator::generateCodeForConst(int value)
             nulls++;
         else
         {
-            print(leftShiftImmediate(AcumulatorRegister,
+            print(leftShiftImmediate(reg,
                                      8 * (nulls + 1)));
-            print(addImmediate(AcumulatorRegister, b));
+            print(addImmediate(reg, b));
             nulls = 0;
         }
     }
     if (nulls > 0)
-        print(leftShiftImmediate(AcumulatorRegister, 8 * nulls));
+        print(leftShiftImmediate(reg, 8 * nulls));
 
     setDebugName("end ConstK");
 }
