@@ -957,7 +957,7 @@ void CodeGenerator::mountFileStructure()
 {
     std::cout << "Compressed File\n";
     int headerSize = 1;
-    int slotStart = 2058;
+    int slotStart = 2060;
 
     mif.printSize(code.size(), slotStart);
 
