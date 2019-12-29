@@ -629,11 +629,8 @@ void CodeGenerator::generateRegisterOperation(TreeNode *node)
 void CodeGenerator::generateOperationCode(TreeNode *node)
 {
     if (node == NULL)
-    {
-        if (shouldShowVisitingMessages)
-            std::cout << "Thid node is NULL, exiting\n";
         return;
-    }
+
     if (shouldShowVisitingMessages)
         printNode(node); //Check visited node
     switch (node->attr.op)
