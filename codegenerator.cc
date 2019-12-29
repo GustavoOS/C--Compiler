@@ -968,7 +968,7 @@ void CodeGenerator::mountUncompressedProgram()
 {
     if (isOS)
     {
-        mif.printSize(code.size(), programOffset);
+        mif.printOSSize((int) code.size(), programOffset);
         programOffset++;
     }
     for (Instruction *inst : code)

@@ -660,6 +660,7 @@ std::string printRegister(int reg)
         return "$SXR";
     case LinkRegister:
         return "$LR";
+    default:
+        return "!UNKNOWN!";
     }
-    return "!UNKNOWN!";
 }
