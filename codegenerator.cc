@@ -483,34 +483,38 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             std::cout << "VARIABLE\n";
             generateCode(node->child[1]);
-            fetchVarOffset(varToBeAssignedInto, TemporaryRegister);
-            print(
-                new TypeBInstruction(
-                    40,
-                    "STR",
-                    varToBeAssignedInto->scope == "global"
-                        ? GlobalPointer
-                        : FramePointer,
-                    TemporaryRegister,
-                    AcumulatorRegister));
+            int offset = fetchVarOffsetAsInteger(varToBeAssignedInto);
+            Registers scopeRegister = varToBeAssignedInto->scope == "global"
+                                          ? GlobalPointer
+                                          : FramePointer;
+            if (offset < 31)
+                print(
+                    new TypeAInstruction(48,
+                                         "STR",
+                                         offset,
+                                         scopeRegister,
+                                         AcumulatorRegister));
+            else
+            {
+                generateCodeForConst(offset, TemporaryRegister);
+                print(
+                    new TypeBInstruction(40,
+                                         "STR",
+                                         TemporaryRegister,
+                                         scopeRegister,
+                                         AcumulatorRegister));
+            }
         }
         break;
         case VetK:
         {
             std::cout << "VECTOR\n";
-            loadVariable(varToBeAssignedInto, TemporaryRegister);
-            print(
-                pushRegister(TemporaryRegister));
-            generateCode(varToBeAssignedInto->child[0]);
-            print(
-                pushAcumulator());
-            generateCode(node->child[1]);
-            print(
-                moveLowToHigh(AcumulatorRegister, SwapRegister));
-            generateCodeForPop(AcumulatorRegister);
-            generateCodeForPop(TemporaryRegister);
+            generateCode(node->child[1]); // Value to be assigned
+            print(pushAcumulator());
+            generateCode(varToBeAssignedInto->child[0]);          // Offset
+            loadVariable(varToBeAssignedInto, TemporaryRegister); // Base Address
             print(sumRegisters(TemporaryRegister, AcumulatorRegister));
-            print(moveHighToLow(AcumulatorRegister, SwapRegister));
+            generateCodeForPop(AcumulatorRegister);
             print(
                 new TypeAInstruction(
                     48,
@@ -518,9 +522,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                     0,
                     TemporaryRegister,
                     AcumulatorRegister));
-
-            print(
-                moveLowToHigh(AcumulatorRegister, SwapRegister));
         }
         break;
 
