@@ -1,6 +1,7 @@
 #include "mifgenerator.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "bytes.h"
 
 MifGenerator::MifGenerator()
@@ -94,4 +95,13 @@ void MifGenerator::printSize(int codeSize, int place)
                      size.to_string(),
                      "size = " +
                          std::to_string(codeSize) + "\n");
+}
+
+void MifGenerator::printOSSize(int codeSize, int place)
+{
+    Bytes size = Bytes(codeSize);
+    updateGreatestLine(place);
+    printLine("    " + std::to_string(place) +
+              " : " + size.to_string() +
+              "; -- size: " + std::to_string(codeSize) + "\n");
 }

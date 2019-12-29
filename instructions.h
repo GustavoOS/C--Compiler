@@ -13,7 +13,10 @@ enum Registers : int
     SnapshotPointer,
     ReturnAddressRegister,
     SystemCallRegister,
-    SwapRegister
+    StoredSpecReg,
+    LinkRegister = 13,
+    StackPointer,
+    ProgramCounter
 };
 
 enum ConditionCodes
@@ -78,6 +81,11 @@ Instruction *copySP(Registers reg);
 Instruction *extendZero(Registers reg);
 Instruction *rightShiftImmediate(Registers, int);
 Instruction *branchImmediate(ConditionCodes, int);
+Instruction *leftShiftImmediate(Registers, int);
+Instruction *addImmediate(Registers, int);
+Instruction *subtractImmediate(Registers, int);
+Instruction *signExtendHW(Registers);
+Instruction *interrupt();
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);

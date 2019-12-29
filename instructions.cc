@@ -111,6 +111,26 @@ Instruction *rightShiftImmediate(Registers reg, int immediate)
     return new TypeAInstruction(2, "LSR", immediate, reg, reg);
 }
 
+Instruction *leftShiftImmediate(Registers reg, int number)
+{
+    return new TypeAInstruction(1, "LSL", number, reg, reg);
+}
+
+Instruction *addImmediate(Registers reg, int number)
+{
+    return new TypeDInstruction(10, "ADD", reg, number);
+}
+
+Instruction *subtractImmediate(Registers reg, int number)
+{
+    return new TypeDInstruction(11, "SUB", reg, number);
+}
+
+Instruction *signExtendHW(Registers reg)
+{
+    return new TypeEInstruction(59, "SXTH", reg, reg);
+}
+
 Instruction *moveHighToLow(Registers low, Registers high)
 {
     return new TypeEInstruction(
@@ -143,6 +163,11 @@ Instruction *copySP(Registers reg)
                                 "ADD",
                                 reg,
                                 0);
+}
+
+Instruction *interrupt()
+{
+    return new TypeAInstruction(72, "SWI", 0, 0, 0);
 }
 
 Instruction *halt()
@@ -179,7 +204,7 @@ BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
 {
     tolabel = gotolabel;
     firstByte = loadImediateToRegister(TemporaryRegister, 0);
-    secondByte = loadImediateToRegister(AcumulatorRegister, 0);
+    secondByte = addImmediate(TemporaryRegister, 0);
     branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
 }
 
@@ -442,6 +467,7 @@ std::vector<std::string> opcode =
         "1101", // 73
         "1110", // 74
         "1110", // 75
+        "1011"  // 76
 };
 
 std::map<int, int> opMap = {
@@ -538,7 +564,7 @@ std::map<int, std::string> funct2 = {
     {69, "1110"},
     {70, "1110"},
     {71, "1110"},
-};
+    {76, "0000"}};
 
 std::map<int, std::string> funct1 = {
     {4, "00"},
@@ -579,6 +605,7 @@ std::map<int, std::string> funct1 = {
     {45, "01"},
     {46, "10"},
     {47, "11"},
+    {58, "00"},
     {59, "00"},
     {60, "01"},
     {61, "10"},
@@ -591,7 +618,8 @@ std::map<int, std::string> funct1 = {
     {68, "00"},
     {69, "00"},
     {70, "01"},
-    {71, "10"}};
+    {71, "10"},
+    {76, "01"}};
 
 std::string Instruction::getOpCode(int id)
 {
@@ -633,8 +661,11 @@ std::string printRegister(int reg)
         return "$RA";
     case SnapshotPointer:
         return "$XP";
-    case SwapRegister:
-        return "$SR";
+    case StoredSpecReg:
+        return "$SXR";
+    case LinkRegister:
+        return "$LR";
+    default:
+        return "!UNKNOWN!";
     }
-    return "!UNKNOWN!";
 }

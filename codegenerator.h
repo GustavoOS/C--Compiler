@@ -38,22 +38,28 @@ private:
     void print(Instruction *instruction);
     void generateCode(TreeNode *node);
     void createHeader();
+    void createOSHeader();
+    void createBIOSHeader();
     void createFooter();
     void generateCodeForAnyNode(TreeNode *);
     void generateCodeForStmtNode(TreeNode *node);
     void generateCodeForExprNode(TreeNode *node);
     void generateOperationCode(TreeNode *);
+    void generateRegisterOperation(TreeNode *);
+    void generateOptimizedOperation(TreeNode *);
     void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode *child = NULL);
     void generateCodeForIf(TreeNode * node);
     void generateCodeForIfElse(TreeNode * node);
     void generateCodeForPop(Registers reg);
     void registerLabelInstruction(std::string label, Instruction *Instruction);
-    void generateCodeForConst(int);
+    void generateCodeForConst(int, Registers);
 
     void mountFileStructure();
     void mountUncompressedProgram();
 
     void fetchVarOffset(TreeNode *node, Registers reg);
+    int fetchVarOffsetAsInteger(TreeNode * node);
+    int fetchVarOffsetByName(std::string variable, std::string scope);
     void loadVariable(TreeNode *node, Registers reg);
     void printLabelNop(std::string);
 
@@ -67,6 +73,7 @@ private:
     void buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode);
     void jumpAndLink(std::string);
     void goToApplication();
+    void setOSVariables();
 
     void insertIndexInsideEveryInstruction();
     void printEveryLabelLink();

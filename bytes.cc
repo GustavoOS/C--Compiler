@@ -19,6 +19,14 @@ int Bytes::getNthByte(int nthByte)
     return (int)partialNumber.to_ulong();
 }
 
+int Bytes::findFirstByteIndex()
+{
+    for (int i = 0; i < 4; i++)
+        if (getNthByte(i) != 0)
+            return i;
+    return 3;
+}
+
 std::string getVal5Bits(int val)
 {
     std::bitset<5> bs(val);
