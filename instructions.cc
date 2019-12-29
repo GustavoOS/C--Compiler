@@ -121,6 +121,11 @@ Instruction *addImmediate(Registers reg, int number)
     return new TypeDInstruction(10, "ADD", reg, number);
 }
 
+Instruction *subtractImmediate(Registers reg, int number)
+{
+    return new TypeDInstruction(11, "SUB", reg, number);
+}
+
 Instruction *signExtendHW(Registers reg)
 {
     return new TypeEInstruction(59, "SXTH", reg, reg);

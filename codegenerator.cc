@@ -555,20 +555,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
     {
     case OpK:
     {
-
-        generateCode(node->child[0]);
-        print(pushAcumulator());
-
-        generateCode(node->child[1]);
-
-        print(
-            moveLowToLowRegister(
-                AcumulatorRegister,
-                TemporaryRegister));
-
-        generateCodeForPop(AcumulatorRegister);
-
-        generateOperationCode(node);
+        generateOptimizedOperation(node);
     }
     break;
     case ConstK:
@@ -602,6 +589,43 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         break;
     }
 }
+
+void CodeGenerator::generateOptimizedOperation(TreeNode *node)
+{
+    TreeNode *rightSon = node->child[1];
+    if (rightSon->nodekind != ExpK ||
+        rightSon->kind.stmt != ConstK ||
+        rightSon->attr.val > 255)
+    {
+        generateRegisterOperation(node);
+        return;
+    }
+    generateCode(node->child[0]);
+    switch (node->attr.op)
+    {
+    case PLUS:
+        print(addImmediate(AcumulatorRegister, rightSon->attr.val));
+        break;
+    case MINUS:
+        print(subtractImmediate(AcumulatorRegister, rightSon->attr.val));
+        break;
+    default:
+        generateRegisterOperation(node);
+        return;
+    }
+    setDebugName("OPTIMIZED OPERATION");
+}
+
+void CodeGenerator::generateRegisterOperation(TreeNode *node)
+{
+    generateCode(node->child[1]);
+    print(pushAcumulator());
+    generateCode(node->child[0]);
+    generateCodeForPop(TemporaryRegister);
+    generateOperationCode(node);
+    setDebugName("Register Operation");
+}
+
 void CodeGenerator::generateOperationCode(TreeNode *node)
 {
     if (node == NULL)
@@ -968,7 +992,7 @@ void CodeGenerator::mountUncompressedProgram()
 {
     if (isOS)
     {
-        mif.printOSSize((int) code.size(), programOffset);
+        mif.printOSSize(code.size(), programOffset);
         programOffset++;
     }
     for (Instruction *inst : code)

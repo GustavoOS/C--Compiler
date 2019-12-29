@@ -45,6 +45,8 @@ private:
     void generateCodeForStmtNode(TreeNode *node);
     void generateCodeForExprNode(TreeNode *node);
     void generateOperationCode(TreeNode *);
+    void generateRegisterOperation(TreeNode *);
+    void generateOptimizedOperation(TreeNode *);
     void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode *child = NULL);
     void generateCodeForIf(TreeNode * node);
     void generateCodeForIfElse(TreeNode * node);

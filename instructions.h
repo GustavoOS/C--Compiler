@@ -83,6 +83,7 @@ Instruction *rightShiftImmediate(Registers, int);
 Instruction *branchImmediate(ConditionCodes, int);
 Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
+Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt();
 
