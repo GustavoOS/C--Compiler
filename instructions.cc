@@ -656,8 +656,6 @@ std::string printRegister(int reg)
         return "$RA";
     case SnapshotPointer:
         return "$XP";
-    case SwapRegister:
-        return "$SR";
     case StoredSpecReg:
         return "$SXR";
     case LinkRegister:

@@ -13,7 +13,6 @@ enum Registers : int
     SnapshotPointer,
     ReturnAddressRegister,
     SystemCallRegister,
-    SwapRegister,
     StoredSpecReg,
     LinkRegister = 13,
     StackPointer,
