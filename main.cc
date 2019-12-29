@@ -48,9 +48,9 @@ int TraceCode = TRUE;
 int Error = FALSE;
 
 // Mark True for OS mode development
-bool isOperatingSystem = true;
+bool isOperatingSystem = false;
 bool isBios = false;
-bool isCompressedProgram = false;
+bool isCompressedProgram = true;
 
 int PROGRAM_OFFSET = 0;
 
