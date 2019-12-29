@@ -917,7 +917,10 @@ void CodeGenerator::generateRunTimeSystem()
     createFooter();
     if (!isBios && !isOS)
         print(loadImediateToRegister(SystemCallRegister, 2));
-    print(interrupt());
+    if (!isBios)
+        print(interrupt());
+    else
+        print(halt());
 }
 
 void CodeGenerator::destroyGlobalAR()
