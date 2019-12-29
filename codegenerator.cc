@@ -372,7 +372,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "fun_readFromMemory") &&
             (FunctionName != "fun_writeIntoMemory") &&
             (FunctionName != "fun_extractFirstHW") &&
-            (FunctionName != "fun_extractSecondHW"))
+            (FunctionName != "fun_extractSecondHW") &&
+            (FunctionName != "fun_mod"))
         {
             if (shouldShowVisitingMessages)
                 hr(node->attr.name);
@@ -464,6 +465,16 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             generateCode(arg);
             print(extendZero(AcumulatorRegister));
         }
+        else if (FunctionName == "fun_mod")
+        {
+            generateCodeForAnyNode(arg);
+            print(pushAcumulator()); //Push b arg
+            arg = arg->sibling;
+            generateCodeForAnyNode(arg);           //a in Acumulator
+            generateCodeForPop(TemporaryRegister); //b in Temporary Register
+            print(new TypeEInstruction(65, "MOD", TemporaryRegister, AcumulatorRegister));
+        }
+
         else
             generateCodeForFunctionActivation(node);
     }

@@ -14,7 +14,8 @@ void LibraryIncluder::buildLibrary()
     libraryString += "void writeIntoMemory(int address, int data){}\n";
     libraryString += "int extractFirstHW(int number){}\n";
     libraryString += "int extractSecondHW(int number){}\n";
-    libSize+=6;
+    libraryString += "int mod(int a, int b){}\n";
+    libSize+=7;
 }
 
 FILE *LibraryIncluder::getFinalFile()
