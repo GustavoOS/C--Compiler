@@ -720,6 +720,7 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(SnapshotPointer));                  // SP
     print(moveHighToLow(TemporaryRegister, LinkRegister)); // PC
     print(pushRegister(TemporaryRegister));
+    print(nop());
     print(moveHighToLow(TemporaryRegister, StoredSpecReg));
     print(pushRegister(TemporaryRegister)); //SpecReg
     print(pushRegister(SystemCallRegister));
