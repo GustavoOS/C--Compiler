@@ -403,10 +403,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             generateCode(arg);
             if (!isOS && !isBios)
-            {
-                print(loadImediateToRegister(SystemCallRegister, 1));
-                print(interrupt());
-            }
+                print(interrupt(1));
             print(pause());
             print(
                 new TypeEInstruction(
@@ -420,10 +417,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             generateCode(arg);
             if (!isOS && !isBios)
-            {
-                print(loadImediateToRegister(SystemCallRegister, 1));
-                print(interrupt());
-            }
+                print(interrupt(1));
             printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
         }
@@ -752,7 +746,6 @@ void CodeGenerator::createFooter()
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
     print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
-    goToApplication();
 }
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
@@ -927,12 +920,7 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-    if (!isBios && !isOS)
-        print(loadImediateToRegister(SystemCallRegister, 2));
-    if (!isBios)
-        print(interrupt());
-    else
-        print(halt());
+    print(interrupt(2));
 }
 
 void CodeGenerator::destroyGlobalAR()
@@ -941,11 +929,6 @@ void CodeGenerator::destroyGlobalAR()
     int globalCount = ds.getSize("global");
     for (int i = 0; i < globalCount + 1; i++)
         generateCodeForPop(TemporaryRegister);
-}
-
-void CodeGenerator::goToApplication()
-{
-    print(interrupt());
 }
 
 void CodeGenerator::generateBinaryCode(std::string outputFile)
