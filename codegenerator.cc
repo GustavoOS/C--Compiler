@@ -920,7 +920,7 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-    print(interrupt(2));
+    print(interrupt(isBios ? 3 : 2));
 }
 
 void CodeGenerator::destroyGlobalAR()
