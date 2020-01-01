@@ -39,7 +39,6 @@ private:
     void generateCode(TreeNode *node);
     void createHeader();
     void createOSHeader();
-    void createBIOSHeader();
     void createFooter();
     void generateCodeForAnyNode(TreeNode *);
     void generateCodeForStmtNode(TreeNode *node);

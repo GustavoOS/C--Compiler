@@ -692,8 +692,6 @@ void CodeGenerator::createHeader()
     setDebugName("begin Header");
     if (isOS)
         createOSHeader();
-    if (isBios)
-        createBIOSHeader();
 
     generateRunTimeSystem();
 
@@ -706,6 +704,7 @@ void CodeGenerator::createOSHeader()
 {
     print(new TypeEInstruction(58, "CPXR", 0, StoredSpecReg));
     setDebugName("Create OS header");
+    print(pushRegister(HeapArrayRegister));
     print(pushAcumulator());
     print(pushRegister(TemporaryRegister));
     print(pushRegister(FramePointer));
@@ -720,11 +719,6 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(SystemCallRegister));
     print(copySP(TemporaryRegister));
     setDebugName("OS HEADER END");
-}
-
-void CodeGenerator::createBIOSHeader()
-{
-    generateCodeForConst(8192, HeapArrayRegister);
 }
 
 void CodeGenerator::createFooter()
@@ -745,6 +739,7 @@ void CodeGenerator::createFooter()
     generateCodeForPop(FramePointer);
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
+    generateCodeForPop(HeapArrayRegister);
     print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
 }
 
@@ -920,7 +915,7 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-    print(interrupt(isBios ? 3 : 2));
+    print(interrupt(isBios ? 4 : 2));
 }
 
 void CodeGenerator::destroyGlobalAR()
