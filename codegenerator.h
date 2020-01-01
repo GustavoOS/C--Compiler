@@ -72,7 +72,6 @@ private:
     void destroyGlobalAR();
     void buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode);
     void jumpAndLink(std::string);
-    void goToApplication();
     void setOSVariables();
 
     void insertIndexInsideEveryInstruction();

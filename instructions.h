@@ -85,7 +85,7 @@ Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
-Instruction *interrupt();
+Instruction *interrupt(int systemCall);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
