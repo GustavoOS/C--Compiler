@@ -692,7 +692,8 @@ void CodeGenerator::createHeader()
     setDebugName("begin Header");
     if (isOS)
         createOSHeader();
-
+    if (isBios)
+        createBIOSHeader();
     generateRunTimeSystem();
 
     if (shouldShowVisitingMessages)
@@ -719,6 +720,12 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(SystemCallRegister));
     print(copySP(TemporaryRegister));
     setDebugName("OS HEADER END");
+}
+
+void CodeGenerator::createBIOSHeader()
+{
+    if (osArrayPlace > 0)
+        generateCodeForConst(osArrayPlace, HeapArrayRegister);
 }
 
 void CodeGenerator::createFooter()

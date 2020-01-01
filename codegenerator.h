@@ -33,12 +33,14 @@ private:
     MifGenerator mif;
     bool isBios, isCompressedProgram, isOS;
     int memorySize;
+    int osArrayPlace = 0;
 
     //Private methods
     void print(Instruction *instruction);
     void generateCode(TreeNode *node);
     void createHeader();
     void createOSHeader();
+    void createBIOSHeader();
     void createFooter();
     void generateCodeForAnyNode(TreeNode *);
     void generateCodeForStmtNode(TreeNode *node);
