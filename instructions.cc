@@ -165,7 +165,7 @@ Instruction *copySP(Registers reg)
                                 0);
 }
 
-Instruction *interrupt(int systemCall)
+Instruction *interrupt(SystemCalls systemCall)
 {
     return new TypeAInstruction(72, "SWI", systemCall, 0, 0);
 }

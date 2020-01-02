@@ -41,6 +41,15 @@ enum ConditionCodes
     CC = 3  //Unsigned Lower THan
 };
 
+enum SystemCalls
+{
+    Preemption = 0,
+    IORequest,
+    ProgramCompletion,
+    UserPreemption,
+    BiosCompletion
+};
+
 std::string printRegister(int reg);
 
 class Instruction
@@ -85,7 +94,7 @@ Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
-Instruction *interrupt(int systemCall);
+Instruction *interrupt(SystemCalls systemCall);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);

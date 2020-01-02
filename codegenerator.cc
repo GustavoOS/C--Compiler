@@ -403,7 +403,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             generateCode(arg);
             if (!isOS && !isBios)
-                print(interrupt(1));
+                print(interrupt(IORequest));
             print(pause());
             print(
                 new TypeEInstruction(
@@ -417,7 +417,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             generateCode(arg);
             if (!isOS && !isBios)
-                print(interrupt(1));
+                print(interrupt(IORequest));
             printRegister(AcumulatorRegister);
             setDebugName("OUTPUT");
         }
@@ -920,7 +920,7 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-    print(interrupt(isBios ? 3 : 2));
+    print(interrupt(isBios ? BiosCompletion : ProgramCompletion));
 }
 
 void CodeGenerator::destroyGlobalAR()
