@@ -349,11 +349,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case ReturnK:
     {
-
         if (node->child[0] != NULL)
             generateCode(node->child[0]);
-        else
-            print(loadImmediateToRegister(AcumulatorRegister, 0));
 
         generateCodeForBranch("end_" + node->scope, AL);
     }
