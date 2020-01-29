@@ -286,10 +286,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 AcumulatorRegister,
                 HeapArrayRegister));
 
-        print(
-            loadImediateToRegister(
-                TemporaryRegister,
-                node->attr.val));
+        print(loadImmediateToRegister(TemporaryRegister, node->attr.val));
         print(
             new TypeAInstruction(
                 1,
@@ -356,8 +353,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         if (node->child[0] != NULL)
             generateCode(node->child[0]);
         else
-            print(
-                loadImediateToRegister(AcumulatorRegister, 0));
+            print(loadImmediateToRegister(AcumulatorRegister, 0));
 
         generateCodeForBranch("end_" + node->scope, AL);
     }
@@ -673,13 +669,7 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
         break;
 
     default:
-        print(
-            new TypeEInstruction(
-                22,
-                "CMP",
-                TemporaryRegister,
-                AcumulatorRegister));
-
+        print(compare(TemporaryRegister, AcumulatorRegister));
         break;
     }
 }
@@ -778,7 +768,7 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
     BucketList record = getRecordFromSymbolTable(node);
-    print(loadImediateToRegister(reg, record->memloc));
+    print(loadImmediateToRegister(reg, record->memloc));
 }
 
 int CodeGenerator::fetchVarOffsetAsInteger(TreeNode *node)
@@ -835,7 +825,7 @@ void CodeGenerator::generateGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(loadImediateToRegister(AcumulatorRegister, 0));
+    print(loadImmediateToRegister(AcumulatorRegister, 0));
     setDebugName("begin GlobalAR");
     for (int i = 0; i < globalCount + 1; i++)
         print(pushAcumulator());
@@ -883,7 +873,7 @@ void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode 
 {
     if (localVariableCount > 0)
     {
-        print(loadImediateToRegister(AcumulatorRegister, 0));
+        print(loadImmediateToRegister(AcumulatorRegister, 0));
 
         // Inserting the local vars into the AR
         for (int i = 0; i < localVariableCount; ++i)
@@ -1049,7 +1039,7 @@ void CodeGenerator::generateCodeForConst(int value, Registers reg)
     Bytes number = Bytes(value);
     int nulls = 0;
     int current = number.findFirstByteIndex();
-    print(loadImediateToRegister(reg, number.getNthByte(current)));
+    print(loadImmediateToRegister(reg, number.getNthByte(current)));
     setDebugName("begin ConstK");
     for (int i = current + 1; i < 4; i++)
     {

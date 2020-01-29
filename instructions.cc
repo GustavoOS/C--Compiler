@@ -53,7 +53,7 @@ Instruction *pushRegister(Registers reg)
         reg);
 }
 
-Instruction *loadImediateToRegister(Registers regis, int number)
+Instruction *loadImmediateToRegister(Registers regis, int number)
 {
     return new TypeDInstruction(
         8,
@@ -170,6 +170,15 @@ Instruction *interrupt(SystemCalls systemCall)
     return new TypeAInstruction(72, "SWI", systemCall, 0, 0);
 }
 
+Instruction *compare(Registers a, Registers b)
+{
+    return new TypeEInstruction(
+        22,
+        "CMP",
+        a,
+        b);
+}
+
 Instruction *halt()
 {
     return new TypeDInstruction(
@@ -203,7 +212,7 @@ std::string Instruction::to_string_with_label()
 BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
 {
     tolabel = gotolabel;
-    firstByte = loadImediateToRegister(TemporaryRegister, 0);
+    firstByte = loadImmediateToRegister(TemporaryRegister, 0);
     secondByte = addImmediate(TemporaryRegister, 0);
     branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
 }

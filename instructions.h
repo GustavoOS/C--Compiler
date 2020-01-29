@@ -43,7 +43,7 @@ enum ConditionCodes
 
 enum SystemCalls
 {
-    Preemption = 0,
+    StandardPreemptionFlow = 0,
     IORequest,
     ProgramCompletion,
     UserPreemption,
@@ -77,7 +77,7 @@ public:
 };
 
 Instruction *nop();
-Instruction *loadImediateToRegister(Registers regis, int number);
+Instruction *loadImmediateToRegister(Registers regis, int number);
 Instruction *pushAcumulator();
 Instruction *pushRegister(Registers reg);
 Instruction *popRegister(Registers reg);
@@ -95,6 +95,7 @@ Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt(SystemCalls systemCall);
+Instruction * compare(Registers a, Registers b);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
