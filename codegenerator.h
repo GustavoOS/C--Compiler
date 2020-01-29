@@ -80,6 +80,8 @@ private:
 
     void printRegister(Registers reg);
     void pushArguments(int argumentCount, TreeNode *argumentNode);
+
+    SystemCalls getFooterSystemCall();
 };
 
 #endif

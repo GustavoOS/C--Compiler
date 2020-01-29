@@ -910,7 +910,12 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-    print(interrupt(isBios ? BiosCompletion : ProgramCompletion));
+    print(interrupt(getFooterSystemCall()));
+}
+
+SystemCalls CodeGenerator::getFooterSystemCall()
+{
+    return isOS ? StandardPreemptionFlow : isBios ? BiosCompletion : ProgramCompletion;
 }
 
 void CodeGenerator::destroyGlobalAR()
