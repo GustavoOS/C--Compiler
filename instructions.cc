@@ -366,7 +366,7 @@ TypeFInstruction::TypeFInstruction(
 std::string TypeFInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(condition) + " " +
+           name + " " + getConditionString((ConditionCodes)condition) + " " +
            printRegister(regd);
 }
 
@@ -390,7 +390,7 @@ TypeGInstruction::TypeGInstruction(
 std::string TypeGInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(condition) + " " +
+           name + " " + getConditionString((ConditionCodes)condition) + " " +
            std::to_string(offset) + " :" + label;
 }
 
@@ -398,6 +398,26 @@ std::string TypeGInstruction::to_binary()
 {
     return getOpCode(id) + getVal4Bits(condition) + getVal8BitsSignal(offset);
 }
+
+std::vector<std::string> conditionNames =
+    {
+        "EQ",    //Equal
+        "NE",    //NOT EQUAL
+        "HS/CS", //Unsigned Greater than or equal
+        "LO/CC", //Unsigned Lower then
+        "MI",    //Negative
+        "PL",    //Positive or zero
+        "VS",    //Overflow
+        "VC",    //No overflow
+        "HI",    //Unsigned greater than
+        "LS",    //Unsgined lower than or equal
+        "GE",    //Signed greater than or equal
+        "LT",    //Signed lower than
+        "GT",    //Signed greater than
+        "LE",    //Signed lower than
+        "AL",    //Always
+        "AB",    //Absolute, always
+};
 
 std::vector<std::string> opcode =
     {
@@ -633,6 +653,11 @@ std::map<int, std::string> funct1 = {
 std::string Instruction::getOpCode(int id)
 {
     return opcode[id - 1];
+}
+
+std::string Instruction::getConditionString(ConditionCodes condition)
+{
+    return conditionNames[condition];
 }
 
 std::string Instruction::getOpBit(int id)

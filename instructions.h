@@ -74,6 +74,7 @@ public:
     static std::string getOpBit(int id);
     static std::string getFunct2(int id);
     static std::string getFunct1(int id);
+    static std::string getConditionString(ConditionCodes condition);
 };
 
 Instruction *nop();
