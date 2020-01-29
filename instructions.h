@@ -10,11 +10,11 @@ enum Registers : int
     TemporaryRegister,
     FramePointer,
     GlobalPointer,
-    SnapshotPointer,
+    UserSPKeeper,
     ReturnAddressRegister,
     SystemCallRegister,
     StoredSpecReg,
-    LinkRegister = 13,
+    PCKeeper = 13,
     StackPointer,
     ProgramCounter
 };

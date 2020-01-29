@@ -668,12 +668,12 @@ std::string printRegister(int reg)
         return "$SC";
     case ReturnAddressRegister:
         return "$RA";
-    case SnapshotPointer:
-        return "$XP";
+    case UserSPKeeper:
+        return "$USPK";
     case StoredSpecReg:
         return "$SXR";
-    case LinkRegister:
-        return "$LR";
+    case PCKeeper:
+        return "$PCK";
     default:
         return "!UNKNOWN!";
     }

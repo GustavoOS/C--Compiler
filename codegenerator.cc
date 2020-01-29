@@ -698,8 +698,8 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(FramePointer));
     print(pushRegister(GlobalPointer));
     print(pushRegister(ReturnAddressRegister));
-    print(pushRegister(SnapshotPointer));                  // SP
-    print(moveHighToLow(TemporaryRegister, LinkRegister)); // PC
+    print(pushRegister(UserSPKeeper));
+    print(moveHighToLow(TemporaryRegister, PCKeeper));
     print(pushRegister(TemporaryRegister));
     print(nop());
     print(moveHighToLow(TemporaryRegister, StoredSpecReg));
@@ -725,8 +725,8 @@ void CodeGenerator::createFooter()
     generateCodeForPop(TemporaryRegister);
     print(moveLowToHigh(TemporaryRegister, StoredSpecReg));
     generateCodeForPop(TemporaryRegister);
-    print(moveLowToHigh(TemporaryRegister, LinkRegister));
-    generateCodeForPop(SnapshotPointer);
+    print(moveLowToHigh(TemporaryRegister, PCKeeper));
+    generateCodeForPop(UserSPKeeper);
     generateCodeForPop(ReturnAddressRegister);
     generateCodeForPop(GlobalPointer);
     generateCodeForPop(FramePointer);
