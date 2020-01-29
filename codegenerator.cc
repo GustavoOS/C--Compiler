@@ -721,7 +721,7 @@ void CodeGenerator::createFooter()
     if (!isOS)
         return;
     generateCodeForPop(SystemCallRegister);
-    print(loadImediateToRegister(SystemCallRegister, 0));
+    print(loadImmediateToRegister(SystemCallRegister, 0));
     generateCodeForPop(TemporaryRegister);
     print(moveLowToHigh(TemporaryRegister, StoredSpecReg));
     generateCodeForPop(TemporaryRegister);
