@@ -95,7 +95,7 @@ Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt(SystemCalls systemCall);
-Instruction * compare(Registers a, Registers b);
+Instruction *compare(Registers a, Registers b);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
