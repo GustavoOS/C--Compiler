@@ -308,25 +308,26 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     {
         //Label names
         std::string while_label = "while_" + std::to_string(node->attr.val);
-        std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
         TreeNode *condition = node->child[0];
         TreeNode *body = node->child[1];
 
-        printLabelNop(while_label);
-        setDebugName(while_label);
-
-        generateCodeForBranch( // If cond, then go to do_label
-            do_label,
-            translateCondition(condition->attr.op),
-            condition);
+        int firstWhileInstrIndex = code.size();
+        generateCode(condition);
+        registerLabelInstruction(while_label, code[firstWhileInstrIndex]);
+        code[firstWhileInstrIndex]->debugname = while_label;
+        Instruction *branch = branchImmediate(translateCondition(condition->attr.op), 9);
+        print(branch);
+        int size = code.size();
+        branch->debugname = while_label + " branch";
 
         generateCodeForBranch( // Else, go to while_end_label
             while_end_label,
             AL);
 
-        printLabelNop(do_label); // Goes here if cond is true
+        size = code.size() - size + 1;
+        branch->offset = size;
 
         generateCode(body);
 
