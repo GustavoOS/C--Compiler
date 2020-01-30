@@ -791,14 +791,14 @@ void hr(std::string middle)
 void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
     DataSection ds;
-    int functionVariables = ds.getSize(node->attr.name);
+    int varCount = ds.getSize(node->attr.name);
 
-    //Return redirects to here
     std::string label = "end_" + node->attr.name;
-    printLabelNop(label);
-
     generateCodeForPop(ReturnAddressRegister);
-    for (int recordInAR = 0; recordInAR < functionVariables; recordInAR++)
+    registerLabelInstruction(label, code.back());
+    setDebugName(label);
+
+    for (int delVars = 0; delVars < varCount; delVars++)
         generateCodeForPop(TemporaryRegister);
 
     generateCodeForPop(FramePointer);
