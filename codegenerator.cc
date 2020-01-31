@@ -878,14 +878,9 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
 void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
 {
-    if (localVariableCount > 0)
-    {
-        print(loadImmediateToRegister(AcumulatorRegister, 0));
-
-        // Inserting the local vars into the AR
-        for (int i = 0; i < localVariableCount; ++i)
-            print(pushAcumulator());
-    }
+    // Inserting the local vars into the AR
+    for (int i = 0; i < localVariableCount; ++i)
+        print(pushAcumulator());
 
     pushArguments(argumentCount, argumentNode);
 }
