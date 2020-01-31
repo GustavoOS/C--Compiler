@@ -10,9 +10,9 @@
 #include "bytes.h"
 #include "instructions.h"
 
-ConditionCodes translateCondition(TokenType operation)
+ConditionCodes translateCondition(TreeNode *conditionNode)
 {
-
+    TokenType operation = conditionNode->attr.op;
     switch (operation)
     {
     case LESSER:
@@ -215,8 +215,7 @@ void CodeGenerator::generateCodeForIf(TreeNode *node)
                          std::to_string(node->attr.val);
     TreeNode *condition = node->child[0];
     TreeNode *body = node->child[1];
-    Instruction *branch =
-        branchImmediate(translateCondition(condition->attr.op), 9);
+    Instruction *branch = branchImmediate(translateCondition(condition), 5);
     generateCode(condition);
     print(branch);
     int size = code.size();
@@ -234,7 +233,7 @@ void CodeGenerator::generateCodeForIfElse(TreeNode *node)
     TreeNode *condition = node->child[0];
     TreeNode *body = node->child[1], *elseBody = node->child[2];
     generateCodeForBranch(if_true_label_,
-                          translateCondition(condition->attr.op),
+                          translateCondition(condition),
                           condition);
 
     generateCode(elseBody);
@@ -317,7 +316,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         generateCode(condition);
         registerLabelInstruction(while_label, code[firstWhileInstrIndex]);
         code[firstWhileInstrIndex]->debugname = while_label;
-        Instruction *branch = branchImmediate(translateCondition(condition->attr.op), 9);
+        Instruction *branch = branchImmediate(translateCondition(condition), 9);
         print(branch);
         int size = code.size();
         branch->debugname = while_label + " branch";
@@ -344,7 +343,17 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         if (node->child[2])
             generateCodeForIfElse(node);
         else
-            generateCodeForIf(node);
+        {
+            TreeNode *condition = node->child[0];
+            TreeNode *body = node->child[1];
+            if ((body != NULL) && (body->kind.stmt == ReturnK) && (body->child[0] == NULL))
+            {
+                generateCodeForBranch("end_" + body->scope, translateCondition(condition), condition);
+                setDebugName("if_return to end_" + body->scope);
+            }
+            else
+                generateCodeForIf(node);
+        }
     }
     break;
 
