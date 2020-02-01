@@ -77,7 +77,6 @@ void CodeGenerator::generate(TreeNode *node)
     generateCode(node);
 }
 
-
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 {
     if (node == NULL)
