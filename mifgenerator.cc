@@ -97,7 +97,7 @@ void MifGenerator::printSize(int codeSize, int place)
                          std::to_string(codeSize) + "\n");
 }
 
-void MifGenerator::printOSSize(int codeSize, int place)
+void MifGenerator::printUncompressedSize(int codeSize, int place)
 {
     Bytes size = Bytes(codeSize);
     updateGreatestLine(place);

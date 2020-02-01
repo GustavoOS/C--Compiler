@@ -27,6 +27,8 @@
 #include "analyze.h"
 #if !_CODE_GENERATOR_
 #include "codegenerator.h"
+#include "binarygenerator.h"
+#include "linker.h"
 #endif
 #endif
 #endif
@@ -56,96 +58,107 @@ int PROGRAM_OFFSET = 0;
 
 int main(int argc, char *argv[])
 {
-  TreeNode *syntaxTree;
-  std::string pgm; /* source code file name */
-  std::string outputFile = "output.txt";
-  if (argc != 2 && argc != 3)
-  {
-    fprintf(stderr, "usage: %s <filename> <output>\n", argv[0]);
-    exit(1);
-  }
+    TreeNode *syntaxTree;
+    std::string pgm; /* source code file name */
+    std::string outputFile = "output.txt";
+    if (argc != 2 && argc != 3)
+    {
+        fprintf(stderr, "usage: %s <filename> <output>\n", argv[0]);
+        exit(1);
+    }
 
-  if (argc == 3)
-    outputFile = argv[2];
+    if (argc == 3)
+        outputFile = argv[2];
 
-  pgm = std::string(argv[1]);
-  if (pgm.find('.') == std::string::npos)
-    pgm = pgm + ".c";
-  originalSource = fopen(pgm.c_str(), "r");
-  if (originalSource == NULL)
-  {
-    fprintf(stderr, "File %s not found\n", pgm.c_str());
-    exit(1);
-  }
-  fclose(originalSource);
-  listing = stdout; /* send listing to screen */
-  LibraryIncluder includer = LibraryIncluder(pgm);
-  source = includer.getFinalFile();
-  lineno = -includer.libSize;
-  // lineno = 0;
-  fprintf(listing, "\nC- COMPILATION: %s\n", pgm.c_str());
+    pgm = std::string(argv[1]);
+    if (pgm.find('.') == std::string::npos)
+        pgm = pgm + ".c";
+    originalSource = fopen(pgm.c_str(), "r");
+    if (originalSource == NULL)
+    {
+        fprintf(stderr, "File %s not found\n", pgm.c_str());
+        exit(1);
+    }
+    fclose(originalSource);
+    listing = stdout; /* send listing to screen */
+    LibraryIncluder includer = LibraryIncluder(pgm);
+    source = includer.getFinalFile();
+    lineno = -includer.libSize;
+    // lineno = 0;
+    fprintf(listing, "\nC- COMPILATION: %s\n", pgm.c_str());
 #if NO_PARSE
-  while (getToken() != ENDFILE)
-    ;
+    while (getToken() != ENDFILE)
+        ;
 #else
-  syntaxTree = parse();
-  if (TraceParse)
-  {
-    fprintf(listing, "\nSyntax tree:\n");
-    printTree(syntaxTree);
-  }
+    syntaxTree = parse();
+    if (TraceParse)
+    {
+        fprintf(listing, "\nSyntax tree:\n");
+        printTree(syntaxTree);
+    }
 #if !NO_ANALYZE
-  if (!Error)
-  {
+    if (Error)
+    {
+        fclose(source);
+        return 1;
+    }
+
     if (TraceAnalyze)
-      fprintf(listing, "\nBuilding Symbol Table...\n");
+        fprintf(listing, "\nBuilding Symbol Table...\n");
     buildSymtab(syntaxTree);
-  }
-  if (!Error)
-  {
+
+    if (Error)
+    {
+        fclose(source);
+        return 1;
+    }
+
     if (TraceAnalyze)
-      fprintf(listing, "\nChecking for main Function...\n");
+        fprintf(listing, "\nChecking for main Function...\n");
     mainVerify();
-  }
-  if (!Error)
-  {
+
+    if (Error)
+    {
+        fclose(source);
+        return 1;
+    }
+
     if (TraceAnalyze)
-      fprintf(listing, "\nChecking Types...\n");
+        fprintf(listing, "\nChecking Types...\n");
     typeCheck(syntaxTree);
     if (TraceAnalyze)
-      fprintf(listing, "\nType Checking Finished\n");
-  }
-  if (!Error)
-  {
-    CodeGenerator cg = CodeGenerator(TraceCode,
-                                     PROGRAM_OFFSET);
-    cg.setMode(isBios, isCompressedProgram, isOperatingSystem);
+        fprintf(listing, "\nType Checking Finished\n");
+
+    if (Error)
+    {
+        fclose(source);
+        return 1;
+    }
+
+    CodeGenerator cg = CodeGenerator(TraceCode);
+    cg.setMode(isBios, isOperatingSystem);
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
     cg.generate(syntaxTree);
-    cg.linker();
-    cg.generateBinaryCode(outputFile);
-  }
-#if !NO_CODE
-  if (!Error)
-  {
-    char *codefile;
-    int fnlen = strcspn(pgm, ".");
-    codefile = (char *)calloc(fnlen + 4, sizeof(char));
-    strncpy(codefile, pgm, fnlen);
-    strcat(codefile, ".tm");
-    code = fopen(codefile, "w");
-    if (code == NULL)
-    {
-      printf("Unable to open %s\n", codefile);
-      exit(1);
-    }
-    codeGen(syntaxTree, codefile);
-    fclose(code);
-  }
+
+    (new Linker())
+        ->withCode(cg.getCode())
+        ->withDestMap(cg.getDestMap())
+        ->withOriginMap(cg.getOriginMap())
+        ->withOffset(PROGRAM_OFFSET)
+        ->link();
+
+    BinaryGenerator *bGenerator =
+        BinaryGeneratorFactory::generate(
+            isCompressedProgram,
+            isBios,
+            isOperatingSystem);
+    bGenerator->setFile(outputFile);
+    bGenerator->setOffset(PROGRAM_OFFSET);
+    bGenerator->run(cg.getCode());
+
 #endif
 #endif
-#endif
-  fclose(source);
-  return 0;
+    fclose(source);
+    return 0;
 }

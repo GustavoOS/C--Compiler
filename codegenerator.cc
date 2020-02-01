@@ -33,7 +33,7 @@ ConditionCodes translateCondition(TreeNode *conditionNode)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable, int programOffset)
+CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -43,15 +43,12 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset)
     mainActivation->attr.val = 0;
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
-    this->programOffset = programOffset;
 }
 
-void CodeGenerator::setMode(bool bios, bool compressed, bool os)
+void CodeGenerator::setMode(bool bios, bool os)
 {
     isBios = bios;
-    isCompressedProgram = compressed;
     isOS = os;
-    memorySize = isBios ? 512 : 16384;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -80,52 +77,6 @@ void CodeGenerator::generate(TreeNode *node)
     generateCode(node);
 }
 
-void CodeGenerator::linker()
-{
-    printEveryLabelLink();
-
-    insertIndexInsideEveryInstruction();
-
-    for (auto origin : labelOriginMap)
-    {
-        std::string label = origin.first;
-        for (BranchLabel *label_dest : origin.second)
-        {
-            int destinationAddress =
-                labelDestMap[label]->relativeAddress -
-                label_dest->branch->relativeAddress;
-            Bytes number = Bytes(destinationAddress);
-            label_dest->firstByte->immediate = number.getNthByte(2);
-            label_dest->secondByte->immediate = number.getNthByte(3);
-
-            // Prints
-            std::cout << "LINKER PRINTS\n";
-            std::cout << label << " -> " << label_dest->to_string() << "\n";
-            std::cout << "destinationAddress: " << destinationAddress << "\n";
-            std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
-            std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
-            std::cout << "branch position: " << label_dest->branch->relativeAddress + programOffset << "\n";
-            std::cout << "absolute position: " << labelDestMap[label]->relativeAddress + programOffset << "\n";
-        }
-    }
-}
-
-void CodeGenerator::insertIndexInsideEveryInstruction()
-{
-    int i = 0;
-    for (Instruction *inst : code)
-        inst->relativeAddress = i++;
-}
-
-void CodeGenerator::printEveryLabelLink()
-{
-    for (auto item : labelDestMap)
-    {
-        std::string label = item.first;
-        Instruction *label_dest = item.second;
-        std::cout << label << " -> " << label_dest->name << "\n";
-    }
-}
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
 {
@@ -237,13 +188,9 @@ void CodeGenerator::generateCodeForIfElse(TreeNode *node)
                           condition);
 
     generateCode(elseBody);
-
     generateCodeForBranch(if_end_label, AL);
-
     printLabelNop(if_true_label_);
-
     generateCode(body);
-
     printLabelNop(if_end_label);
 }
 
@@ -682,7 +629,6 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
 }
 
 //Headers and Footers
-
 void CodeGenerator::createHeader()
 {
     print(nop());
@@ -926,119 +872,6 @@ void CodeGenerator::destroyGlobalAR()
     int globalCount = ds.getSize("global");
     for (int i = 0; i < globalCount + 1; i++)
         generateCodeForPop(TemporaryRegister);
-}
-
-void CodeGenerator::generateBinaryCode(std::string outputFile)
-{
-    printf("\n\n +++++ Code generator! +++++ \n\n");
-
-    mif.open(outputFile, isBios, isCompressedProgram);
-
-    if (programOffset)
-        generateCodeToJumpToOS();
-
-    if (isCompressedProgram)
-        mountFileStructure();
-    else
-        mountUncompressedProgram();
-
-    mif.printMultipleEmptyPosition(memorySize);
-
-    mif.printFooter();
-    printf("\n\n Output saved on %s \n\n", outputFile.c_str());
-}
-
-void CodeGenerator::mountFileStructure()
-{
-    std::cout << "Compressed File\n";
-    int headerSize = 1;
-    int slotStart = 2060;
-
-    mif.printSize(code.size(), slotStart);
-
-    for (int i = 0; i < (int)code.size(); i += 2)
-    {
-        bool hasNext = (i + 1) < (int)code.size();
-        std::string leftInstr = code[i]->to_binary();
-        std::string rightInstr = hasNext
-                                     ? code[i + 1]->to_binary()
-                                     : "0000000000000000";
-        std::string debugText = code[i]->to_string();
-        if (hasNext)
-            debugText += " | " + code[i + 1]->to_string();
-
-        mif.printInstruction(slotStart + headerSize + ((int)i / 2),
-                             leftInstr + rightInstr,
-                             debugText);
-
-        if (!code[i]->debugname.empty())
-            mif.printDebugMsg(code[i]->debugname);
-        if (hasNext && (!code[i + 1]->debugname.empty()))
-            mif.printDebugMsg(code[i + 1]->debugname);
-
-        mif.jumpLine();
-    }
-}
-
-void CodeGenerator::mountUncompressedProgram()
-{
-    if (isOS)
-    {
-        mif.printOSSize(code.size(), programOffset);
-        programOffset++;
-    }
-    for (Instruction *inst : code)
-    {
-        std::string bin = inst->to_binary();
-        assert(bin.size() == 16);
-
-        if (!inst->debugname.empty())
-            printf("%s\n", inst->debugname.c_str());
-
-        printf("% 3d: %-22s => %s\n",
-               inst->relativeAddress,
-               inst->to_string().c_str(),
-               bin.c_str());
-
-        mif.printInstruction(inst->relativeAddress + programOffset,
-                             bin,
-                             inst->to_string());
-
-        if (!inst->debugname.empty())
-            mif.printDebugMsg(inst->debugname);
-
-        mif.jumpLine();
-    }
-}
-
-void CodeGenerator::generateCodeToJumpToOS()
-{
-    std::vector<Instruction *> originalCode = code, newCode;
-    std::string originalInst = generatedCode, ngc;
-    code = newCode;
-    generatedCode = ngc;
-    generateCodeForConst(programOffset, AcumulatorRegister);
-
-    print(jumpToRegister(AcumulatorRegister));
-
-    Instruction *inst;
-
-    for (int i = 0; i < (int)code.size(); i++)
-    {
-        inst = code[i];
-        std::string bin = inst->to_binary();
-        assert(bin.size() == 16);
-
-        this->mif.printInstruction(i,
-                                   bin,
-                                   inst->to_string());
-
-        this->mif.jumpLine();
-    }
-
-    mif.printMultipleEmptyPosition(programOffset);
-    code = originalCode;
-    generatedCode = originalInst;
 }
 
 void CodeGenerator::generateCodeForConst(int value, Registers reg)
