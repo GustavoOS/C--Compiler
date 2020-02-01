@@ -53,7 +53,7 @@ Instruction *pushRegister(Registers reg)
         reg);
 }
 
-Instruction *loadImediateToRegister(Registers regis, int number)
+Instruction *loadImmediateToRegister(Registers regis, int number)
 {
     return new TypeDInstruction(
         8,
@@ -170,6 +170,15 @@ Instruction *interrupt(SystemCalls systemCall)
     return new TypeAInstruction(72, "SWI", systemCall, 0, 0);
 }
 
+Instruction *compare(Registers a, Registers b)
+{
+    return new TypeEInstruction(
+        22,
+        "CMP",
+        a,
+        b);
+}
+
 Instruction *halt()
 {
     return new TypeDInstruction(
@@ -203,7 +212,7 @@ std::string Instruction::to_string_with_label()
 BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
 {
     tolabel = gotolabel;
-    firstByte = loadImediateToRegister(TemporaryRegister, 0);
+    firstByte = loadImmediateToRegister(TemporaryRegister, 0);
     secondByte = addImmediate(TemporaryRegister, 0);
     branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
 }
@@ -357,7 +366,7 @@ TypeFInstruction::TypeFInstruction(
 std::string TypeFInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(condition) + " " +
+           name + " " + getConditionString((ConditionCodes)condition) + " " +
            printRegister(regd);
 }
 
@@ -381,7 +390,7 @@ TypeGInstruction::TypeGInstruction(
 std::string TypeGInstruction::to_string()
 {
     return "(" + std::to_string(id) + ") " +
-           name + " " + std::to_string(condition) + " " +
+           name + " " + getConditionString((ConditionCodes)condition) + " " +
            std::to_string(offset) + " :" + label;
 }
 
@@ -389,6 +398,26 @@ std::string TypeGInstruction::to_binary()
 {
     return getOpCode(id) + getVal4Bits(condition) + getVal8BitsSignal(offset);
 }
+
+std::vector<std::string> conditionNames =
+    {
+        "EQ",    //Equal
+        "NE",    //NOT EQUAL
+        "HS/CS", //Unsigned Greater than or equal
+        "LO/CC", //Unsigned Lower then
+        "MI",    //Negative
+        "PL",    //Positive or zero
+        "VS",    //Overflow
+        "VC",    //No overflow
+        "HI",    //Unsigned greater than
+        "LS",    //Unsgined lower than or equal
+        "GE",    //Signed greater than or equal
+        "LT",    //Signed lower than
+        "GT",    //Signed greater than
+        "LE",    //Signed lower than
+        "AL",    //Always
+        "AB",    //Absolute, always
+};
 
 std::vector<std::string> opcode =
     {
@@ -626,6 +655,11 @@ std::string Instruction::getOpCode(int id)
     return opcode[id - 1];
 }
 
+std::string Instruction::getConditionString(ConditionCodes condition)
+{
+    return conditionNames[condition];
+}
+
 std::string Instruction::getOpBit(int id)
 {
     return std::to_string(opMap[id]);
@@ -659,12 +693,12 @@ std::string printRegister(int reg)
         return "$SC";
     case ReturnAddressRegister:
         return "$RA";
-    case SnapshotPointer:
-        return "$XP";
+    case UserSPKeeper:
+        return "$USPK";
     case StoredSpecReg:
         return "$SXR";
-    case LinkRegister:
-        return "$LR";
+    case PCKeeper:
+        return "$PCK";
     default:
         return "!UNKNOWN!";
     }

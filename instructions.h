@@ -10,11 +10,11 @@ enum Registers : int
     TemporaryRegister,
     FramePointer,
     GlobalPointer,
-    SnapshotPointer,
+    UserSPKeeper,
     ReturnAddressRegister,
     SystemCallRegister,
     StoredSpecReg,
-    LinkRegister = 13,
+    PCKeeper = 13,
     StackPointer,
     ProgramCounter
 };
@@ -43,7 +43,7 @@ enum ConditionCodes
 
 enum SystemCalls
 {
-    Preemption = 0,
+    StandardPreemptionFlow = 0,
     IORequest,
     ProgramCompletion,
     UserPreemption,
@@ -74,10 +74,11 @@ public:
     static std::string getOpBit(int id);
     static std::string getFunct2(int id);
     static std::string getFunct1(int id);
+    static std::string getConditionString(ConditionCodes condition);
 };
 
 Instruction *nop();
-Instruction *loadImediateToRegister(Registers regis, int number);
+Instruction *loadImmediateToRegister(Registers regis, int number);
 Instruction *pushAcumulator();
 Instruction *pushRegister(Registers reg);
 Instruction *popRegister(Registers reg);
@@ -95,6 +96,7 @@ Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt(SystemCalls systemCall);
+Instruction *compare(Registers a, Registers b);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);

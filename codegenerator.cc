@@ -10,9 +10,9 @@
 #include "bytes.h"
 #include "instructions.h"
 
-ConditionCodes translateCondition(TokenType operation)
+ConditionCodes translateCondition(TreeNode *conditionNode)
 {
-
+    TokenType operation = conditionNode->attr.op;
     switch (operation)
     {
     case LESSER:
@@ -33,7 +33,7 @@ ConditionCodes translateCondition(TokenType operation)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable, int programOffset)
+CodeGenerator::CodeGenerator(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -43,15 +43,12 @@ CodeGenerator::CodeGenerator(bool displayable, int programOffset)
     mainActivation->attr.val = 0;
     mainActivation->child[0] = NULL;
     mainActivation->scope = "global";
-    this->programOffset = programOffset;
 }
 
-void CodeGenerator::setMode(bool bios, bool compressed, bool os)
+void CodeGenerator::setMode(bool bios, bool os)
 {
     isBios = bios;
-    isCompressedProgram = compressed;
     isOS = os;
-    memorySize = isBios ? 512 : 16384;
 }
 
 void CodeGenerator::print(Instruction *instruction)
@@ -78,53 +75,6 @@ void CodeGenerator::generate(TreeNode *node)
 {
     createHeader();
     generateCode(node);
-}
-
-void CodeGenerator::linker()
-{
-    printEveryLabelLink();
-
-    insertIndexInsideEveryInstruction();
-
-    for (auto origin : labelOriginMap)
-    {
-        std::string label = origin.first;
-        for (BranchLabel *label_dest : origin.second)
-        {
-            int destinationAddress =
-                labelDestMap[label]->relativeAddress -
-                label_dest->branch->relativeAddress;
-            Bytes number = Bytes(destinationAddress);
-            label_dest->firstByte->immediate = number.getNthByte(2);
-            label_dest->secondByte->immediate = number.getNthByte(3);
-
-            // Prints
-            std::cout << "LINKER PRINTS\n";
-            std::cout << label << " -> " << label_dest->to_string() << "\n";
-            std::cout << "destinationAddress: " << destinationAddress << "\n";
-            std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
-            std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
-            std::cout << "branch position: " << label_dest->branch->relativeAddress + programOffset << "\n";
-            std::cout << "absolute position: " << labelDestMap[label]->relativeAddress + programOffset << "\n";
-        }
-    }
-}
-
-void CodeGenerator::insertIndexInsideEveryInstruction()
-{
-    int i = 0;
-    for (Instruction *inst : code)
-        inst->relativeAddress = i++;
-}
-
-void CodeGenerator::printEveryLabelLink()
-{
-    for (auto item : labelDestMap)
-    {
-        std::string label = item.first;
-        Instruction *label_dest = item.second;
-        std::cout << label << " -> " << label_dest->name << "\n";
-    }
 }
 
 void CodeGenerator::generateCodeForAnyNode(TreeNode *node)
@@ -215,8 +165,7 @@ void CodeGenerator::generateCodeForIf(TreeNode *node)
                          std::to_string(node->attr.val);
     TreeNode *condition = node->child[0];
     TreeNode *body = node->child[1];
-    Instruction *branch =
-        branchImmediate(translateCondition(condition->attr.op), 9);
+    Instruction *branch = branchImmediate(translateCondition(condition), 5);
     generateCode(condition);
     print(branch);
     int size = code.size();
@@ -234,17 +183,13 @@ void CodeGenerator::generateCodeForIfElse(TreeNode *node)
     TreeNode *condition = node->child[0];
     TreeNode *body = node->child[1], *elseBody = node->child[2];
     generateCodeForBranch(if_true_label_,
-                          translateCondition(condition->attr.op),
+                          translateCondition(condition),
                           condition);
 
     generateCode(elseBody);
-
     generateCodeForBranch(if_end_label, AL);
-
     printLabelNop(if_true_label_);
-
     generateCode(body);
-
     printLabelNop(if_end_label);
 }
 
@@ -286,10 +231,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 AcumulatorRegister,
                 HeapArrayRegister));
 
-        print(
-            loadImediateToRegister(
-                TemporaryRegister,
-                node->attr.val));
+        print(loadImmediateToRegister(TemporaryRegister, node->attr.val));
         print(
             new TypeAInstruction(
                 1,
@@ -311,25 +253,26 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
     {
         //Label names
         std::string while_label = "while_" + std::to_string(node->attr.val);
-        std::string do_label = "w_do_" + std::to_string(node->attr.val);
         std::string while_end_label = "w_end_" + std::to_string(node->attr.val);
 
         TreeNode *condition = node->child[0];
         TreeNode *body = node->child[1];
 
-        printLabelNop(while_label);
-        setDebugName(while_label);
-
-        generateCodeForBranch( // If cond, then go to do_label
-            do_label,
-            translateCondition(condition->attr.op),
-            condition);
+        int firstWhileInstrIndex = code.size();
+        generateCode(condition);
+        registerLabelInstruction(while_label, code[firstWhileInstrIndex]);
+        code[firstWhileInstrIndex]->debugname = while_label;
+        Instruction *branch = branchImmediate(translateCondition(condition), 9);
+        print(branch);
+        int size = code.size();
+        branch->debugname = while_label + " branch";
 
         generateCodeForBranch( // Else, go to while_end_label
             while_end_label,
             AL);
 
-        printLabelNop(do_label); // Goes here if cond is true
+        size = code.size() - size + 1;
+        branch->offset = size;
 
         generateCode(body);
 
@@ -346,18 +289,24 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         if (node->child[2])
             generateCodeForIfElse(node);
         else
-            generateCodeForIf(node);
+        {
+            TreeNode *condition = node->child[0];
+            TreeNode *body = node->child[1];
+            if ((body != NULL) && (body->kind.stmt == ReturnK) && (body->child[0] == NULL))
+            {
+                generateCodeForBranch("end_" + body->scope, translateCondition(condition), condition);
+                setDebugName("if_return to end_" + body->scope);
+            }
+            else
+                generateCodeForIf(node);
+        }
     }
     break;
 
     case ReturnK:
     {
-
         if (node->child[0] != NULL)
             generateCode(node->child[0]);
-        else
-            print(
-                loadImediateToRegister(AcumulatorRegister, 0));
 
         generateCodeForBranch("end_" + node->scope, AL);
     }
@@ -673,19 +622,12 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
         break;
 
     default:
-        print(
-            new TypeEInstruction(
-                22,
-                "CMP",
-                TemporaryRegister,
-                AcumulatorRegister));
-
+        print(compare(TemporaryRegister, AcumulatorRegister));
         break;
     }
 }
 
 //Headers and Footers
-
 void CodeGenerator::createHeader()
 {
     print(nop());
@@ -711,8 +653,8 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(FramePointer));
     print(pushRegister(GlobalPointer));
     print(pushRegister(ReturnAddressRegister));
-    print(pushRegister(SnapshotPointer));                  // SP
-    print(moveHighToLow(TemporaryRegister, LinkRegister)); // PC
+    print(pushRegister(UserSPKeeper));
+    print(moveHighToLow(TemporaryRegister, PCKeeper));
     print(pushRegister(TemporaryRegister));
     print(nop());
     print(moveHighToLow(TemporaryRegister, StoredSpecReg));
@@ -734,12 +676,12 @@ void CodeGenerator::createFooter()
     if (!isOS)
         return;
     generateCodeForPop(SystemCallRegister);
-    print(loadImediateToRegister(SystemCallRegister, 0));
+    print(loadImmediateToRegister(SystemCallRegister, 0));
     generateCodeForPop(TemporaryRegister);
     print(moveLowToHigh(TemporaryRegister, StoredSpecReg));
     generateCodeForPop(TemporaryRegister);
-    print(moveLowToHigh(TemporaryRegister, LinkRegister));
-    generateCodeForPop(SnapshotPointer);
+    print(moveLowToHigh(TemporaryRegister, PCKeeper));
+    generateCodeForPop(UserSPKeeper);
     generateCodeForPop(ReturnAddressRegister);
     generateCodeForPop(GlobalPointer);
     generateCodeForPop(FramePointer);
@@ -778,7 +720,7 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
 void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
 {
     BucketList record = getRecordFromSymbolTable(node);
-    print(loadImediateToRegister(reg, record->memloc));
+    print(loadImmediateToRegister(reg, record->memloc));
 }
 
 int CodeGenerator::fetchVarOffsetAsInteger(TreeNode *node)
@@ -804,14 +746,14 @@ void hr(std::string middle)
 void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 {
     DataSection ds;
-    int functionVariables = ds.getSize(node->attr.name);
+    int varCount = ds.getSize(node->attr.name);
 
-    //Return redirects to here
     std::string label = "end_" + node->attr.name;
-    printLabelNop(label);
-
     generateCodeForPop(ReturnAddressRegister);
-    for (int recordInAR = 0; recordInAR < functionVariables; recordInAR++)
+    registerLabelInstruction(label, code.back());
+    setDebugName(label);
+
+    for (int delVars = 0; delVars < varCount; delVars++)
         generateCodeForPop(TemporaryRegister);
 
     generateCodeForPop(FramePointer);
@@ -835,7 +777,7 @@ void CodeGenerator::generateGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(loadImediateToRegister(AcumulatorRegister, 0));
+    print(loadImmediateToRegister(AcumulatorRegister, 0));
     setDebugName("begin GlobalAR");
     for (int i = 0; i < globalCount + 1; i++)
         print(pushAcumulator());
@@ -881,14 +823,9 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
 void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
 {
-    if (localVariableCount > 0)
-    {
-        print(loadImediateToRegister(AcumulatorRegister, 0));
-
-        // Inserting the local vars into the AR
-        for (int i = 0; i < localVariableCount; ++i)
-            print(pushAcumulator());
-    }
+    // Inserting the local vars into the AR
+    for (int i = 0; i < localVariableCount; ++i)
+        print(pushAcumulator());
 
     pushArguments(argumentCount, argumentNode);
 }
@@ -920,7 +857,12 @@ void CodeGenerator::generateRunTimeSystem()
     generateCodeForFunctionActivation(mainActivation);
     destroyGlobalAR();
     createFooter();
-    print(interrupt(isBios ? BiosCompletion : ProgramCompletion));
+    print(interrupt(getFooterSystemCall()));
+}
+
+SystemCalls CodeGenerator::getFooterSystemCall()
+{
+    return isOS ? StandardPreemptionFlow : isBios ? BiosCompletion : ProgramCompletion;
 }
 
 void CodeGenerator::destroyGlobalAR()
@@ -931,125 +873,12 @@ void CodeGenerator::destroyGlobalAR()
         generateCodeForPop(TemporaryRegister);
 }
 
-void CodeGenerator::generateBinaryCode(std::string outputFile)
-{
-    printf("\n\n +++++ Code generator! +++++ \n\n");
-
-    mif.open(outputFile, isBios, isCompressedProgram);
-
-    if (programOffset)
-        generateCodeToJumpToOS();
-
-    if (isCompressedProgram)
-        mountFileStructure();
-    else
-        mountUncompressedProgram();
-
-    mif.printMultipleEmptyPosition(memorySize);
-
-    mif.printFooter();
-    printf("\n\n Output saved on %s \n\n", outputFile.c_str());
-}
-
-void CodeGenerator::mountFileStructure()
-{
-    std::cout << "Compressed File\n";
-    int headerSize = 1;
-    int slotStart = 2060;
-
-    mif.printSize(code.size(), slotStart);
-
-    for (int i = 0; i < (int)code.size(); i += 2)
-    {
-        bool hasNext = (i + 1) < (int)code.size();
-        std::string leftInstr = code[i]->to_binary();
-        std::string rightInstr = hasNext
-                                     ? code[i + 1]->to_binary()
-                                     : "0000000000000000";
-        std::string debugText = code[i]->to_string();
-        if (hasNext)
-            debugText += " | " + code[i + 1]->to_string();
-
-        mif.printInstruction(slotStart + headerSize + ((int)i / 2),
-                             leftInstr + rightInstr,
-                             debugText);
-
-        if (!code[i]->debugname.empty())
-            mif.printDebugMsg(code[i]->debugname);
-        if (hasNext && (!code[i + 1]->debugname.empty()))
-            mif.printDebugMsg(code[i + 1]->debugname);
-
-        mif.jumpLine();
-    }
-}
-
-void CodeGenerator::mountUncompressedProgram()
-{
-    if (isOS)
-    {
-        mif.printOSSize(code.size(), programOffset);
-        programOffset++;
-    }
-    for (Instruction *inst : code)
-    {
-        std::string bin = inst->to_binary();
-        assert(bin.size() == 16);
-
-        if (!inst->debugname.empty())
-            printf("%s\n", inst->debugname.c_str());
-
-        printf("% 3d: %-22s => %s\n",
-               inst->relativeAddress,
-               inst->to_string().c_str(),
-               bin.c_str());
-
-        mif.printInstruction(inst->relativeAddress + programOffset,
-                             bin,
-                             inst->to_string());
-
-        if (!inst->debugname.empty())
-            mif.printDebugMsg(inst->debugname);
-
-        mif.jumpLine();
-    }
-}
-
-void CodeGenerator::generateCodeToJumpToOS()
-{
-    std::vector<Instruction *> originalCode = code, newCode;
-    std::string originalInst = generatedCode, ngc;
-    code = newCode;
-    generatedCode = ngc;
-    generateCodeForConst(programOffset, AcumulatorRegister);
-
-    print(jumpToRegister(AcumulatorRegister));
-
-    Instruction *inst;
-
-    for (int i = 0; i < (int)code.size(); i++)
-    {
-        inst = code[i];
-        std::string bin = inst->to_binary();
-        assert(bin.size() == 16);
-
-        this->mif.printInstruction(i,
-                                   bin,
-                                   inst->to_string());
-
-        this->mif.jumpLine();
-    }
-
-    mif.printMultipleEmptyPosition(programOffset);
-    code = originalCode;
-    generatedCode = originalInst;
-}
-
 void CodeGenerator::generateCodeForConst(int value, Registers reg)
 {
     Bytes number = Bytes(value);
     int nulls = 0;
     int current = number.findFirstByteIndex();
-    print(loadImediateToRegister(reg, number.getNthByte(current)));
+    print(loadImmediateToRegister(reg, number.getNthByte(current)));
     setDebugName("begin ConstK");
     for (int i = current + 1; i < 4; i++)
     {

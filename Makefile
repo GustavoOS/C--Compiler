@@ -1,10 +1,11 @@
 ANALYSIS = obj/lex.yy.o obj/parser.o obj/util.o obj/memory.o obj/analyze.o obj/symtab.o 
 SYNTHESIS = obj/codegenerator.o obj/syntaticErrors.o obj/instructions.o obj/library.o obj/mifgenerator.o
 HELPER = obj/bytes.o
+PRODUCTION = obj/binarygenerator.o obj/linker.o
 CC = g++
 FLAGS = -Wall -g -std=c++11
 
-cminus: $(ANALYSIS) $(SYNTHESIS) $(HELPER)
+cminus: $(ANALYSIS) $(SYNTHESIS) $(HELPER) $(PRODUCTION)
 	$(CC) ${FLAGS} -o bin/cminus obj/*  main.cc -ly -lfl
 
 obj/lex.yy.o: scanner.l
@@ -41,6 +42,12 @@ obj/library.o: library.cc
 
 obj/mifgenerator.o: mifgenerator.cc
 	$(CC) $(FLAGS) -c mifgenerator.cc -o obj/mifgenerator.o
+
+obj/binarygenerator.o: binarygenerator.cc
+	$(CC) $(FLAGS) -c binarygenerator.cc -o obj/binarygenerator.o
+
+obj/linker.o: linker.cc
+	$(CC) $(FLAGS) -c linker.cc -o obj/linker.o
 
 obj/bytes.o: bytes.cc
 	$(CC) $(FLAGS) -c bytes.cc -o obj/bytes.o

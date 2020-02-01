@@ -12,7 +12,7 @@ public:
     void printInstruction(int, std::string, std::string);
     void printDebugMsg(std::string);
     void printSize(int codeSize, int place);
-    void printOSSize(int codeSize, int place);
+    void printUncompressedSize(int codeSize, int place);
     void jumpLine();
     void printFooter();
 private:

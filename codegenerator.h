@@ -15,11 +15,24 @@ void hr(std::string);
 class CodeGenerator
 {
 public:
-    CodeGenerator(bool displayable, int programOffset);
-    void setMode(bool isBios, bool isCompressed, bool isOS);
+    CodeGenerator(bool displayable);
+    void setMode(bool isBios, bool isOS);
     void generate(TreeNode *node);
+    void generateCodeToJumpToOS();
     void linker();
-    void generateBinaryCode(std::string outputFile);
+    std::vector<Instruction *> getCode()
+    {
+        return code;
+    }
+
+    std::map<std::string, Instruction *> getDestMap()
+    {
+        return labelDestMap;
+    }
+    std::map<std::string, std::vector<BranchLabel *>> getOriginMap()
+    {
+        return labelOriginMap;
+    }
 
 private:
     std::string generatedCode;
@@ -29,10 +42,7 @@ private:
     bool shouldPrintGeneratedCodeOnScreen;
     bool shouldShowVisitingMessages;
     TreeNode *mainActivation;
-    int programOffset;
-    MifGenerator mif;
-    bool isBios, isCompressedProgram, isOS;
-    int memorySize;
+    bool isBios, isOS;
 
     //Private methods
     void print(Instruction *instruction);
@@ -48,17 +58,14 @@ private:
     void generateRegisterOperation(TreeNode *);
     void generateOptimizedOperation(TreeNode *);
     void generateCodeForBranch(std::string branch_name, ConditionCodes condition, TreeNode *child = NULL);
-    void generateCodeForIf(TreeNode * node);
-    void generateCodeForIfElse(TreeNode * node);
+    void generateCodeForIf(TreeNode *node);
+    void generateCodeForIfElse(TreeNode *node);
     void generateCodeForPop(Registers reg);
     void registerLabelInstruction(std::string label, Instruction *Instruction);
     void generateCodeForConst(int, Registers);
 
-    void mountFileStructure();
-    void mountUncompressedProgram();
-
     void fetchVarOffset(TreeNode *node, Registers reg);
-    int fetchVarOffsetAsInteger(TreeNode * node);
+    int fetchVarOffsetAsInteger(TreeNode *node);
     int fetchVarOffsetByName(std::string variable, std::string scope);
     void loadVariable(TreeNode *node, Registers reg);
     void printLabelNop(std::string);
@@ -74,12 +81,10 @@ private:
     void jumpAndLink(std::string);
     void setOSVariables();
 
-    void insertIndexInsideEveryInstruction();
-    void printEveryLabelLink();
-    void generateCodeToJumpToOS();
-
     void printRegister(Registers reg);
     void pushArguments(int argumentCount, TreeNode *argumentNode);
+
+    SystemCalls getFooterSystemCall();
 };
 
 #endif
