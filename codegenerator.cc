@@ -554,13 +554,14 @@ void CodeGenerator::generateOptimizedOperation(TreeNode *node)
         generateRegisterOperation(node);
         return;
     }
-    generateCode(node->child[0]);
     switch (node->attr.op)
     {
     case PLUS:
+        generateCode(node->child[0]);
         print(addImmediate(AcumulatorRegister, rightSon->attr.val));
         break;
     case MINUS:
+        generateCode(node->child[0]);
         print(subtractImmediate(AcumulatorRegister, rightSon->attr.val));
         break;
     default:
