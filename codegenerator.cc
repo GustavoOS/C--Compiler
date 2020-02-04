@@ -328,12 +328,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 hr(node->attr.name);
 
             TreeNode *functionBody = node->child[1];
-
-            Instruction *labelInstruction = pushRegister(ReturnAddressRegister);
-            registerLabelInstruction(FunctionName, labelInstruction);
-
-            print(labelInstruction);
+            Instruction * LRtoAcc = moveHighToLow(AcumulatorRegister, LinkRegister);
+            registerLabelInstruction(FunctionName, LRtoAcc);
+            print(LRtoAcc);
             setDebugName("begin FunDeclK " + FunctionName);
+            print(pushAcumulator());
             print(copySP(FramePointer));
             if (functionBody)
                 generateCode(functionBody);
@@ -647,7 +646,7 @@ void CodeGenerator::createHeader()
 
 void CodeGenerator::createOSHeader()
 {
-    print(new TypeEInstruction(58, "CPXR", 0, StoredSpecReg));
+    print(new TypeHInstruction(58, "CPXR", StoredSpecReg));
     setDebugName("Create OS header");
     print(pushAcumulator());
     print(pushRegister(TemporaryRegister));
@@ -754,8 +753,9 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
     registerLabelInstruction(label, code.back());
     setDebugName(label);
 
-    for (int delVars = 0; delVars < varCount; delVars++)
-        generateCodeForPop(TemporaryRegister);
+    // for (int delVars = 0; delVars < varCount; delVars++)
+    //     generateCodeForPop(TemporaryRegister);
+    print(popMultiple(varCount));
 
     generateCodeForPop(FramePointer);
 
@@ -818,16 +818,17 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
     setDebugName("begin Activation " + FunctionName);
 
     buildAR(functionVariables - argumentCount, argumentCount, node->child[0]);
-    jumpAndLink(FunctionName);
+    generateCodeForBranch(FunctionName, L);
     setDebugName("end Activation " + FunctionName);
 }
 
 void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
 {
-    // Inserting the local vars into the AR
-    for (int i = 0; i < localVariableCount; ++i)
-        print(pushAcumulator());
+    // // Inserting the local vars into the AR
+    // for (int i = 0; i < localVariableCount; ++i)
+    //     print(pushAcumulator());
 
+    print(pushMultiple(localVariableCount));
     pushArguments(argumentCount, argumentNode);
 }
 
@@ -839,17 +840,6 @@ void CodeGenerator::pushArguments(int argumentCount, TreeNode *argumentNode)
         print(pushAcumulator());
         argumentNode = argumentNode->sibling;
     }
-}
-
-void CodeGenerator::jumpAndLink(std::string FunctionName)
-{
-    int branchCodeStart = code.size();
-    Instruction *jumpAndLinkAddress = sumWithPC(ReturnAddressRegister, 0);
-    print(jumpAndLinkAddress);
-
-    generateCodeForBranch(FunctionName, AL);
-
-    jumpAndLinkAddress->immediate = code.size() - branchCodeStart;
 }
 
 void CodeGenerator::generateRunTimeSystem()

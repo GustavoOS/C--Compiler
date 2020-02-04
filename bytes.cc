@@ -45,6 +45,12 @@ std::string getVal4Bits(int val)
     return bs.to_string();
 }
 
+std::string getVal7Bits(int val)
+{
+    std::bitset<7> bs(val);
+    return bs.to_string();
+}
+
 std::string getVal8Bits(int val)
 {
     std::bitset<8> bs(val);

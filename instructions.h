@@ -14,7 +14,8 @@ enum Registers : int
     ReturnAddressRegister,
     SystemCallRegister,
     StoredSpecReg,
-    PCKeeper = 13,
+    LinkRegister = 12,
+    PCKeeper,
     StackPointer,
     ProgramCounter
 };
@@ -36,7 +37,7 @@ enum ConditionCodes
     GT,     //Signed greater than
     LE,     //Signed lower than
     AL,     //Always
-    AB,     //Absolute, always
+    L,      //Absolute, always
     CS = 2, //Unsigned Greater than or equal
     CC = 3  //Unsigned Lower THan
 };
@@ -81,6 +82,8 @@ Instruction *nop();
 Instruction *loadImmediateToRegister(Registers regis, int number);
 Instruction *pushAcumulator();
 Instruction *pushRegister(Registers reg);
+Instruction *pushMultiple(int count);
+Instruction *popMultiple(int count);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 Instruction *moveLowToLowRegister(Registers origin, Registers destination);
@@ -200,6 +203,45 @@ public:
         int offsetSize);
 
     std::string to_string();
+    std::string to_binary();
+};
+
+class TypeHInstruction : public Instruction
+{
+public:
+    TypeHInstruction(
+        int identity,
+        std::string instructionName,
+        int RegisterD);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
+class TypeIInstruction : public Instruction
+{
+public:
+    TypeIInstruction(
+        int identity,
+        std::string instructionName,
+        int value);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
+class TypeJInstruction : public Instruction
+{
+public:
+    TypeJInstruction(
+        int identity,
+        std::string instructionName,
+        int regd);
+
+    std::string to_string();
+
     std::string to_binary();
 };
 

@@ -18,6 +18,7 @@ public:
 std::string getVal5Bits(int val);
 std::string getVal3Bits(int val);
 std::string getVal4Bits(int val);
+std::string getVal7Bits(int val);
 std::string getVal8Bits(int val);
 std::string getVal8BitsSignal(int val);
 

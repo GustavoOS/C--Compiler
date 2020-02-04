@@ -15,7 +15,7 @@ Instruction *jumpToRegister(Registers reg)
     return new TypeFInstruction(
         38,
         "BX",
-        AB,
+        L,
         reg);
 }
 Instruction *branchImmediate(ConditionCodes cond, int small)
@@ -37,20 +37,28 @@ Instruction *outputRegister(Registers reg)
 
 Instruction *popRegister(Registers reg)
 {
-    return new TypeEInstruction(
+    return new TypeJInstruction(
         68,
         "POP",
-        0,
         reg);
 }
 
 Instruction *pushRegister(Registers reg)
 {
-    return new TypeEInstruction(
+    return new TypeJInstruction(
         67,
         "PUSH",
-        0,
         reg);
+}
+
+Instruction *pushMultiple(int count)
+{
+    return new TypeIInstruction(77, "PUSHM", count);
+}
+
+Instruction *popMultiple(int count)
+{
+    return new TypeIInstruction(78, "POPM", count);
 }
 
 Instruction *loadImmediateToRegister(Registers regis, int number)
@@ -167,7 +175,7 @@ Instruction *copySP(Registers reg)
 
 Instruction *interrupt(SystemCalls systemCall)
 {
-    return new TypeAInstruction(72, "SWI", systemCall, 0, 0);
+    return new TypeDInstruction(72, "SWI", 0, systemCall);
 }
 
 Instruction *compare(Registers a, Registers b)
@@ -399,6 +407,72 @@ std::string TypeGInstruction::to_binary()
     return getOpCode(id) + getVal4Bits(condition) + getVal8BitsSignal(offset);
 }
 
+TypeHInstruction::TypeHInstruction(
+    int identity,
+    std::string instructionName,
+    int RegisterD)
+{
+    id = identity;
+    name = instructionName;
+    regd = RegisterD;
+}
+
+std::string TypeHInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           printRegister(regd);
+}
+
+std::string TypeHInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + getFunct1(id) + "00" + getVal4Bits(regd);
+}
+
+TypeIInstruction::TypeIInstruction(
+    int identity,
+    std::string instructionName,
+    int value)
+{
+    id = identity;
+    name = instructionName;
+    offset = value;
+}
+
+std::string TypeIInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           std::to_string(offset);
+}
+
+std::string TypeIInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + "1" + getVal7Bits(offset);
+}
+
+TypeJInstruction::TypeJInstruction(
+    int identity,
+    std::string instructionName,
+    int reg)
+{
+    id = identity;
+    name = instructionName;
+    regd = reg;
+}
+
+std::string TypeJInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           printRegister(regd);
+}
+
+std::string TypeJInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + "00000" + getVal3Bits(regd);
+}
+
 std::vector<std::string> conditionNames =
     {
         "EQ",    //Equal
@@ -416,7 +490,7 @@ std::vector<std::string> conditionNames =
         "GT",    //Signed greater than
         "LE",    //Signed lower than
         "AL",    //Always
-        "AB",    //Absolute, always
+        "L",    // Link
 };
 
 std::vector<std::string> opcode =
@@ -496,7 +570,9 @@ std::vector<std::string> opcode =
         "1101", // 73
         "1110", // 74
         "1110", // 75
-        "1011"  // 76
+        "1011", // 76
+        "1011", // 77
+        "1011"  // 78
 };
 
 std::map<int, int> opMap = {
@@ -593,7 +669,9 @@ std::map<int, std::string> funct2 = {
     {69, "1110"},
     {70, "1110"},
     {71, "1110"},
-    {76, "0000"}};
+    {76, "0000"},
+    {77, "0100"},
+    {78, "1101"}};
 
 std::map<int, std::string> funct1 = {
     {4, "00"},
@@ -699,6 +777,8 @@ std::string printRegister(int reg)
         return "$SXR";
     case PCKeeper:
         return "$PCK";
+    case LinkRegister:
+        return "$LR";
     default:
         return "!UNKNOWN!";
     }
