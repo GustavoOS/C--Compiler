@@ -37,7 +37,6 @@ enum ConditionCodes
     GT,     //Signed greater than
     LE,     //Signed lower than
     AL,     //Always
-    L,      //Absolute, always
     CS = 2, //Unsigned Greater than or equal
     CC = 3  //Unsigned Lower THan
 };
@@ -94,6 +93,8 @@ Instruction *copySP(Registers reg);
 Instruction *extendZero(Registers reg);
 Instruction *rightShiftImmediate(Registers, int);
 Instruction *branchImmediate(ConditionCodes, int);
+Instruction *branchLink(Registers reg);
+Instruction *relativeBranch(ConditionCodes cond, Registers reg);
 Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
@@ -236,6 +237,19 @@ class TypeJInstruction : public Instruction
 {
 public:
     TypeJInstruction(
+        int identity,
+        std::string instructionName,
+        int regd);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
+class TypeKInstruction : public Instruction
+{
+public:
+    TypeKInstruction(
         int identity,
         std::string instructionName,
         int regd);

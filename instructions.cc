@@ -12,12 +12,19 @@ std::string Instruction::to_string()
 
 Instruction *jumpToRegister(Registers reg)
 {
-    return new TypeFInstruction(
-        38,
-        "BX",
-        L,
-        reg);
+    return new TypeKInstruction(80, "BX", reg);
 }
+
+Instruction *relativeBranch(ConditionCodes cond, Registers reg)
+{
+    return new TypeFInstruction(38, "B", cond, reg);
+}
+
+Instruction *branchLink(Registers reg)
+{
+    return new TypeKInstruction(79, "BL", reg);
+}
+
 Instruction *branchImmediate(ConditionCodes cond, int small)
 {
     return new TypeGInstruction(
@@ -217,12 +224,13 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
+BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition, bool isJumpAndLink)
 {
     tolabel = gotolabel;
     firstByte = loadImmediateToRegister(TemporaryRegister, 0);
     secondByte = addImmediate(TemporaryRegister, 0);
-    branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
+    branch = isJumpAndLink ? branchLink(TemporaryRegister)
+                           : relativeBranch(condition, TemporaryRegister);
 }
 
 std::string BranchLabel::to_string()
@@ -473,6 +481,28 @@ std::string TypeJInstruction::to_binary()
     return getOpCode(id) + getFunct2(id) + "00000" + getVal3Bits(regd);
 }
 
+TypeKInstruction::TypeKInstruction(
+    int identity,
+    std::string instructionName,
+    int reg)
+{
+    id = identity;
+    name = instructionName;
+    regd = reg;
+}
+
+std::string TypeKInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           printRegister(regd);
+}
+
+std::string TypeKInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + getOpBit(id) + "000" + getVal4Bits(regd);
+}
+
 std::vector<std::string> conditionNames =
     {
         "EQ",    //Equal
@@ -490,7 +520,7 @@ std::vector<std::string> conditionNames =
         "GT",    //Signed greater than
         "LE",    //Signed lower than
         "AL",    //Always
-        "L",    // Link
+        "L",     // Link
 };
 
 std::vector<std::string> opcode =
@@ -572,7 +602,9 @@ std::vector<std::string> opcode =
         "1110", // 75
         "1011", // 76
         "1011", // 77
-        "1011"  // 78
+        "1011", // 78
+        "1011", // 79
+        "1011"  // 80
 };
 
 std::map<int, int> opMap = {
@@ -625,7 +657,9 @@ std::map<int, int> opMap = {
     {55, 1},
     {56, 0},
     {57, 1},
-    {75, 1}};
+    {75, 1},
+    {79, 0},
+    {80, 1}};
 
 std::map<int, std::string> funct2 = {
     {12, "0000"},
@@ -671,7 +705,9 @@ std::map<int, std::string> funct2 = {
     {71, "1110"},
     {76, "0000"},
     {77, "0100"},
-    {78, "1101"}};
+    {78, "1101"},
+    {79, "0001"},
+    {80, "0001"}};
 
 std::map<int, std::string> funct1 = {
     {4, "00"},

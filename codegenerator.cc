@@ -129,13 +129,14 @@ BucketList getRecordFromSymbolTable(TreeNode *node)
 
 void CodeGenerator::generateCodeForBranch(std::string branch_name,
                                           ConditionCodes condition,
-                                          TreeNode *operationNode)
+                                          TreeNode *operationNode,
+                                          bool isJumpAndLink)
 {
 
     if (shouldShowVisitingMessages)
         std::cout << "+++++++++++++ Branch start +++++++++++++\n";
 
-    BranchLabel *branchLabel = new BranchLabel(branch_name, condition);
+    BranchLabel *branchLabel = new BranchLabel(branch_name, condition, isJumpAndLink);
 
     print(branchLabel->firstByte);
     setDebugName("begin Branch");
@@ -328,11 +329,11 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                 hr(node->attr.name);
 
             TreeNode *functionBody = node->child[1];
-            Instruction * LRtoAcc = moveHighToLow(AcumulatorRegister, LinkRegister);
-            registerLabelInstruction(FunctionName, LRtoAcc);
-            print(LRtoAcc);
+            Instruction *LRtoLow = moveHighToLow(TemporaryRegister, LinkRegister);
+            registerLabelInstruction(FunctionName, LRtoLow);
+            print(LRtoLow);
             setDebugName("begin FunDeclK " + FunctionName);
-            print(pushAcumulator());
+            print(pushRegister(TemporaryRegister));
             print(copySP(FramePointer));
             if (functionBody)
                 generateCode(functionBody);
@@ -818,7 +819,7 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
     setDebugName("begin Activation " + FunctionName);
 
     buildAR(functionVariables - argumentCount, argumentCount, node->child[0]);
-    generateCodeForBranch(FunctionName, L);
+    generateCodeForBranch(FunctionName, AL, NULL, true);
     setDebugName("end Activation " + FunctionName);
 }
 
