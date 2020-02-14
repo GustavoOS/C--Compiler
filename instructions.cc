@@ -12,12 +12,39 @@ std::string Instruction::to_string()
 
 Instruction *jumpToRegister(Registers reg)
 {
-    return new TypeFInstruction(
-        38,
-        "BX",
-        AB,
-        reg);
+    return new TypeKInstruction(80, "BX", reg);
 }
+
+Instruction *relativeBranch(ConditionCodes cond, Registers reg)
+{
+    return new TypeFInstruction(38, "B", cond, reg);
+}
+
+Instruction *storeWithImmediate(Registers content, Registers baseAddr, int offset)
+{
+    return new TypeAInstruction(48, "STR", offset, baseAddr, content);
+}
+
+Instruction *storeWithRegister(Registers content, Registers baseAddr, Registers offset)
+{
+    return new TypeBInstruction(40, "STR", baseAddr, offset, content);
+}
+
+Instruction *loadWithImmediate(Registers target, Registers baseAddr, int offset)
+{
+    return new TypeAInstruction(49, "LDR", offset, baseAddr, target);
+}
+
+Instruction *loadWithRegister(Registers target, Registers baseAddr, Registers offset)
+{
+    return new TypeBInstruction(44, "LDR", baseAddr, offset, target);
+}
+
+Instruction *branchLink(Registers reg)
+{
+    return new TypeKInstruction(79, "BL", reg);
+}
+
 Instruction *branchImmediate(ConditionCodes cond, int small)
 {
     return new TypeGInstruction(
@@ -37,20 +64,28 @@ Instruction *outputRegister(Registers reg)
 
 Instruction *popRegister(Registers reg)
 {
-    return new TypeEInstruction(
+    return new TypeJInstruction(
         68,
         "POP",
-        0,
         reg);
 }
 
 Instruction *pushRegister(Registers reg)
 {
-    return new TypeEInstruction(
+    return new TypeJInstruction(
         67,
         "PUSH",
-        0,
         reg);
+}
+
+Instruction *pushMultiple(int count)
+{
+    return new TypeIInstruction(77, "PUSHM", count);
+}
+
+Instruction *popMultiple(int count)
+{
+    return new TypeIInstruction(78, "POPM", count);
 }
 
 Instruction *loadImmediateToRegister(Registers regis, int number)
@@ -167,7 +202,7 @@ Instruction *copySP(Registers reg)
 
 Instruction *interrupt(SystemCalls systemCall)
 {
-    return new TypeAInstruction(72, "SWI", systemCall, 0, 0);
+    return new TypeDInstruction(72, "SWI", 0, systemCall);
 }
 
 Instruction *compare(Registers a, Registers b)
@@ -209,12 +244,13 @@ std::string Instruction::to_string_with_label()
                    : this->to_string();
 }
 
-BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition)
+BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition, bool isJumpAndLink)
 {
     tolabel = gotolabel;
     firstByte = loadImmediateToRegister(TemporaryRegister, 0);
     secondByte = addImmediate(TemporaryRegister, 0);
-    branch = new TypeFInstruction(38, "BX", condition, TemporaryRegister);
+    branch = isJumpAndLink ? branchLink(TemporaryRegister)
+                           : relativeBranch(condition, TemporaryRegister);
 }
 
 std::string BranchLabel::to_string()
@@ -399,6 +435,94 @@ std::string TypeGInstruction::to_binary()
     return getOpCode(id) + getVal4Bits(condition) + getVal8BitsSignal(offset);
 }
 
+TypeHInstruction::TypeHInstruction(
+    int identity,
+    std::string instructionName,
+    int RegisterD)
+{
+    id = identity;
+    name = instructionName;
+    regd = RegisterD;
+}
+
+std::string TypeHInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           printRegister(regd);
+}
+
+std::string TypeHInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + getFunct1(id) + "00" + getVal4Bits(regd);
+}
+
+TypeIInstruction::TypeIInstruction(
+    int identity,
+    std::string instructionName,
+    int value)
+{
+    id = identity;
+    name = instructionName;
+    offset = value;
+}
+
+std::string TypeIInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           std::to_string(offset);
+}
+
+std::string TypeIInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + "1" + getVal7Bits(offset);
+}
+
+TypeJInstruction::TypeJInstruction(
+    int identity,
+    std::string instructionName,
+    int reg)
+{
+    id = identity;
+    name = instructionName;
+    regd = reg;
+}
+
+std::string TypeJInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           printRegister(regd);
+}
+
+std::string TypeJInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + "00000" + getVal3Bits(regd);
+}
+
+TypeKInstruction::TypeKInstruction(
+    int identity,
+    std::string instructionName,
+    int reg)
+{
+    id = identity;
+    name = instructionName;
+    regd = reg;
+}
+
+std::string TypeKInstruction::to_string()
+{
+    return "(" + std::to_string(id) + ") " +
+           name + " " +
+           printRegister(regd);
+}
+
+std::string TypeKInstruction::to_binary()
+{
+    return getOpCode(id) + getFunct2(id) + getOpBit(id) + "000" + getVal4Bits(regd);
+}
+
 std::vector<std::string> conditionNames =
     {
         "EQ",    //Equal
@@ -416,7 +540,7 @@ std::vector<std::string> conditionNames =
         "GT",    //Signed greater than
         "LE",    //Signed lower than
         "AL",    //Always
-        "AB",    //Absolute, always
+        "L",     // Link
 };
 
 std::vector<std::string> opcode =
@@ -496,7 +620,11 @@ std::vector<std::string> opcode =
         "1101", // 73
         "1110", // 74
         "1110", // 75
-        "1011"  // 76
+        "1011", // 76
+        "1011", // 77
+        "1011", // 78
+        "1011", // 79
+        "1011"  // 80
 };
 
 std::map<int, int> opMap = {
@@ -549,7 +677,9 @@ std::map<int, int> opMap = {
     {55, 1},
     {56, 0},
     {57, 1},
-    {75, 1}};
+    {75, 1},
+    {79, 0},
+    {80, 1}};
 
 std::map<int, std::string> funct2 = {
     {12, "0000"},
@@ -593,7 +723,11 @@ std::map<int, std::string> funct2 = {
     {69, "1110"},
     {70, "1110"},
     {71, "1110"},
-    {76, "0000"}};
+    {76, "0000"},
+    {77, "0100"},
+    {78, "1101"},
+    {79, "0001"},
+    {80, "0001"}};
 
 std::map<int, std::string> funct1 = {
     {4, "00"},
@@ -691,14 +825,16 @@ std::string printRegister(int reg)
         return "$GP";
     case SystemCallRegister:
         return "$SC";
-    case ReturnAddressRegister:
-        return "$RA";
+    case SecondRegister:
+        return "$T2";
     case UserSPKeeper:
         return "$USPK";
     case StoredSpecReg:
         return "$SXR";
     case PCKeeper:
         return "$PCK";
+    case LinkRegister:
+        return "$LR";
     default:
         return "!UNKNOWN!";
     }

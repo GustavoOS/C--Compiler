@@ -8,13 +8,14 @@ enum Registers : int
     HeapArrayRegister = 0,
     AcumulatorRegister,
     TemporaryRegister,
+    SecondRegister,
     FramePointer,
     GlobalPointer,
     UserSPKeeper,
-    ReturnAddressRegister,
     SystemCallRegister,
     StoredSpecReg,
-    PCKeeper = 13,
+    LinkRegister = 12,
+    PCKeeper,
     StackPointer,
     ProgramCounter
 };
@@ -36,7 +37,6 @@ enum ConditionCodes
     GT,     //Signed greater than
     LE,     //Signed lower than
     AL,     //Always
-    AB,     //Absolute, always
     CS = 2, //Unsigned Greater than or equal
     CC = 3  //Unsigned Lower THan
 };
@@ -81,6 +81,8 @@ Instruction *nop();
 Instruction *loadImmediateToRegister(Registers regis, int number);
 Instruction *pushAcumulator();
 Instruction *pushRegister(Registers reg);
+Instruction *pushMultiple(int count);
+Instruction *popMultiple(int count);
 Instruction *popRegister(Registers reg);
 Instruction *jumpToRegister(Registers reg);
 Instruction *moveLowToLowRegister(Registers origin, Registers destination);
@@ -91,12 +93,18 @@ Instruction *copySP(Registers reg);
 Instruction *extendZero(Registers reg);
 Instruction *rightShiftImmediate(Registers, int);
 Instruction *branchImmediate(ConditionCodes, int);
+Instruction *branchLink(Registers reg);
+Instruction *relativeBranch(ConditionCodes cond, Registers reg);
 Instruction *leftShiftImmediate(Registers, int);
 Instruction *addImmediate(Registers, int);
 Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt(SystemCalls systemCall);
 Instruction *compare(Registers a, Registers b);
+Instruction *storeWithImmediate(Registers content, Registers baseAddr, int offset);
+Instruction *storeWithRegister(Registers content, Registers baseAddr, Registers offset);
+Instruction *loadWithImmediate(Registers target, Registers baseAddr, int offset);
+Instruction *loadWithRegister(Registers target, Registers baseAddr, Registers offset);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
@@ -203,6 +211,58 @@ public:
     std::string to_binary();
 };
 
+class TypeHInstruction : public Instruction
+{
+public:
+    TypeHInstruction(
+        int identity,
+        std::string instructionName,
+        int RegisterD);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
+class TypeIInstruction : public Instruction
+{
+public:
+    TypeIInstruction(
+        int identity,
+        std::string instructionName,
+        int value);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
+class TypeJInstruction : public Instruction
+{
+public:
+    TypeJInstruction(
+        int identity,
+        std::string instructionName,
+        int regd);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
+class TypeKInstruction : public Instruction
+{
+public:
+    TypeKInstruction(
+        int identity,
+        std::string instructionName,
+        int regd);
+
+    std::string to_string();
+
+    std::string to_binary();
+};
+
 class BranchLabel
 {
     std::string tolabel;
@@ -212,7 +272,7 @@ public:
     Instruction *secondByte;
     Instruction *branch;
 
-    BranchLabel(std::string gotolabe, ConditionCodes condition);
+    BranchLabel(std::string gotolabe, ConditionCodes condition, bool isJumpAndLink);
 
     std::string to_string();
 };
