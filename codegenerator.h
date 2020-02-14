@@ -64,7 +64,6 @@ private:
     void registerLabelInstruction(std::string label, Instruction *Instruction);
     void generateCodeForConst(int, Registers);
 
-    void fetchVarOffset(TreeNode *node, Registers reg);
     int fetchVarOffsetAsInteger(TreeNode *node);
     int fetchVarOffsetByName(std::string variable, std::string scope);
     void loadVariable(TreeNode *node, Registers reg);

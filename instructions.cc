@@ -20,6 +20,26 @@ Instruction *relativeBranch(ConditionCodes cond, Registers reg)
     return new TypeFInstruction(38, "B", cond, reg);
 }
 
+Instruction *storeWithImmediate(Registers content, Registers baseAddr, int offset)
+{
+    return new TypeAInstruction(48, "STR", offset, baseAddr, content);
+}
+
+Instruction *storeWithRegister(Registers content, Registers baseAddr, Registers offset)
+{
+    return new TypeBInstruction(40, "STR", baseAddr, offset, content);
+}
+
+Instruction *loadWithImmediate(Registers target, Registers baseAddr, int offset)
+{
+    return new TypeAInstruction(49, "LDR", offset, baseAddr, target);
+}
+
+Instruction *loadWithRegister(Registers target, Registers baseAddr, Registers offset)
+{
+    return new TypeBInstruction(44, "LDR", baseAddr, offset, target);
+}
+
 Instruction *branchLink(Registers reg)
 {
     return new TypeKInstruction(79, "BL", reg);
@@ -805,8 +825,8 @@ std::string printRegister(int reg)
         return "$GP";
     case SystemCallRegister:
         return "$SC";
-    case ReturnAddressRegister:
-        return "$RA";
+    case SecondRegister:
+        return "$T2";
     case UserSPKeeper:
         return "$USPK";
     case StoredSpecReg:

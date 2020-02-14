@@ -220,29 +220,36 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
 
     case VetDeclK:
+    {
+        int offset = fetchVarOffsetAsInteger(node);
+        Registers scopeRegister =
+            node->scope == "global" ? GlobalPointer
+                                    : FramePointer;
+        if (offset < 32)
+        {
+            print(storeWithImmediate(HeapArrayRegister,
+                                     scopeRegister,
+                                     offset));
+            setDebugName("begin VetDeclK " + node->attr.val);
+        }
+        else
+        {
+            generateCodeForConst(offset, TemporaryRegister);
+            print(storeWithRegister(HeapArrayRegister,
+                                    scopeRegister,
+                                    TemporaryRegister));
+        }
 
-        fetchVarOffset(node, AcumulatorRegister);
-        setDebugName("begin VetDeclK " + node->attr.val);
-
-        print(
-            new TypeBInstruction(
-                40,
-                "STR",
-                node->scope == "global" ? GlobalPointer : FramePointer,
-                AcumulatorRegister,
-                HeapArrayRegister));
-
-        print(loadImmediateToRegister(TemporaryRegister, node->attr.val));
-        print(
-            new TypeAInstruction(
-                1,
-                "LSL",
-                2,
-                TemporaryRegister,
-                TemporaryRegister));
-        print(sumRegisters(HeapArrayRegister, TemporaryRegister));
+        if (node->attr.val < 256)
+            print(addImmediate(HeapArrayRegister, node->attr.val));
+        else
+        {
+            generateCodeForConst(node->attr.val, TemporaryRegister);
+            print(sumRegisters(HeapArrayRegister, TemporaryRegister));
+        }
         setDebugName("end VetDeclK " + node->attr.val);
-        break;
+    }
+    break;
 
     case VarDeclK:
         if (shouldShowVisitingMessages)
@@ -373,12 +380,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         else if (FunctionName == "fun_readFromMemory")
         {
             generateCode(arg);
-            print(
-                new TypeAInstruction(49,
-                                     "LDR",
-                                     0,
-                                     AcumulatorRegister,
-                                     AcumulatorRegister));
+            print(loadWithImmediate(AcumulatorRegister, AcumulatorRegister, 0));
             setDebugName("READ MEMORY");
         }
         else if (FunctionName == "fun_writeIntoMemory")
@@ -388,14 +390,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             arg = arg->sibling;
             generateCodeForAnyNode(arg);           //Address in Acumulator
             generateCodeForPop(TemporaryRegister); //Data in Temporary Register
-            print(
-                new TypeAInstruction(
-                    48,
-                    "STR",
-                    0,
-                    AcumulatorRegister, //Address
-                    TemporaryRegister   //Data
-                    ));
+            print(storeWithImmediate(TemporaryRegister, AcumulatorRegister, 0));
             setDebugName("WRITE MEMORY");
         }
         else if (FunctionName == "fun_extractFirstHW")
@@ -442,21 +437,15 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                                           ? GlobalPointer
                                           : FramePointer;
             if (offset < 31)
-                print(
-                    new TypeAInstruction(48,
-                                         "STR",
-                                         offset,
+                print(storeWithImmediate(AcumulatorRegister,
                                          scopeRegister,
-                                         AcumulatorRegister));
+                                         offset));
             else
             {
                 generateCodeForConst(offset, TemporaryRegister);
-                print(
-                    new TypeBInstruction(40,
-                                         "STR",
-                                         TemporaryRegister,
-                                         scopeRegister,
-                                         AcumulatorRegister));
+                print(storeWithRegister(AcumulatorRegister,
+                                        scopeRegister,
+                                        TemporaryRegister));
             }
         }
         break;
@@ -464,18 +453,22 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             std::cout << "VECTOR\n";
             generateCode(node->child[1]); // Value to be assigned
-            print(pushAcumulator());
-            generateCode(varToBeAssignedInto->child[0]);          // Offset
-            loadVariable(varToBeAssignedInto, TemporaryRegister); // Base Address
-            print(sumRegisters(TemporaryRegister, AcumulatorRegister));
-            generateCodeForPop(AcumulatorRegister);
-            print(
-                new TypeAInstruction(
-                    48,
-                    "STR",
-                    0,
-                    TemporaryRegister,
-                    AcumulatorRegister));
+            TreeNode *offsetNode = varToBeAssignedInto->child[0];
+            if (offsetNode->kind.exp == ConstK && node->attr.val < 31)
+            {
+                int offset = node->attr.val;
+                loadVariable(varToBeAssignedInto, TemporaryRegister);
+                print(storeWithImmediate(AcumulatorRegister, TemporaryRegister, offset));
+            }
+            else
+            {
+                print(pushAcumulator());
+                generateCode(offsetNode);
+                loadVariable(varToBeAssignedInto, TemporaryRegister);
+                generateCodeForPop(SecondRegister);
+                print(storeWithRegister(SecondRegister, AcumulatorRegister, TemporaryRegister));
+            }
+            setDebugName("Vector Access");
         }
         break;
 
@@ -525,15 +518,23 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
 
     case VetK:
     {
-        generateCode(node->child[0]);
-        loadVariable(node, TemporaryRegister);
-        print(
-            new TypeBInstruction(
-                44,
-                "LDR",
-                TemporaryRegister,
-                AcumulatorRegister,
-                AcumulatorRegister));
+        TreeNode *offsetNode = node->child[0];
+        if (offsetNode->kind.exp == ConstK && offsetNode->attr.val < 32)
+        {
+            int offset = offsetNode->attr.val;
+            loadVariable(node, TemporaryRegister);
+            print(loadWithImmediate(AcumulatorRegister,
+                                    TemporaryRegister,
+                                    offset));
+        }
+        else
+        {
+            generateCode(node->child[0]);
+            loadVariable(node, TemporaryRegister);
+            print(loadWithRegister(AcumulatorRegister,
+                                   TemporaryRegister,
+                                   AcumulatorRegister));
+        }
     }
     break;
 
@@ -651,9 +652,9 @@ void CodeGenerator::createOSHeader()
     setDebugName("Create OS header");
     print(pushAcumulator());
     print(pushRegister(TemporaryRegister));
+    print(pushRegister(SecondRegister));
     print(pushRegister(FramePointer));
     print(pushRegister(GlobalPointer));
-    print(pushRegister(ReturnAddressRegister));
     print(pushRegister(UserSPKeeper));
     print(moveHighToLow(TemporaryRegister, PCKeeper));
     print(pushRegister(TemporaryRegister));
@@ -683,9 +684,9 @@ void CodeGenerator::createFooter()
     generateCodeForPop(TemporaryRegister);
     print(moveLowToHigh(TemporaryRegister, PCKeeper));
     generateCodeForPop(UserSPKeeper);
-    generateCodeForPop(ReturnAddressRegister);
     generateCodeForPop(GlobalPointer);
     generateCodeForPop(FramePointer);
+    generateCodeForPop(SecondRegister);
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
     print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
@@ -697,31 +698,13 @@ void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
     Registers scopeRegister = node->scope == "global"
                                   ? GlobalPointer
                                   : FramePointer;
-    if (offset < 31)
-        print(
-            new TypeAInstruction(
-                49,
-                "LDR",
-                offset,
-                scopeRegister,
-                reg));
+    if (offset < 32)
+        print(loadWithImmediate(reg, scopeRegister, offset));
     else
     {
         generateCodeForConst(offset, reg);
-        print(
-            new TypeBInstruction(
-                44,
-                "LDR",
-                reg,
-                scopeRegister,
-                reg));
+        print(loadWithRegister(reg, scopeRegister, reg));
     }
-}
-
-void CodeGenerator::fetchVarOffset(TreeNode *node, Registers reg)
-{
-    BucketList record = getRecordFromSymbolTable(node);
-    print(loadImmediateToRegister(reg, record->memloc));
 }
 
 int CodeGenerator::fetchVarOffsetAsInteger(TreeNode *node)
@@ -750,7 +733,7 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
     int varCount = ds.getSize(node->attr.name);
 
     std::string label = "end_" + node->attr.name;
-    generateCodeForPop(ReturnAddressRegister);
+    generateCodeForPop(TemporaryRegister);
     registerLabelInstruction(label, code.back());
     setDebugName(label);
 
@@ -760,7 +743,7 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
 
     generateCodeForPop(FramePointer);
 
-    print(jumpToRegister(ReturnAddressRegister));
+    print(jumpToRegister(TemporaryRegister));
 }
 
 void CodeGenerator::registerLabelInstruction(std::string label, Instruction *Instruction)
@@ -797,13 +780,9 @@ void CodeGenerator::setOSVariables()
     std::cout << "STATE: " << std::to_string(state) << " \n";
     if (state > 0)
     {
-        print(
-            new TypeAInstruction(
-                48,
-                "STR",
-                state,
-                GlobalPointer,
-                TemporaryRegister));
+        print(storeWithImmediate(TemporaryRegister,
+                                 GlobalPointer,
+                                 state));
         setDebugName("SET OS VARIABLE");
     }
 }

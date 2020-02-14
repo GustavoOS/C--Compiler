@@ -8,10 +8,10 @@ enum Registers : int
     HeapArrayRegister = 0,
     AcumulatorRegister,
     TemporaryRegister,
+    SecondRegister,
     FramePointer,
     GlobalPointer,
     UserSPKeeper,
-    ReturnAddressRegister,
     SystemCallRegister,
     StoredSpecReg,
     LinkRegister = 12,
@@ -101,6 +101,10 @@ Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt(SystemCalls systemCall);
 Instruction *compare(Registers a, Registers b);
+Instruction *storeWithImmediate(Registers content, Registers baseAddr, int offset);
+Instruction *storeWithRegister(Registers content, Registers baseAddr, Registers offset);
+Instruction *loadWithImmediate(Registers target, Registers baseAddr, int offset);
+Instruction *loadWithRegister(Registers target, Registers baseAddr, Registers offset);
 
 Instruction *moveLowToHigh(Registers low, Registers high);
 Instruction *moveHighToLow(Registers low, Registers high);
@@ -268,7 +272,7 @@ public:
     Instruction *secondByte;
     Instruction *branch;
 
-    BranchLabel(std::string gotolabe, ConditionCodes condition);
+    BranchLabel(std::string gotolabe, ConditionCodes condition, bool isJumpAndLink);
 
     std::string to_string();
 };
