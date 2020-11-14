@@ -1,5 +1,5 @@
 
-Gramática BNF para C-:
+# Gramática BNF para C-:
 
 programa → declaração-lista
 declaração-lista → declaração-lista declaração | declaracao
@@ -34,7 +34,7 @@ args → arg-lista | vazio
 arg-lista → arg-lista , expressão | expressão
 
 
-EXEMPLO (SUGESTÃO) DE ÁRVORE SINTÁTICA:
+# EXEMPLO (SUGESTÃO) DE ÁRVORE SINTÁTICA:
 Programa de entrada:
 1 
  int gcd(int u, int v)
