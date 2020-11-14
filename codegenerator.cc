@@ -623,7 +623,12 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 AcumulatorRegister));
         break;
     case MOD:
-        std::cout << "MOD TO BE IMPLEMENTED" << std::endl;
+        print(
+            new TypeEInstruction(
+                65,
+                "MOD",
+                TemporaryRegister,
+                AcumulatorRegister));
         break;
 
     default:
