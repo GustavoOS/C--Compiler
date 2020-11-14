@@ -8,15 +8,19 @@ FLAGS = -Wall -g -std=c++11
 cminus: $(ANALYSIS) $(SYNTHESIS) $(HELPER) $(PRODUCTION)
 	$(CC) ${FLAGS} -o bin/cminus obj/*  main.cc -ly -lfl
 
-obj/lex.yy.o: scanner.l
-	flex -o scanner.c scanner.l
-	$(CC)  -g -std=c++11 -c scanner.c -o obj/lex.yy.o
+lex.yy.c: scanner.l
+	flex scanner.l
+
+obj/lex.yy.o: lex.yy.c
+	$(CC) $(FLAGS) -c lex.yy.c -o obj/lex.yy.o
 
 obj/util.o: util.cc
 	$(CC) $(FLAGS) -c util.cc -o obj/util.o
 
-obj/parser.o: cminus.y cminus.tab.c
+cminus.tab.c: cminus.y
 	bison -d cminus.y
+
+obj/parser.o: cminus.tab.c
 	$(CC) $(FLAGS) -c cminus.tab.c -o obj/parser.o
 
 obj/codegenerator.o: codegenerator.cc
