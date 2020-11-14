@@ -59,3 +59,8 @@ obj/bytes.o: bytes.cc
 
 view:
 	dot -Tps calc.dot -o graph.ps; evince graph.ps
+
+clean:
+	rm -rf obj
+	rm *.yy.*
+	rm *.tab.*
