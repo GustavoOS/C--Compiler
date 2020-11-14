@@ -6,12 +6,13 @@ CC = g++
 FLAGS = -Wall -g -std=c++11
 
 cminus: $(ANALYSIS) $(SYNTHESIS) $(HELPER) $(PRODUCTION)
-	$(CC) ${FLAGS} -o bin/cminus obj/*  main.cc -ly -lfl
+	$(CC) $(FLAGS) -o bin/cminus obj/*  main.cc -ly -lfl
 
 lex.yy.c: scanner.l
 	flex scanner.l
 
 obj/lex.yy.o: lex.yy.c
+	mkdir -p obj
 	$(CC) $(FLAGS) -c lex.yy.c -o obj/lex.yy.o
 
 obj/util.o: util.cc
