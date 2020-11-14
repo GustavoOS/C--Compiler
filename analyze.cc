@@ -348,6 +348,7 @@ static void checkNode(TreeNode *t)
       case MINUS:
       case TIMES:
       case SLASH:
+      case MOD:
         t->type = Integer;
         break;
       default:

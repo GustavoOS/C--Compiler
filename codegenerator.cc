@@ -622,6 +622,14 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister));
         break;
+    case MOD:
+        print(
+            new TypeEInstruction(
+                65,
+                "MOD",
+                TemporaryRegister,
+                AcumulatorRegister));
+        break;
 
     default:
         print(compare(TemporaryRegister, AcumulatorRegister));

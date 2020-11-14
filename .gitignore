@@ -1,12 +1,10 @@
-obj/*
-obj/*.o
-bin/*
+obj/
+bin/
+lex.yy.c
+*.o
 *.output
-*.tab.c
-*.tab.h
+cminus.tab.*
 scanner.c
-/tests/temporary.o
-temporary.o
 output.txt
 
 ### VisualStudioCode ###

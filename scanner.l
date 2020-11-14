@@ -51,6 +51,7 @@ static int yylex(void);
 "-"                                 return MINUS;
 "*"                                 return TIMES;
 "/"                                 return SLASH;
+\|                                  return MOD;
 "<"                                 return LESSER;
 "<="                                return LESSEQ;
 ">"                                 return GREATER;
