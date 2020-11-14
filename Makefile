@@ -11,7 +11,7 @@ cminus: $(ANALYSIS) $(SYNTHESIS) $(HELPER) $(PRODUCTION)
 lex.yy.c: scanner.l
 	flex scanner.l
 
-obj/lex.yy.o: lex.yy.c
+obj/lex.yy.o: lex.yy.c cminus.tab.c
 	mkdir -p obj
 	$(CC) $(FLAGS) -c lex.yy.c -o obj/lex.yy.o
 

@@ -622,6 +622,9 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister));
         break;
+    case MOD:
+        std::cout << "MOD TO BE IMPLEMENTED" << std::endl;
+        break;
 
     default:
         print(compare(TemporaryRegister, AcumulatorRegister));
