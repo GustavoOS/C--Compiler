@@ -52,7 +52,9 @@ void printToken(TokenType token, const char *tokenString)
   case SLASH:
     fprintf(listing, "/\n");
     break;
-
+  case MOD:
+    fprintf(listing, "|\n");
+    break;
   case LESSER:
     fprintf(listing, "<\n");
     break;
