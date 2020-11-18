@@ -510,12 +510,13 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         }
         else
         {
-            generateCode(node->child[0]);
+            generateCode(offsetNode);
             loadVariable(node, TemporaryRegister);
             print(loadWithRegister(AcumulatorRegister,
                                    TemporaryRegister,
                                    AcumulatorRegister));
         }
+        setDebugName("Vector loading");
     }
     break;
 
