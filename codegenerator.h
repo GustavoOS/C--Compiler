@@ -83,6 +83,8 @@ private:
     void printRegister(Registers reg);
     void pushArguments(int argumentCount, TreeNode *argumentNode);
 
+    void generateCodeForSimpleVariableAssignment(TreeNode * variable, TreeNode * value);
+
     SystemCalls getFooterSystemCall();
 };
 

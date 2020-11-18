@@ -14,7 +14,7 @@ void LibraryIncluder::buildLibrary()
     libraryString += "void writeIntoMemory(int address, int data){}\n";
     libraryString += "int extractFirstHW(int number){}\n";
     libraryString += "int extractSecondHW(int number){}\n";
-    libraryString += "int mod(int a, int b){}\n";
+    libraryString += "void assignPointer(int vector[], int address){}\n";
     libSize+=7;
 }
 
