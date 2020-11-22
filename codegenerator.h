@@ -78,7 +78,6 @@ private:
     void destroyGlobalAR();
     void buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode);
     void jumpAndLink(std::string);
-    void setOSVariables();
 
     void printRegister(Registers reg);
     void pushArguments(int argumentCount, TreeNode *argumentNode);

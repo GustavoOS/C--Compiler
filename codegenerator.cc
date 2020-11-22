@@ -221,17 +221,17 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case VetDeclK:
     {
+        if(node->attr.val == 0)
+            break;
+
         int offset = fetchVarOffsetAsInteger(node);
         Registers scopeRegister =
             node->scope == "global" ? GlobalPointer
                                     : FramePointer;
         if (offset < 32)
-        {
             print(storeWithImmediate(HeapArrayRegister,
                                      scopeRegister,
                                      offset));
-            setDebugName("begin VetDeclK " + node->attr.val);
-        }
         else
         {
             generateCodeForConst(offset, TemporaryRegister);
@@ -239,6 +239,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
                                     scopeRegister,
                                     TemporaryRegister));
         }
+        setDebugName("begin VetDeclK " + node->attr.val);
 
         if (node->attr.val < 256)
             print(addImmediate(HeapArrayRegister, node->attr.val));
@@ -758,23 +759,7 @@ void CodeGenerator::generateGlobalAR()
         print(pushAcumulator());
 
     print(copySP(GlobalPointer));
-
-    if (isOS)
-        setOSVariables();
     setDebugName("end GlobalAR");
-}
-
-void CodeGenerator::setOSVariables()
-{
-    int state = fetchVarOffsetByName("registers", "global");
-    std::cout << "STATE: " << std::to_string(state) << " \n";
-    if (state > 0)
-    {
-        print(storeWithImmediate(TemporaryRegister,
-                                 GlobalPointer,
-                                 state));
-        setDebugName("SET OS VARIABLE");
-    }
 }
 
 void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
