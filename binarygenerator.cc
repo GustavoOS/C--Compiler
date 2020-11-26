@@ -47,8 +47,13 @@ void UncompressedBinaryGenerator::run(std::vector<Instruction *> code)
                              bin,
                              inst->to_string());
 
-        if (!inst->debugname.empty())
-            mif.printDebugMsg(inst->debugname);
+        if (!inst->debugname.empty()) {
+            std::string debugAddress = "";
+            if(inst->debugAddress != 0) {
+                debugAddress = " to " + std::to_string(inst->debugAddress);
+            }
+            mif.printDebugMsg(inst->debugname + debugAddress);
+        }
 
         mif.jumpLine();
     }

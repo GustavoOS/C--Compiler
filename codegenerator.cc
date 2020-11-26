@@ -9,6 +9,7 @@
 #include "mifgenerator.h"
 #include "bytes.h"
 #include "instructions.h"
+#include <string>
 
 ConditionCodes translateCondition(TreeNode *conditionNode)
 {
@@ -819,7 +820,7 @@ void CodeGenerator::generateCodeForConst(int value, Registers reg)
     int nulls = 0;
     int current = number.findFirstByteIndex();
     print(loadImmediateToRegister(reg, number.getNthByte(current)));
-    setDebugName("begin ConstK");
+    setDebugName("begin ConstK " + std::to_string(value));
     for (int i = current + 1; i < 4; i++)
     {
         int b = number.getNthByte(i);
@@ -836,7 +837,7 @@ void CodeGenerator::generateCodeForConst(int value, Registers reg)
     if (nulls > 0)
         print(leftShiftImmediate(reg, 8 * nulls));
 
-    setDebugName("end ConstK");
+    setDebugName("end ConstK ");
 }
 
 void CodeGenerator::printRegister(Registers reg)

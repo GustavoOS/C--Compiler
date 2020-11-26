@@ -79,7 +79,7 @@ void MifGenerator::printMultipleEmptyPosition(int repeats)
 
 void MifGenerator::printDebugMsg(std::string msg)
 {
-    printLine(" (" + msg + ")");
+    printLine(" ((" + msg + "))");
 }
 
 void MifGenerator::updateGreatestLine(int line)

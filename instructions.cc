@@ -253,6 +253,11 @@ BranchLabel::BranchLabel(std::string gotolabel, ConditionCodes condition, bool i
                            : relativeBranch(condition, TemporaryRegister);
 }
 
+void BranchLabel::setDestination(int value)
+{
+    destinationAddress = value;
+}
+
 std::string BranchLabel::to_string()
 {
     return "Branch to " + tolabel;

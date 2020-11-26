@@ -69,7 +69,8 @@ public:
     std::string to_string_with_label();
 
     int relativeAddress;
-
+    int debugAddress;
+    
     static std::string getOpCode(int id);
     static std::string getOpBit(int id);
     static std::string getFunct2(int id);
@@ -268,13 +269,15 @@ class BranchLabel
     std::string tolabel;
 
 public:
+    int destinationAddress;
     Instruction *firstByte;
     Instruction *secondByte;
     Instruction *branch;
 
     BranchLabel(std::string gotolabe, ConditionCodes condition, bool isJumpAndLink);
 
+    void setDestination(int value);
     std::string to_string();
 };
 
-#endif
+#endif 
