@@ -78,10 +78,14 @@ private:
     void destroyGlobalAR();
     void buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode);
     void jumpAndLink(std::string);
-    void setOSVariables();
 
     void printRegister(Registers reg);
     void pushArguments(int argumentCount, TreeNode *argumentNode);
+
+    void generateCodeForSimpleVariableAssignment(TreeNode * variable, TreeNode * value);
+
+    void pushMultipleIfNeeded(int number);
+    void popMultipleIfNeeded(int number);
 
     SystemCalls getFooterSystemCall();
 };

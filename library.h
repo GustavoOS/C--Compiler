@@ -1,21 +1,26 @@
 #ifndef __LIBRARY_DEFINITION__
 #define __LIBRARY_DEFINITION__
 #include <iostream>
+#include <list>
 
 class LibraryIncluder
 {
-  public:
-    LibraryIncluder(std::string sourceFileName);
+public:
+    void setFileSource(std::string sourceFileName);
     FILE *getFinalFile();
+    std::list<std::string> library;
 
-    int libSize = 0;
-
-  private:
-
+protected:
     FILE *source;
-    std::string libraryString;
     std::string sourceFileName;
 
+    virtual void buildLibrary();
+};
+
+class OSLibraryIncluder : public LibraryIncluder
+{
+
+protected:
     void buildLibrary();
 };
 

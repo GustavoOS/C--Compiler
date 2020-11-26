@@ -81,9 +81,12 @@ int main(int argc, char *argv[])
     }
     fclose(originalSource);
     listing = stdout; /* send listing to screen */
-    LibraryIncluder includer = LibraryIncluder(pgm);
-    source = includer.getFinalFile();
-    lineno = -includer.libSize;
+    LibraryIncluder *includer = new LibraryIncluder();
+    if (isOperatingSystem || isBios)
+        includer = dynamic_cast<LibraryIncluder *>(new OSLibraryIncluder());
+    includer->setFileSource(pgm);
+    source = includer->getFinalFile();
+    lineno = -includer->library.size();
     // lineno = 0;
     fprintf(listing, "\nC- COMPILATION: %s\n", pgm.c_str());
 #if NO_PARSE
