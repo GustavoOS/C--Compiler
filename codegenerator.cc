@@ -753,10 +753,8 @@ void CodeGenerator::generateGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(loadImmediateToRegister(AcumulatorRegister, 0));
+    print(pushMultiple(globalCount));
     setDebugName("begin GlobalAR");
-    for (int i = 0; i < globalCount + 1; i++)
-        print(pushAcumulator());
 
     print(copySP(GlobalPointer));
     setDebugName("end GlobalAR");
@@ -815,8 +813,7 @@ void CodeGenerator::destroyGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    for (int i = 0; i < globalCount + 1; i++)
-        generateCodeForPop(TemporaryRegister);
+    print(popMultiple(globalCount));
 }
 
 void CodeGenerator::generateCodeForConst(int value, Registers reg)
