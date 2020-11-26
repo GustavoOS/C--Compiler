@@ -84,6 +84,9 @@ private:
 
     void generateCodeForSimpleVariableAssignment(TreeNode * variable, TreeNode * value);
 
+    void pushMultipleIfNeeded(int number);
+    void popMultipleIfNeeded(int number);
+
     SystemCalls getFooterSystemCall();
 };
 

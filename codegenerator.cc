@@ -221,7 +221,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
 
     case VetDeclK:
     {
-        if(node->attr.val == 0)
+        if (node->attr.val == 0)
             break;
 
         int offset = fetchVarOffsetAsInteger(node);
@@ -406,7 +406,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         }
         else if (FunctionName == "fun_assignPointer")
         {
-            TreeNode * vector = arg->sibling;
+            TreeNode *vector = arg->sibling;
             generateCodeForSimpleVariableAssignment(vector, arg);
         }
 
@@ -728,9 +728,7 @@ void CodeGenerator::DestroyARAndExitFunction(TreeNode *node)
     registerLabelInstruction(label, code.back());
     setDebugName(label);
 
-    // for (int delVars = 0; delVars < varCount; delVars++)
-    //     generateCodeForPop(TemporaryRegister);
-    print(popMultiple(varCount));
+    popMultipleIfNeeded(varCount);
 
     generateCodeForPop(FramePointer);
 
@@ -753,11 +751,14 @@ void CodeGenerator::generateGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(pushMultiple(globalCount));
-    setDebugName("begin GlobalAR");
+    if (globalCount > 0)
+    {
+        print(pushMultiple(globalCount));
+        setDebugName("begin GlobalAR");
 
-    print(copySP(GlobalPointer));
-    setDebugName("end GlobalAR");
+        print(copySP(GlobalPointer));
+        setDebugName("end GlobalAR");
+    }
 }
 
 void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
@@ -777,11 +778,7 @@ void CodeGenerator::generateCodeForFunctionActivation(TreeNode *node)
 
 void CodeGenerator::buildAR(int localVariableCount, int argumentCount, TreeNode *argumentNode)
 {
-    // // Inserting the local vars into the AR
-    // for (int i = 0; i < localVariableCount; ++i)
-    //     print(pushAcumulator());
-
-    print(pushMultiple(localVariableCount));
+    pushMultipleIfNeeded(localVariableCount);
     pushArguments(argumentCount, argumentNode);
 }
 
@@ -813,7 +810,7 @@ void CodeGenerator::destroyGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    print(popMultiple(globalCount));
+    popMultipleIfNeeded(globalCount);
 }
 
 void CodeGenerator::generateCodeForConst(int value, Registers reg)
@@ -848,17 +845,17 @@ void CodeGenerator::printRegister(Registers reg)
     print(outputRegister(reg));
 }
 
-void CodeGenerator::generateCodeForSimpleVariableAssignment(TreeNode * variable, TreeNode * value)
+void CodeGenerator::generateCodeForSimpleVariableAssignment(TreeNode *variable, TreeNode *value)
 {
     generateCode(value);
     int offset = fetchVarOffsetAsInteger(variable);
     Registers scopeRegister = variable->scope == "global"
-                                    ? GlobalPointer
-                                    : FramePointer;
+                                  ? GlobalPointer
+                                  : FramePointer;
     if (offset < 31)
         print(storeWithImmediate(AcumulatorRegister,
-                                    scopeRegister,
-                                    offset));
+                                 scopeRegister,
+                                 offset));
     else
     {
         generateCodeForConst(offset, TemporaryRegister);
@@ -867,4 +864,16 @@ void CodeGenerator::generateCodeForSimpleVariableAssignment(TreeNode * variable,
                                 TemporaryRegister));
     }
     setDebugName("Simple Variable Assignment");
+}
+
+void CodeGenerator::pushMultipleIfNeeded(int number)
+{
+    if (number > 0)
+        print(pushMultiple(number));
+}
+
+void CodeGenerator::popMultipleIfNeeded(int number)
+{
+    if (number > 0)
+        print(popMultiple(number));
 }
