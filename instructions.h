@@ -269,14 +269,12 @@ class BranchLabel
     std::string tolabel;
 
 public:
-    int destinationAddress;
     Instruction *firstByte;
     Instruction *secondByte;
     Instruction *branch;
 
     BranchLabel(std::string gotolabe, ConditionCodes condition, bool isJumpAndLink);
 
-    void setDestination(int value);
     std::string to_string();
 };
 

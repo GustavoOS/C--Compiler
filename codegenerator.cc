@@ -9,7 +9,6 @@
 #include "mifgenerator.h"
 #include "bytes.h"
 #include "instructions.h"
-#include <string>
 
 ConditionCodes translateCondition(TreeNode *conditionNode)
 {
