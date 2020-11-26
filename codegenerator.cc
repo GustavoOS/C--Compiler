@@ -847,7 +847,7 @@ void CodeGenerator::printRegister(Registers reg)
 
 void CodeGenerator::generateCodeForSimpleVariableAssignment(TreeNode *variable, TreeNode *value)
 {
-    generateCode(value);
+    generateCodeForAnyNode(value);
     int offset = fetchVarOffsetAsInteger(variable);
     Registers scopeRegister = variable->scope == "global"
                                   ? GlobalPointer
