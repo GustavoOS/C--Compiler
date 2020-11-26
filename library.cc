@@ -1,21 +1,18 @@
 #include "library.h"
 #include <fstream>
 
-LibraryIncluder::LibraryIncluder(std::string sourceFile)
+void LibraryIncluder::setFileSource(std::string sourceFile)
 {
     sourceFileName = sourceFile;
 }
 
 void LibraryIncluder::buildLibrary()
 {
-    libraryString += "int input(void) {}\n";
-    libraryString += "void output(int number) {}\n";
-    libraryString += "int readFromMemory(int address){}\n";
-    libraryString += "void writeIntoMemory(int address, int data){}\n";
-    libraryString += "int extractFirstHW(int number){}\n";
-    libraryString += "int extractSecondHW(int number){}\n";
-    libraryString += "void assignPointer(int vector[], int address){}\n";
-    libSize+=7;
+    std::string lib [] = {
+        "int input(void) {}",
+        "void output(int number) {}"};
+    
+    library.assign(std::begin(lib), std::end(lib));
 }
 
 FILE *LibraryIncluder::getFinalFile()
@@ -24,9 +21,10 @@ FILE *LibraryIncluder::getFinalFile()
     std::ofstream outputFile("temporary.o");
     std::ifstream inputFile(sourceFileName);
     std::string line;
-    // std::stringstream buffer;
-    // buffer << libraryString << inputFile.rdbuf();
-    outputFile << libraryString;
+
+    for(auto fun : library)
+        outputFile << fun << std::endl;
+
     if (inputFile.is_open())
         while (getline(inputFile, line))
         {
@@ -45,4 +43,18 @@ FILE *LibraryIncluder::getFinalFile()
     source = fopen("temporary.o", "r");
     // source = fopen(sourceFileName.c_str(), "r") ;
     return source;
+}
+
+void OSLibraryIncluder::buildLibrary()
+{
+    std::string lib[] = {
+        "int input(void) {}",
+        "void output(int number) {}",
+        "int readFromMemory(int address){}",
+        "void writeIntoMemory(int address, int data){}",
+        "int extractFirstHW(int number){}",
+        "int extractSecondHW(int number){}",
+        "void assignPointer(int vector[], int address){}"};
+
+    library.assign(std::begin(lib), std::end(lib));
 }
