@@ -69,7 +69,8 @@ public:
     std::string to_string_with_label();
 
     int relativeAddress;
-
+    int debugAddress;
+    
     static std::string getOpCode(int id);
     static std::string getOpBit(int id);
     static std::string getFunct2(int id);
@@ -277,4 +278,4 @@ public:
     std::string to_string();
 };
 
-#endif
+#endif 

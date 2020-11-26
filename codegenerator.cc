@@ -819,7 +819,7 @@ void CodeGenerator::generateCodeForConst(int value, Registers reg)
     int nulls = 0;
     int current = number.findFirstByteIndex();
     print(loadImmediateToRegister(reg, number.getNthByte(current)));
-    setDebugName("begin ConstK");
+    setDebugName("begin ConstK " + std::to_string(value));
     for (int i = current + 1; i < 4; i++)
     {
         int b = number.getNthByte(i);
