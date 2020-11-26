@@ -836,7 +836,7 @@ void CodeGenerator::generateCodeForConst(int value, Registers reg)
     if (nulls > 0)
         print(leftShiftImmediate(reg, 8 * nulls));
 
-    setDebugName("end ConstK ");
+    setDebugName("end ConstK");
 }
 
 void CodeGenerator::printRegister(Registers reg)
