@@ -15,9 +15,9 @@ void hr(std::string);
 class CodeGenerator
 {
 public:
-    CodeGenerator(bool displayable);
+    void setTerminalDebug(bool displayable);
     void setMode(bool isBios, bool isOS);
-    void generate(TreeNode *node);
+    virtual void generate(TreeNode *node);
     void generateCodeToJumpToOS();
     void linker();
     std::vector<Instruction *> getCode()
@@ -34,7 +34,7 @@ public:
         return labelOriginMap;
     }
 
-private:
+protected:
     std::string generatedCode;
     std::vector<Instruction *> code;
     std::map<std::string, Instruction *> labelDestMap;
@@ -82,12 +82,18 @@ private:
     void printRegister(Registers reg);
     void pushArguments(int argumentCount, TreeNode *argumentNode);
 
-    void generateCodeForSimpleVariableAssignment(TreeNode * variable, TreeNode * value);
+    void generateCodeForSimpleVariableAssignment(TreeNode *variable, TreeNode *value);
 
     void pushMultipleIfNeeded(int number);
     void popMultipleIfNeeded(int number);
 
     SystemCalls getFooterSystemCall();
+};
+
+class DummyCodeGenerator : public CodeGenerator
+{
+public:
+    void generate(TreeNode *node);
 };
 
 #endif
