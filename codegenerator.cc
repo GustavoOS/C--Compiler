@@ -33,7 +33,7 @@ ConditionCodes translateCondition(TreeNode *conditionNode)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable)
+void CodeGenerator::setTerminalDebug(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -867,4 +867,8 @@ void CodeGenerator::popMultipleIfNeeded(int number)
 {
     if (number > 0)
         print(popMultiple(number));
+}
+
+void DummyCodeGenerator::generate(TreeNode * node)
+{
 }

@@ -138,7 +138,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    CodeGenerator cg = CodeGenerator(TraceCode);
+    CodeGenerator cg;
+    cg.setTerminalDebug(TraceCode);
     cg.setMode(isBios, isOperatingSystem);
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
