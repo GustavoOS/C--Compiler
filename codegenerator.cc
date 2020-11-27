@@ -423,7 +423,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         case VetK:
         {
             std::cout << "VECTOR\n";
-            generateCode(node->child[1]); // Value to be assigned
+            generateCodeForAnyNode(node->child[1]); // Value to be assigned
             TreeNode *offsetNode = varToBeAssignedInto->child[0];
             if (offsetNode->kind.exp == ConstK && node->attr.val < 31)
             {
@@ -434,7 +434,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             else
             {
                 print(pushAcumulator());
-                generateCode(offsetNode);
+                generateCodeForAnyNode(offsetNode);
                 loadVariable(varToBeAssignedInto, TemporaryRegister);
                 generateCodeForPop(SecondRegister);
                 print(storeWithRegister(SecondRegister, AcumulatorRegister, TemporaryRegister));
@@ -500,7 +500,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         }
         else
         {
-            generateCode(offsetNode);
+            generateCodeForAnyNode(offsetNode);
             loadVariable(node, TemporaryRegister);
             print(loadWithRegister(AcumulatorRegister,
                                    TemporaryRegister,
