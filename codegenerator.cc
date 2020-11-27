@@ -328,7 +328,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "fun_input") &&
             (FunctionName != "fun_output") &&
             (FunctionName != "fun_readFromMemory") &&
-            (FunctionName != "fun_writeIntoMemory") &&
             (FunctionName != "fun_extractFirstHW") &&
             (FunctionName != "fun_extractSecondHW") &&
             (FunctionName != "fun_assignPointer"))
@@ -384,16 +383,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             print(loadWithImmediate(AcumulatorRegister, AcumulatorRegister, 0));
             setDebugName("READ MEMORY");
         }
-        else if (FunctionName == "fun_writeIntoMemory")
-        {
-            generateCodeForAnyNode(arg);
-            print(pushAcumulator()); //Push data arg
-            arg = arg->sibling;
-            generateCodeForAnyNode(arg);           //Address in Acumulator
-            generateCodeForPop(TemporaryRegister); //Data in Temporary Register
-            print(storeWithImmediate(TemporaryRegister, AcumulatorRegister, 0));
-            setDebugName("WRITE MEMORY");
-        }
         else if (FunctionName == "fun_extractFirstHW")
         {
             generateCode(arg);
@@ -434,7 +423,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         case VetK:
         {
             std::cout << "VECTOR\n";
-            generateCode(node->child[1]); // Value to be assigned
+            generateCodeForAnyNode(node->child[1]); // Value to be assigned
             TreeNode *offsetNode = varToBeAssignedInto->child[0];
             if (offsetNode->kind.exp == ConstK && node->attr.val < 31)
             {
@@ -445,7 +434,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             else
             {
                 print(pushAcumulator());
-                generateCode(offsetNode);
+                generateCodeForAnyNode(offsetNode);
                 loadVariable(varToBeAssignedInto, TemporaryRegister);
                 generateCodeForPop(SecondRegister);
                 print(storeWithRegister(SecondRegister, AcumulatorRegister, TemporaryRegister));
@@ -511,7 +500,7 @@ void CodeGenerator::generateCodeForExprNode(TreeNode *node)
         }
         else
         {
-            generateCode(offsetNode);
+            generateCodeForAnyNode(offsetNode);
             loadVariable(node, TemporaryRegister);
             print(loadWithRegister(AcumulatorRegister,
                                    TemporaryRegister,

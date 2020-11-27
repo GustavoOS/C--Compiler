@@ -51,7 +51,6 @@ void OSLibraryIncluder::buildLibrary()
         "int input(void) {}",
         "void output(int number) {}",
         "int readFromMemory(int address){}",
-        "void writeIntoMemory(int address, int data){}",
         "int extractFirstHW(int number){}",
         "int extractSecondHW(int number){}",
         "void assignPointer(int vector[], int address){}"};
