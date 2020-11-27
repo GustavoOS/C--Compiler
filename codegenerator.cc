@@ -630,6 +630,7 @@ void CodeGenerator::createOSHeader()
 {
     print(new TypeHInstruction(58, "CPXR", StoredSpecReg));
     setDebugName("Create OS header");
+    print(pushRegister(HeapArrayRegister));
     print(pushAcumulator());
     print(pushRegister(TemporaryRegister));
     print(pushRegister(SecondRegister));
@@ -669,6 +670,7 @@ void CodeGenerator::createFooter()
     generateCodeForPop(SecondRegister);
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
+    generateCodeForPop(HeapArrayRegister);
     print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
 }
 
