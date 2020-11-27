@@ -328,7 +328,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "fun_input") &&
             (FunctionName != "fun_output") &&
             (FunctionName != "fun_readFromMemory") &&
-            (FunctionName != "fun_writeIntoMemory") &&
             (FunctionName != "fun_extractFirstHW") &&
             (FunctionName != "fun_extractSecondHW") &&
             (FunctionName != "fun_assignPointer"))
@@ -383,16 +382,6 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             generateCode(arg);
             print(loadWithImmediate(AcumulatorRegister, AcumulatorRegister, 0));
             setDebugName("READ MEMORY");
-        }
-        else if (FunctionName == "fun_writeIntoMemory")
-        {
-            generateCodeForAnyNode(arg);
-            print(pushAcumulator()); //Push data arg
-            arg = arg->sibling;
-            generateCodeForAnyNode(arg);           //Address in Acumulator
-            generateCodeForPop(TemporaryRegister); //Data in Temporary Register
-            print(storeWithImmediate(TemporaryRegister, AcumulatorRegister, 0));
-            setDebugName("WRITE MEMORY");
         }
         else if (FunctionName == "fun_extractFirstHW")
         {
