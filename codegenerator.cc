@@ -644,6 +644,7 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(TemporaryRegister)); //SpecReg
     print(pushRegister(SystemCallRegister));
     print(copySP(TemporaryRegister));
+    generateCodeForConst(4096, HeapArrayRegister);
     setDebugName("OS HEADER END");
 }
 
