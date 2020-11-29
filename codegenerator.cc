@@ -744,8 +744,7 @@ void CodeGenerator::generateGlobalAR()
     int globalCount = ds.getSize("global");
     if (globalCount > 0)
     {
-        globalCount++;
-        print(pushMultiple(globalCount));
+        print(pushMultiple(globalCount + 1));
         setDebugName("begin GlobalAR");
 
         print(copySP(GlobalPointer));
@@ -871,6 +870,6 @@ void CodeGenerator::popMultipleIfNeeded(int number)
         print(popMultiple(number));
 }
 
-void DummyCodeGenerator::generate(TreeNode * node)
+void DummyCodeGenerator::generate(TreeNode *node)
 {
 }
