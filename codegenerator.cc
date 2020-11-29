@@ -742,6 +742,7 @@ void CodeGenerator::generateGlobalAR()
     int globalCount = ds.getSize("global");
     if (globalCount > 0)
     {
+        globalCount++;
         print(pushMultiple(globalCount));
         setDebugName("begin GlobalAR");
 
@@ -799,7 +800,8 @@ void CodeGenerator::destroyGlobalAR()
 {
     DataSection ds;
     int globalCount = ds.getSize("global");
-    popMultipleIfNeeded(globalCount);
+    if (globalCount > 0)
+        print(popMultiple(globalCount + 1));
 }
 
 void CodeGenerator::generateCodeForConst(int value, Registers reg)
