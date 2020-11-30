@@ -21,5 +21,6 @@ void mainVerify();
 void traverse(TreeNode *t,
               void (*preProc)(TreeNode *),
               void (*postProc)(TreeNode *));
+extern bool hasAllocations;
 
 #endif

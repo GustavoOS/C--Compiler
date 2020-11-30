@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "util.h"
 #include "symtab.h"
+#include "analyze.h"
 #include "memory.h"
 #include <iostream>
 #include <assert.h>
@@ -644,7 +645,8 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(TemporaryRegister)); //SpecReg
     print(pushRegister(SystemCallRegister));
     print(copySP(TemporaryRegister));
-    generateCodeForConst(4096, HeapArrayRegister);
+    if (hasAllocations)
+        generateCodeForConst(4096, HeapArrayRegister);
     setDebugName("OS HEADER END");
 }
 
