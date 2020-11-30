@@ -17,6 +17,8 @@
 //current scope, standard is global
 std::string scope = (std::string) "global";
 
+bool hasAllocations = false;
+
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc 
@@ -112,6 +114,7 @@ static void insertNode(TreeNode *t)
       {
         if (isTreeNodeTypeInt(t))
         {
+          hasAllocations = hasAllocations || (t->attr.val > 0);
           st_declare(t->attr.name,
                      t->lineno,
                      dataSection->allocateVariable(
