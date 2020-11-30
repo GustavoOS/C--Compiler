@@ -426,9 +426,9 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             std::cout << "VECTOR\n";
             generateCodeForAnyNode(node->child[1]); // Value to be assigned
             TreeNode *offsetNode = varToBeAssignedInto->child[0];
-            if (offsetNode->kind.exp == ConstK && node->attr.val < 31)
+            if (offsetNode->kind.exp == ConstK && offsetNode->attr.val < 31)
             {
-                int offset = node->attr.val;
+                int offset = offsetNode->attr.val;
                 loadVariable(varToBeAssignedInto, TemporaryRegister);
                 print(storeWithImmediate(AcumulatorRegister, TemporaryRegister, offset));
             }
