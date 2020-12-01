@@ -650,7 +650,8 @@ void CodeGenerator::createOSHeader()
 
 void CodeGenerator::createBIOSHeader()
 {
-    generateCodeForConst(8192, HeapArrayRegister);
+    if (hasAllocations)
+        generateCodeForConst(6144, HeapArrayRegister);
 }
 
 void CodeGenerator::createFooter()
