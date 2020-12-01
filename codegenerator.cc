@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "util.h"
 #include "symtab.h"
+#include "analyze.h"
 #include "memory.h"
 #include <iostream>
 #include <assert.h>
@@ -33,7 +34,7 @@ ConditionCodes translateCondition(TreeNode *conditionNode)
 }
 
 //Code Generator Class
-CodeGenerator::CodeGenerator(bool displayable)
+void CodeGenerator::setTerminalDebug(bool displayable)
 {
     shouldPrintGeneratedCodeOnScreen = displayable;
     shouldShowVisitingMessages = false;
@@ -630,6 +631,7 @@ void CodeGenerator::createOSHeader()
 {
     print(new TypeHInstruction(58, "CPXR", StoredSpecReg));
     setDebugName("Create OS header");
+    print(pushRegister(HeapArrayRegister));
     print(pushAcumulator());
     print(pushRegister(TemporaryRegister));
     print(pushRegister(SecondRegister));
@@ -638,17 +640,18 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(UserSPKeeper));
     print(moveHighToLow(TemporaryRegister, PCKeeper));
     print(pushRegister(TemporaryRegister));
-    print(nop());
     print(moveHighToLow(TemporaryRegister, StoredSpecReg));
     print(pushRegister(TemporaryRegister)); //SpecReg
     print(pushRegister(SystemCallRegister));
-    print(copySP(TemporaryRegister));
+    if (hasAllocations)
+        generateCodeForConst(4096, HeapArrayRegister);
     setDebugName("OS HEADER END");
 }
 
 void CodeGenerator::createBIOSHeader()
 {
-    generateCodeForConst(8192, HeapArrayRegister);
+    if (hasAllocations)
+        generateCodeForConst(6144, HeapArrayRegister);
 }
 
 void CodeGenerator::createFooter()
@@ -669,7 +672,8 @@ void CodeGenerator::createFooter()
     generateCodeForPop(SecondRegister);
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
-    print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
+    generateCodeForPop(HeapArrayRegister);
+    print(new TypeHInstruction(76,"PXR", StoredSpecReg));
 }
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
@@ -742,8 +746,7 @@ void CodeGenerator::generateGlobalAR()
     int globalCount = ds.getSize("global");
     if (globalCount > 0)
     {
-        globalCount++;
-        print(pushMultiple(globalCount));
+        print(pushMultiple(globalCount + 1));
         setDebugName("begin GlobalAR");
 
         print(copySP(GlobalPointer));
@@ -867,4 +870,8 @@ void CodeGenerator::popMultipleIfNeeded(int number)
 {
     if (number > 0)
         print(popMultiple(number));
+}
+
+void DummyCodeGenerator::generate(TreeNode *node)
+{
 }

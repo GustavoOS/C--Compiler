@@ -5,19 +5,19 @@
 
 enum Registers : int
 {
-    HeapArrayRegister = 0,
+    HeapArrayRegister = 0, /* Low Registers */
     AcumulatorRegister,
     TemporaryRegister,
     SecondRegister,
     FramePointer,
     GlobalPointer,
     UserSPKeeper,
-    SystemCallRegister,
-    StoredSpecReg,
+    SystemCallRegister, /* Low registers*/
+    StoredSpecReg, /* High Registers */
     LinkRegister = 12,
     PCKeeper,
     StackPointer,
-    ProgramCounter
+    ProgramCounter /* High Registers */
 };
 
 enum ConditionCodes
