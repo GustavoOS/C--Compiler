@@ -673,7 +673,7 @@ void CodeGenerator::createFooter()
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
     generateCodeForPop(HeapArrayRegister);
-    print(new TypeEInstruction(76, "PXR", 0, StoredSpecReg));
+    print(new TypeHInstruction(76,"PXR", StoredSpecReg));
 }
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
