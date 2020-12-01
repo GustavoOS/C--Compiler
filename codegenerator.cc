@@ -640,11 +640,9 @@ void CodeGenerator::createOSHeader()
     print(pushRegister(UserSPKeeper));
     print(moveHighToLow(TemporaryRegister, PCKeeper));
     print(pushRegister(TemporaryRegister));
-    print(nop());
     print(moveHighToLow(TemporaryRegister, StoredSpecReg));
     print(pushRegister(TemporaryRegister)); //SpecReg
     print(pushRegister(SystemCallRegister));
-    print(copySP(TemporaryRegister));
     if (hasAllocations)
         generateCodeForConst(4096, HeapArrayRegister);
     setDebugName("OS HEADER END");
