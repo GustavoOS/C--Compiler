@@ -49,7 +49,7 @@ protected:
     void generateCode(TreeNode *node);
     void createHeader();
     void createOSHeader();
-    void createBIOSHeader();
+    void createStandardHeader(int number);
     void createFooter();
     void generateCodeForAnyNode(TreeNode *);
     void generateCodeForStmtNode(TreeNode *node);
