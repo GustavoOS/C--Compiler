@@ -617,7 +617,7 @@ void CodeGenerator::createHeader()
     setDebugName("begin Header");
     if (isOS)
         createOSHeader();
-    if(isBios)
+    if (isBios)
         createStandardHeader(7168);
 
     generateRunTimeSystem();
