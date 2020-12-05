@@ -1,8 +1,9 @@
 #include <assert.h>
 #include "binarygenerator.h"
 
-#define MEMORY_SIZE 16384
-#define BIOS_SIZE 512
+#define MEMORY_SIZE 8191
+#define BIOS_SIZE 256
+#define STORAGE_SIZE 32768
 
 BinaryGenerator *BinaryGeneratorFactory::generate(bool isCompressed, bool isBios, bool isOS)
 {
@@ -97,7 +98,7 @@ void CompressedBinaryGenerator::run(std::vector<Instruction *> code)
         mif.jumpLine();
     }
 
-    mif.printMultipleEmptyPosition(MEMORY_SIZE);
+    mif.printMultipleEmptyPosition(STORAGE_SIZE);
 
     mif.printFooter();
     printf("\n\n Output saved on %s \n\n", fileName.c_str());

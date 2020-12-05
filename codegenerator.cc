@@ -618,7 +618,7 @@ void CodeGenerator::createHeader()
     if (isOS)
         createOSHeader();
     if (isBios)
-        createBIOSHeader();
+        createStandardHeader(7168);
 
     generateRunTimeSystem();
 
@@ -643,15 +643,16 @@ void CodeGenerator::createOSHeader()
     print(moveHighToLow(TemporaryRegister, StoredSpecReg));
     print(pushRegister(TemporaryRegister)); //SpecReg
     print(pushRegister(SystemCallRegister));
-    if (hasAllocations)
-        generateCodeForConst(4096, HeapArrayRegister);
-    setDebugName("OS HEADER END");
+    setDebugName("OS STACK END");
+    createStandardHeader(6144);
 }
 
-void CodeGenerator::createBIOSHeader()
+void CodeGenerator::createStandardHeader(int number)
 {
-    if (hasAllocations)
-        generateCodeForConst(6144, HeapArrayRegister);
+    if (!hasAllocations)
+        return;
+    generateCodeForConst(number, HeapArrayRegister);
+    setDebugName("Set Heap Array Register at " + std::to_string(number));
 }
 
 void CodeGenerator::createFooter()
@@ -673,7 +674,7 @@ void CodeGenerator::createFooter()
     generateCodeForPop(TemporaryRegister);
     generateCodeForPop(AcumulatorRegister);
     generateCodeForPop(HeapArrayRegister);
-    print(new TypeHInstruction(76,"PXR", StoredSpecReg));
+    print(new TypeHInstruction(76, "PXR", StoredSpecReg));
 }
 
 void CodeGenerator::loadVariable(TreeNode *node, Registers reg)
