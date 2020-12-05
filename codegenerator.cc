@@ -21,7 +21,7 @@ ConditionCodes translateCondition(TreeNode *conditionNode)
     case LESSEQ:
         return LS;
     case GREATER:
-        return HI;
+        return GT;
     case GREATEQ:
         return CS;
     case EQCOMP:
