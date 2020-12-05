@@ -1,4 +1,5 @@
 #include "mifgenerator.h"
+#include "binarygenerator.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -15,8 +16,16 @@ MifGenerator::MifGenerator()
 void MifGenerator::open(std::string outputFile, bool isBios, bool isCompressed)
 {
     this->isCompressed = isBios || isCompressed;
-    std::string width = isBios ? "16;\n" : "32;\n";
-    std::string depth = isBios ? "512;\n" : "16384;\n";
+    std::string width = "32;\n";
+    std::string depth = std::to_string(MEMORY_SIZE) + ";\n";
+    if (isBios)
+    {
+        width = "16;\n";
+        depth =  std::to_string(BIOS_SIZE) +";\n";
+    }
+    if(isCompressed)
+        depth = std::to_string(STORAGE_SIZE) + ";\n";
+
     dontcare = isBios ? "XXXXXXXXXXXXXXXX"
                       : "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     header += "WIDTH=" + width +

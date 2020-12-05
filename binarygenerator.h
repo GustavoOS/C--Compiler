@@ -6,6 +6,10 @@
 #include "instructions.h"
 #include "mifgenerator.h"
 
+#define MEMORY_SIZE 8191
+#define BIOS_SIZE 256
+#define STORAGE_SIZE 32768
+
 class BinaryGenerator
 {
 public:

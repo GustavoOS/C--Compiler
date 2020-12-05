@@ -1,10 +1,6 @@
 #include <assert.h>
 #include "binarygenerator.h"
 
-#define MEMORY_SIZE 8191
-#define BIOS_SIZE 256
-#define STORAGE_SIZE 32768
-
 BinaryGenerator *BinaryGeneratorFactory::generate(bool isCompressed, bool isBios, bool isOS)
 {
     if (isCompressed)
