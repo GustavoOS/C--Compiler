@@ -25,20 +25,20 @@ enum ConditionCodes
     EQ = 0, //Equal
     NE,     //NOT EQUAL
     HS,     //Unsigned Greater than or equal
-    LO,     //Unsigned Lower then
+    LO,     //Unsigned less then
     MI,     //Negative
     PL,     //Positive or zero
-    VS,     //Overflow
-    VC,     //No overflow
+    VS,     //Overflow (V set)
+    VC,     //No overflow (V Clear)
     HI,     //Unsigned greater than
-    LS,     //Unsgined lower than or equal
+    LS,     //Unsgined less than or equal
     GE,     //Signed greater than or equal
-    LT,     //Signed lower than
+    LT,     //Signed less than
     GT,     //Signed greater than
-    LE,     //Signed lower than
+    LE,     //Signed less than or equal
     AL,     //Always
     CS = 2, //Unsigned Greater than or equal
-    CC = 3  //Unsigned Lower THan
+    CC = 3  //Unsigned less THan
 };
 
 enum SystemCalls

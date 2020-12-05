@@ -17,7 +17,7 @@ ConditionCodes translateCondition(TreeNode *conditionNode)
     switch (operation)
     {
     case LESSER:
-        return CC;
+        return LT;
     case LESSEQ:
         return LS;
     case GREATER:
