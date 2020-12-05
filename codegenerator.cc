@@ -424,7 +424,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         break;
         case VetK:
         {
-            std::cout << "VECTOR\n";
+            if (shouldPrintGeneratedCodeOnScreen)
+                std::cout << "VECTOR\n";
             generateCodeForAnyNode(node->child[1]); // Value to be assigned
             TreeNode *offsetNode = varToBeAssignedInto->child[0];
             if (offsetNode->kind.exp == ConstK && offsetNode->attr.val < 31)
