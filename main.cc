@@ -44,8 +44,7 @@ FILE *code;
 int EchoSource = FALSE;
 int TraceScan = FALSE;
 int TraceParse = FALSE;
-int TraceAnalyze = TRUE;
-int TraceCode = TRUE;
+bool TraceLink = false;
 
 int Error = FALSE;
 
@@ -141,11 +140,15 @@ int main(int argc, char *argv[])
     CodeGenerator cg;
     cg.setTerminalDebug(TraceCode);
     cg.setMode(isBios, isOperatingSystem);
+    if (TraceCode)
+    {
     std::cout << "\nStarting code generation process\n";
     std::cout << "--------------------------------------\n\n\n";
+    }
     cg.generate(syntaxTree);
 
     (new Linker())
+        ->setDebugMode(!TraceLink)
         ->withCode(cg.getCode())
         ->withDestMap(cg.getDestMap())
         ->withOriginMap(cg.getOriginMap())

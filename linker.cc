@@ -3,7 +3,8 @@
 
 void Linker::link()
 {
-    printEveryLabelLink();
+    if (!is_silent)
+        printEveryLabelLink();
 
     insertIndexInsideEveryInstruction();
 
@@ -21,13 +22,16 @@ void Linker::link()
             label_dest->secondByte->immediate = number.getNthByte(3);
 
             // Prints
-            std::cout << "LINKER PRINTS\n";
-            std::cout << label << " -> " << label_dest->to_string() << "\n";
-            std::cout << "destinationAddress: " << destinationAddress << "\n";
-            std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
-            std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
-            std::cout << "branch position: " << label_dest->branch->relativeAddress + offset << "\n";
-            std::cout << "absolute position: " << labelDestMap[label]->relativeAddress + offset << "\n";
+            if (!is_silent)
+            {
+                std::cout << "LINKER PRINTS\n";
+                std::cout << label << " -> " << label_dest->to_string() << "\n";
+                std::cout << "destinationAddress: " << destinationAddress << "\n";
+                std::cout << "first Byte : " << label_dest->firstByte->to_string() << "\n";
+                std::cout << "second Byte: " << label_dest->secondByte->to_string() << "\n";
+                std::cout << "branch position: " << label_dest->branch->relativeAddress + offset << "\n";
+                std::cout << "absolute position: " << labelDestMap[label]->relativeAddress + offset << "\n";
+            }
         }
     }
 }
@@ -67,5 +71,11 @@ Linker *Linker::withOriginMap(std::map<std::string, std::vector<BranchLabel *>> 
 Linker *Linker::withOffset(int value)
 {
     offset = value;
+    return this;
+}
+
+Linker *Linker::setDebugMode(bool isSilent)
+{
+    is_silent = isSilent;
     return this;
 }

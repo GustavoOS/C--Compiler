@@ -417,7 +417,8 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
         case IdK:
         {
-            std::cout << "VARIABLE\n";
+            if (shouldPrintGeneratedCodeOnScreen)
+                std::cout << "VARIABLE\n";
             generateCodeForSimpleVariableAssignment(varToBeAssignedInto, node->child[1]);
         }
         break;
