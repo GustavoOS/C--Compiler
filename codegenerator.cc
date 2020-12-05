@@ -17,13 +17,13 @@ ConditionCodes translateCondition(TreeNode *conditionNode)
     switch (operation)
     {
     case LESSER:
-        return CC;
+        return LT;
     case LESSEQ:
-        return LS;
+        return LE;
     case GREATER:
-        return HI;
+        return GT;
     case GREATEQ:
-        return CS;
+        return GE;
     case EQCOMP:
         return EQ;
     case NOTEQ:
