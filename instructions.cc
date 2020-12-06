@@ -214,6 +214,11 @@ Instruction *compare(Registers a, Registers b)
         b);
 }
 
+Instruction *compareWithImmediate(Registers reg, int immediate)
+{
+    return new TypeDInstruction(9, "CMP", reg, immediate);
+}
+
 Instruction *halt()
 {
     return new TypeDInstruction(

@@ -540,6 +540,17 @@ void CodeGenerator::generateOptimizedOperation(TreeNode *node)
         generateCode(node->child[0]);
         print(subtractImmediate(AcumulatorRegister, rightSon->attr.val));
         break;
+    case GREATEQ:
+    case GREATER:
+    case LESSEQ:
+    case LESSER:
+    case EQCOMP:
+    case NOTEQ:
+    {
+        generateCode(node->child[0]);
+        print(compareWithImmediate(AcumulatorRegister, rightSon->attr.val));
+        break;
+    }
     default:
         generateRegisterOperation(node);
         return;

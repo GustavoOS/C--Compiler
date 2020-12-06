@@ -13,7 +13,7 @@ enum Registers : int
     GlobalPointer,
     UserSPKeeper,
     SystemCallRegister, /* Low registers*/
-    StoredSpecReg, /* High Registers */
+    StoredSpecReg,      /* High Registers */
     LinkRegister = 12,
     PCKeeper,
     StackPointer,
@@ -70,7 +70,7 @@ public:
 
     int relativeAddress;
     int debugAddress;
-    
+
     static std::string getOpCode(int id);
     static std::string getOpBit(int id);
     static std::string getFunct2(int id);
@@ -102,6 +102,7 @@ Instruction *subtractImmediate(Registers, int);
 Instruction *signExtendHW(Registers);
 Instruction *interrupt(SystemCalls systemCall);
 Instruction *compare(Registers a, Registers b);
+Instruction *compareWithImmediate(Registers reg, int immediate);
 Instruction *storeWithImmediate(Registers content, Registers baseAddr, int offset);
 Instruction *storeWithRegister(Registers content, Registers baseAddr, Registers offset);
 Instruction *loadWithImmediate(Registers target, Registers baseAddr, int offset);
@@ -278,4 +279,4 @@ public:
     std::string to_string();
 };
 
-#endif 
+#endif
