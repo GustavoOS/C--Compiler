@@ -354,6 +354,9 @@ static void checkNode(TreeNode *t)
       case MOD:
       case LEFTSHIFT:
       case RIGHTSHIFT:
+      case BITWISEAND:
+      case BITWISEOR:
+      case XOR:
         t->type = Integer;
         break;
       default:

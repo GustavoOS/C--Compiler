@@ -52,10 +52,10 @@ int Error = FALSE;
 
 // Mark True for OS mode development
 bool isOperatingSystem = false;
-bool isBios = false;
-bool isCompressedProgram = true;
+bool isBios = true;
+bool isCompressedProgram = false;
 
-int PROGRAM_OFFSET = 1560;
+int PROGRAM_OFFSET = 0;
 
 int main(int argc, char *argv[])
 {

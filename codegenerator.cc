@@ -650,6 +650,15 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
     case RIGHTSHIFT:
         print(lsr(AcumulatorRegister, TemporaryRegister));
         break;
+    case BITWISEAND:
+        print(andBitwise(AcumulatorRegister, TemporaryRegister));
+        break;
+    case BITWISEOR:
+        print(orBitwise(AcumulatorRegister, TemporaryRegister));
+        break;
+    case XOR:
+        print(xorBitwise(AcumulatorRegister, TemporaryRegister));
+        break;
     default:
         print(compare(TemporaryRegister, AcumulatorRegister));
         break;
