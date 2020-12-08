@@ -192,6 +192,25 @@ Instruction *sumRegisters(Registers ra, Registers rb)
                                 ra);
 }
 
+Instruction *lsl(Registers ld, Registers ls)
+{
+    return new TypeEInstruction(14, "LSL", ls, ld);
+}
+
+Instruction *lslImmediate(Registers ld, int immediate)
+{
+    return new TypeAInstruction(1,"LSL", immediate, ld, ld);
+}
+
+Instruction *lsr(Registers ld, Registers ls)
+{
+    return new TypeEInstruction(15, "LSR", ls, ld);
+}
+Instruction *lsrImmediate(Registers ld, int immediate)
+{
+    return new TypeAInstruction(2, "LSR", immediate, ld, ld);
+}
+
 Instruction *copySP(Registers reg)
 {
     return new TypeDInstruction(57,

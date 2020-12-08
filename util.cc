@@ -55,6 +55,12 @@ void printToken(TokenType token, const char *tokenString)
   case MOD:
     fprintf(listing, "|\n");
     break;
+  case LEFTSHIFT:
+    fprintf(listing, "<<\n");
+    break;
+  case RIGHTSHIFT:
+    fprintf(listing, ">>\n");
+    break;
   case LESSER:
     fprintf(listing, "<\n");
     break;
