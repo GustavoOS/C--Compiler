@@ -44,18 +44,18 @@ FILE *code;
 int EchoSource = FALSE;
 int TraceScan = FALSE;
 int TraceParse = FALSE;
-int TraceAnalyze = TRUE;
-int TraceCode = TRUE;
+int TraceAnalyze = FALSE;
+int TraceCode = FALSE;
 bool TraceLink = false;
 
 int Error = FALSE;
 
 // Mark True for OS mode development
 bool isOperatingSystem = false;
-bool isBios = false;
-bool isCompressedProgram = true;
+bool isBios = true;
+bool isCompressedProgram = false;
 
-int PROGRAM_OFFSET = 2060;
+int PROGRAM_OFFSET = 0;
 
 int main(int argc, char *argv[])
 {
@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
     cg.setMode(isBios, isOperatingSystem);
     if (TraceCode)
     {
-    std::cout << "\nStarting code generation process\n";
-    std::cout << "--------------------------------------\n\n\n";
+        std::cout << "\nStarting code generation process\n";
+        std::cout << "--------------------------------------\n\n\n";
     }
     cg.generate(syntaxTree);
 

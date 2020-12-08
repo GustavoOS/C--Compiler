@@ -90,6 +90,10 @@ Instruction *moveLowToLowRegister(Registers origin, Registers destination);
 Instruction *subImeditateFromRegister(int value, Registers destination);
 Instruction *sumWithPC(Registers reg, int number);
 Instruction *sumRegisters(Registers ra, Registers rb); // A = A + B
+Instruction *lsl(Registers ld, Registers ls);
+Instruction *lslImmediate(Registers ld, int immediate);
+Instruction *lsr(Registers ld, Registers ls);
+Instruction *lsrImmediate(Registers ld, int immediate);
 Instruction *copySP(Registers reg);
 Instruction *extendZero(Registers reg);
 Instruction *rightShiftImmediate(Registers, int);

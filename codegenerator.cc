@@ -530,15 +530,16 @@ void CodeGenerator::generateOptimizedOperation(TreeNode *node)
         generateRegisterOperation(node);
         return;
     }
+    int value = rightSon->attr.val;
     switch (node->attr.op)
     {
     case PLUS:
         generateCode(node->child[0]);
-        print(addImmediate(AcumulatorRegister, rightSon->attr.val));
+        print(addImmediate(AcumulatorRegister, value));
         break;
     case MINUS:
         generateCode(node->child[0]);
-        print(subtractImmediate(AcumulatorRegister, rightSon->attr.val));
+        print(subtractImmediate(AcumulatorRegister, value));
         break;
     case GREATEQ:
     case GREATER:
@@ -548,7 +549,34 @@ void CodeGenerator::generateOptimizedOperation(TreeNode *node)
     case NOTEQ:
     {
         generateCode(node->child[0]);
-        print(compareWithImmediate(AcumulatorRegister, rightSon->attr.val));
+        print(compareWithImmediate(AcumulatorRegister, value));
+        break;
+    }
+    case LEFTSHIFT:
+    {
+        if(value < 32){
+            generateCode(node->child[0]);
+            if(value == 0)
+                return; // Won't change a thing
+            print(lslImmediate(AcumulatorRegister, value));
+        } else{
+            generateRegisterOperation(node);
+        }
+        break;
+    }
+    case RIGHTSHIFT:
+    {
+        if (value < 32)
+        {
+            generateCode(node->child[0]);
+            if (value == 0)
+                return; // Won't change a thing
+            print(lsrImmediate(AcumulatorRegister, value));
+        }
+        else
+        {
+            generateRegisterOperation(node);
+        }
         break;
     }
     default:
@@ -616,7 +644,12 @@ void CodeGenerator::generateOperationCode(TreeNode *node)
                 TemporaryRegister,
                 AcumulatorRegister));
         break;
-
+    case LEFTSHIFT:
+        print(lsl(AcumulatorRegister, TemporaryRegister));
+        break;
+    case RIGHTSHIFT:
+        print(lsr(AcumulatorRegister, TemporaryRegister));
+        break;
     default:
         print(compare(TemporaryRegister, AcumulatorRegister));
         break;
