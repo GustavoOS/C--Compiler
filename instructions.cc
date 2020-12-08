@@ -206,9 +206,25 @@ Instruction *lsr(Registers ld, Registers ls)
 {
     return new TypeEInstruction(15, "LSR", ls, ld);
 }
+
 Instruction *lsrImmediate(Registers ld, int immediate)
 {
     return new TypeAInstruction(2, "LSR", immediate, ld, ld);
+}
+
+Instruction *andBitwise(Registers ld, Registers lm)
+{
+    return new TypeEInstruction(12, "AND", lm, ld);
+}
+
+Instruction *orBitwise(Registers ld, Registers lb)
+{
+    return new TypeEInstruction(24, "ORR", lb, ld);
+}
+
+Instruction *xorBitwise(Registers ld, Registers lb)
+{
+    return new TypeEInstruction(13, "EXOR", lb, ld);
 }
 
 Instruction *copySP(Registers reg)

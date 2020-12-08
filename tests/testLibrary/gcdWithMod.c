@@ -6,7 +6,7 @@ int gcd(int u, int v)
     if (v == 0)
         return u;
     else
-        return gcd(v, u | v);
+        return gcd(v, u % v);
 }
 
 void main(void)

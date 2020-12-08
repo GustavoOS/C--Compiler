@@ -39,7 +39,7 @@
 %token ERROR ELSE IF INT RETURN VOID WHILE
 %token PLUS MINUS TIMES SLASH MOD
 %token LESSER LESSEQ GREATER GREATEQ EQCOMP NOTEQ EQATR
-%token LEFTSHIFT RIGHTSHIFT
+%token LEFTSHIFT RIGHTSHIFT BITWISEAND BITWISEOR XOR
 %token SEMI COMMA
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token ID NUM
@@ -436,6 +436,21 @@ mult:
             {
                 $$ = newExpNode(OpK);
                 $$->attr.op = RIGHTSHIFT;
+            }
+        | BITWISEAND
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = BITWISEAND;
+            }
+        | BITWISEOR
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = BITWISEOR;
+            }
+        | XOR
+            {
+                $$ = newExpNode(OpK);
+                $$->attr.op = XOR;
             }
         ;
 
