@@ -11,7 +11,7 @@ else  if  int  return  void  while
 
 special symbols:
 
-<  <=  >  >=  ==  !=  = - + *  /   ;  ,  (  )  [  ]  {  }  
+<  <= << >  >= >> % | ^ ==  !=  = - + *  /   ;  ,  (  )  [  ]  {  }  
 
 Identifiers:
 ID = May optionally start with _ @ or : followed by a letter followed by any number of repetitions of (letter or num or _)
