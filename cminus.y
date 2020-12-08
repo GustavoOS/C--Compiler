@@ -447,7 +447,6 @@ mult:
                 $$ = newExpNode(OpK);
                 $$->attr.op = BITWISEOR;
             }
-        ;
         | XOR
             {
                 $$ = newExpNode(OpK);
