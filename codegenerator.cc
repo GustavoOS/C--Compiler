@@ -331,6 +331,7 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
             (FunctionName != "fun_readFromMemory") &&
             (FunctionName != "fun_extractFirstHW") &&
             (FunctionName != "fun_extractSecondHW") &&
+            (FunctionName != "fun_readPointer") &&
             (FunctionName != "fun_assignPointer"))
         {
             if (shouldShowVisitingMessages)
@@ -398,6 +399,10 @@ void CodeGenerator::generateCodeForStmtNode(TreeNode *node)
         {
             TreeNode *vector = arg->sibling;
             generateCodeForSimpleVariableAssignment(vector, arg);
+        }
+        else if(FunctionName == "fun_readPointer")
+        {
+            loadVariable(arg, AcumulatorRegister);
         }
 
         else

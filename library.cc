@@ -53,7 +53,8 @@ void OSLibraryIncluder::buildLibrary()
         "int readFromMemory(int address){}",
         "int extractFirstHW(int number){}",
         "int extractSecondHW(int number){}",
-        "void assignPointer(int vector[], int address){}"};
+        "void assignPointer(int vector[], int address){}",
+        "int readPointer(int vector[]){}"};
 
     library.assign(std::begin(lib), std::end(lib));
 }
