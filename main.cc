@@ -55,7 +55,7 @@ bool isOperatingSystem = false;
 bool isBios = false;
 bool isCompressedProgram = true;
 
-int PROGRAM_OFFSET = 1560;
+int PROGRAM_OFFSET = 1570;
 
 int main(int argc, char *argv[])
 {
